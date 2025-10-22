@@ -5,7 +5,7 @@ Tests para el servicio de planificación de horarios.
 import pytest
 from datetime import date, datetime
 from app.services.scheduler_service import SchedulerService
-from app.models.group_plan import Plan, MediaGroup
+from app.models.plan import Plan, MediaGroup
 
 
 class TestSchedulerService:

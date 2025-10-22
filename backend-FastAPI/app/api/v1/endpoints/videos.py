@@ -1,3 +1,12 @@
+"""
+Video processing and publishing endpoints.
+
+This module provides API endpoints for:
+- Creating video grouping plans
+- Grouping videos using FFmpeg
+- Publishing videos to YouTube with scheduling
+"""
+
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 from datetime import datetime, date
@@ -13,10 +22,9 @@ from app.services.metadata_service import MetadataServiceFactory
 from app.services.grouping_service import GroupingService
 from app.services.scheduler_service import SchedulerService
 from app.services.youtube_service import YouTubeService
-from app.services.tiktok_service import TikTokService
 from app.services.ffmpeg_service import FFmpegService
 from app.services.report_service import ReportService
-from app.models.group_plan import Plan, MediaGroup
+from app.models.plan import Plan, MediaGroup
 
 
 # Pydantic models for requests/responses
@@ -62,26 +70,10 @@ class PublishYouTubeRequest(BaseModel):
 class PublishYouTubeResponse(BaseModel):
     results: List[Dict[str, Any]]
 
-class PublishTikTokRequest(BaseModel):
-    outputs: List[OutputItem]
-    slots: Dict[str, str]
-    use_sheets: bool = True
-
-class PublishTikTokResponse(BaseModel):
-    results: List[Dict[str, Any]]
-
-class ReportResponse(BaseModel):
-    items: List[Dict[str, Any]]
-
 
 router = APIRouter()
 
 # Global config instance - removed to avoid issues
-
-@router.get("/health")
-def health() -> Dict[str, str]:
-    """Health check endpoint."""
-    return {"status": "ok"}
 
 @router.post("/plan", response_model=PlanResponse)
 def create_plan(request: PlanRequest) -> PlanResponse:
@@ -369,162 +361,4 @@ def publish_youtube(request: PublishYouTubeRequest) -> PublishYouTubeResponse:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to publish to YouTube: {str(e)}"
-        )
-
-@router.post("/publish/tiktok", response_model=PublishTikTokResponse)
-def publish_tiktok(request: PublishTikTokRequest) -> PublishTikTokResponse:
-    """Publish videos to TikTok (optional)."""
-    try:
-        config = Settings()
-        results = []
-        tiktok_service = TikTokService(config)
-        report_service = ReportService(config.report_path)
-
-        # Get metadata service
-        metadata_source = "sheets" if request.use_sheets else config.metadata_source_type
-        metadata_service = MetadataServiceFactory.create_service(config, force_source=metadata_source)
-
-        # Get metadata for all outputs
-        num_outputs = len(request.outputs)
-        metadata_list = metadata_service.get_metadata_for_outputs(num_outputs)
-
-        for output in request.outputs:
-            try:
-                # Get metadata for this output
-                meta_index = output.index - 1
-                if meta_index < len(metadata_list):
-                    metadata = metadata_list[meta_index]
-                else:
-                    metadata = {"title": f"Video {output.index}", "description": "", "hashtags": []}
-
-                # Upload video
-                upload_result = tiktok_service.upload_video(
-                    file_path=output.path,
-                    title=metadata["title"],
-                    description=metadata["description"],
-                    hashtags=metadata["hashtags"],
-                    mode="auto"
-                )
-
-                results.append({
-                    "index": output.index,
-                    "status": upload_result["status"],
-                    "video_id": upload_result["video_id"]
-                })
-
-                # Update report
-                report_service.append_entry({
-                    "output_path": output.path,
-                    "tiktok_status": upload_result["status"],
-                    "tiktok_video_id": upload_result["video_id"]
-                })
-
-            except Exception as e:
-                logger.error(f"Failed to publish TikTok output {output.index}: {e}")
-                error_str = str(e)
-                results.append({
-                    "index": output.index,
-                    "status": "error",
-                    "video_id": None,
-                    "error": error_str
-                })
-
-                # Update report with error
-                report_service.append_entry({
-                    "output_path": output.path,
-                    "tiktok_status": "error",
-                    "errors": [error_str]
-                })
-
-        return PublishTikTokResponse(results=results)
-
-    except Exception as e:
-        logger.error(f"Error in TikTok publish: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to publish to TikTok: {str(e)}"
-        )
-
-@router.get("/report", response_model=ReportResponse)
-def get_report() -> ReportResponse:
-    """Get the publication report."""
-    try:
-        config = Settings()
-        report_path = config.report_path
-        if report_path.exists():
-            import json
-            with open(report_path, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-                return ReportResponse(items=data.get("items", []))
-        else:
-            return ReportResponse(items=[])
-
-    except Exception as e:
-        logger.error(f"Error reading report: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to read report: {str(e)}"
-        )
-
-@router.get("/oauth2/authorize/youtube/{channel}")
-def authorize_youtube(channel: str):
-    """Initiate YouTube OAuth flow for a specific channel."""
-    try:
-        config = Settings()
-        flow = Flow.from_client_secrets_file(
-            str(Path("credentials.json")),
-            scopes=["https://www.googleapis.com/auth/youtube.upload", "https://www.googleapis.com/auth/youtube"],
-            redirect_uri=config.yt_redirect_uri
-        )
-        authorization_url, state = flow.authorization_url(
-            access_type='offline',
-            include_granted_scopes='true'
-        )
-        # Store channel in state for callback
-        state_with_channel = f"{channel}:{state}"
-        authorization_url = authorization_url.replace(f"state={state}", f"state={state_with_channel}")
-        return RedirectResponse(authorization_url)
-    except Exception as e:
-        logger.error(f"Error initiating OAuth: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to initiate OAuth: {str(e)}"
-        )
-
-@router.get("/oauth2/callback/youtube")
-def oauth2_callback_youtube(code: str, state: str | None = None):
-    """Handle YouTube OAuth callback."""
-    try:
-        # Extract channel from state (format: "channel:original_state")
-        if not state or ":" not in state:
-            raise HTTPException(status_code=400, detail="Invalid state parameter")
-
-        channel, original_state = state.split(":", 1)
-
-        config = Settings()
-        flow = Flow.from_client_secrets_file(
-            str(Path("credentials.json")),
-            scopes=["https://www.googleapis.com/auth/youtube.upload", "https://www.googleapis.com/auth/youtube"],
-            redirect_uri=config.yt_redirect_uri
-        )
-
-        # Set the state back to the original state for flow.fetch_token
-        flow._state = original_state
-
-        flow.fetch_token(code=code)
-        creds = flow.credentials
-
-        # Ensure token directory exists
-        token_dir = Path(f".tokens/{channel}")
-        token_dir.mkdir(parents=True, exist_ok=True)
-        with open(token_dir / "token.json", 'w') as token:
-            token.write(creds.to_json())
-
-        logger.info(f"YouTube OAuth successful for channel {channel}")
-        return {"message": f"OAuth successful for channel {channel}", "token_saved": True, "channel": channel}
-    except Exception as e:
-        logger.error(f"Error in OAuth callback: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"OAuth callback failed: {str(e)}"
         )

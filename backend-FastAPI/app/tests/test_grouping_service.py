@@ -10,7 +10,7 @@ from app.services.grouping_service import (
     _get_sortable_name,
     _generate_output_name
 )
-from app.models.group_plan import MediaGroup, Plan
+from app.models.plan import MediaGroup, Plan
 
 
 class TestGroupingService:

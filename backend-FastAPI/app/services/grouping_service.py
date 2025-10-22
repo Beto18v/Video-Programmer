@@ -1,7 +1,7 @@
 import re
 from pathlib import Path
 
-from app.models.group_plan import MediaGroup, Plan
+from app.models.plan import MediaGroup, Plan
 
 
 # Extensiones de video soportadas (configurable)

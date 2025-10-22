@@ -57,8 +57,6 @@ async def edit_metadata(request: Request, channel: str):
                         "title": sheet_data.get("title", f"Video {idx+1}"),
                         "description": sheet_data.get("description", ""),
                         "hashtags": ",".join(sheet_data.get("hashtags", [])),
-                        "hashtags_tiktok": ",".join(sheet_data.get("hashtags_tiktok", [])),
-                        "hashtags_youtube": ",".join(sheet_data.get("hashtags_youtube", [])),
                         "datetime": ""
                     })
                 else:
@@ -68,8 +66,6 @@ async def edit_metadata(request: Request, channel: str):
                         "title": f"Video {idx+1}",
                         "description": "",
                         "hashtags": "",
-                        "hashtags_tiktok": "",
-                        "hashtags_youtube": "",
                         "datetime": ""
                     })
         except Exception as e:
@@ -120,29 +116,17 @@ async def save_metadata_and_publish(request: Request, channel: str):
         slots[str(idx+1)] = datetime_value
     metadatos = []
     for idx in range(len(files)):
-        # Procesar hashtags de TikTok
-        hashtags_tiktok_value = form.get(f"hashtags_tiktok_{idx}")
-        if isinstance(hashtags_tiktok_value, str):
-            hashtags_tiktok_list = [h.strip() for h in hashtags_tiktok_value.split(",") if h.strip()]
+        # Procesar hashtags
+        hashtags_value = form.get(f"hashtags_{idx}")
+        if isinstance(hashtags_value, str):
+            hashtags_list = [h.strip() for h in hashtags_value.split(",") if h.strip()]
         else:
-            hashtags_tiktok_list = []
-
-        # Procesar hashtags de YouTube
-        hashtags_youtube_value = form.get(f"hashtags_youtube_{idx}")
-        if isinstance(hashtags_youtube_value, str):
-            hashtags_youtube_list = [h.strip() for h in hashtags_youtube_value.split(",") if h.strip()]
-        else:
-            hashtags_youtube_list = []
-
-        # Combinar hashtags para compatibilidad con el sistema actual
-        all_hashtags = hashtags_tiktok_list + hashtags_youtube_list
+            hashtags_list = []
 
         metadatos.append({
             "title": str(form.get(f"title_{idx}") or ""),
             "description": str(form.get(f"description_{idx}") or ""),
-            "hashtags": all_hashtags,
-            "hashtags_tiktok": hashtags_tiktok_list,
-            "hashtags_youtube": hashtags_youtube_list
+            "hashtags": hashtags_list
         })
 
     # Actualizar metadatos en Google Sheets si el canal está soportado

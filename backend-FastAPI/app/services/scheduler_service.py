@@ -8,7 +8,7 @@ en el tiempo con soporte completo de zonas horarias IANA.
 from datetime import date, datetime, time
 
 import pytz
-from app.models.group_plan import Plan
+from app.models.plan import Plan
 
 
 class SchedulerService:
