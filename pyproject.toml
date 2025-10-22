@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "video-programmer"
+version = "0.1.0"
+description = "Video Programmer App"
+authors = ["Your Name <your.email@example.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "*"
+uvicorn = {extras = ["standard"], version = "*"}
+pydantic-settings = "*"
+python-dotenv = "*"
+python-dateutil = "*"
+pytz = "*"
+google-api-python-client = "*"
+google-auth = "*"
+google-auth-oauthlib = "*"
+google-auth-httplib2 = "*"
+httpx = "*"
+pandas = "*"
+pytest = "*"
+loguru = "*"
+
+[tool.poetry.group.dev.dependencies]
+mypy = "*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -1,0 +1,15 @@
+fastapi
+uvicorn[standard]
+pydantic-settings
+python-dotenv
+python-dateutil
+pytz
+google-api-python-client
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
+httpx
+pandas
+pytest
+loguru
+mypy

@@ -1,0 +1,177 @@
+{
+  "items": [
+    {
+      "output_path": "output1.mp4",
+      "created_at": "2025-10-16T01:06:19.409217",
+      "errors": [
+        "El archivo 001.mp4 no existe",
+        "El archivo 001.mp4 no existe",
+        "El archivo 001.mp4 no existe"
+      ]
+    },
+    {
+      "output_path": "storage/salida/Semana01_Dia01.mp4",
+      "created_at": "2025-10-16T01:57:14.967017",
+      "errors": [
+        "[WinError 2] The system cannot find the file specified",
+        "[WinError 2] The system cannot find the file specified",
+        "[WinError 2] The system cannot find the file specified",
+        "[WinError 2] The system cannot find the file specified",
+        "[WinError 2] The system cannot find the file specified",
+        "[WinError 2] The system cannot find the file specified",
+        "[WinError 2] The system cannot find the file specified",
+        "Error al concatenar videos con reencoding: ffmpeg version 8.0-essentials_build-www.gyan.dev Copyright (c) 2000-2025 the FFmpeg developers\n  built with gcc 15.2.0 (Rev8, Built by MSYS2 project)\n  configuration: --enable-gpl --enable-version3 --enable-static --disable-w32threads --disable-autodetect --enable-fontconfig --enable-iconv --enable-gnutls --enable-libxml2 --enable-gmp --enable-bzlib --enable-lzma --enable-zlib --enable-libsrt --enable-libssh --enable-libzmq --enable-avisynth --enable-sdl2 --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxvid --enable-libaom --enable-libopenjpeg --enable-libvpx --enable-mediafoundation --enable-libass --enable-libfreetype --enable-libfribidi --enable-libharfbuzz --enable-libvidstab --enable-libvmaf --enable-libzimg --enable-amf --enable-cuda-llvm --enable-cuvid --enable-dxva2 --enable-d3d11va --enable-d3d12va --enable-ffnvcodec --enable-libvpl --enable-nvdec --enable-nvenc --enable-vaapi --enable-openal --enable-libgme --enable-libopenmpt --enable-libopencore-amrwb --enable-libmp3lame --enable-libtheora --enable-libvo-amrwbenc --enable-libgsm --enable-libopencore-amrnb --enable-libopus --enable-libspeex --enable-libvorbis --enable-librubberband\n  libavutil      60.  8.100 / 60.  8.100\n  libavcodec     62. 11.100 / 62. 11.100\n  libavformat    62.  3.100 / 62.  3.100\n  libavdevice    62.  1.100 / 62.  1.100\n  libavfilter    11.  4.100 / 11.  4.100\n  libswscale      9.  1.100 /  9.  1.100\n  libswresample   6.  1.100 /  6.  1.100\n[concat @ 0000015613ea47c0] Impossible to open 'C:\\Users\\RYZEN5~1\\AppData\\Local\\Temp\\storage\\videos\\001.mp4'\n[in#0 @ 0000015613ea4540] Error opening input: No such file or directory\nError opening input file C:\\Users\\RYZEN5~1\\AppData\\Local\\Temp\\tmpxiz3tp5h.txt.\nError opening input files: No such file or directory\n",
+        "Error al concatenar videos con reencoding: ffmpeg version 8.0-essentials_build-www.gyan.dev Copyright (c) 2000-2025 the FFmpeg developers\n  built with gcc 15.2.0 (Rev8, Built by MSYS2 project)\n  configuration: --enable-gpl --enable-version3 --enable-static --disable-w32threads --disable-autodetect --enable-fontconfig --enable-iconv --enable-gnutls --enable-libxml2 --enable-gmp --enable-bzlib --enable-lzma --enable-zlib --enable-libsrt --enable-libssh --enable-libzmq --enable-avisynth --enable-sdl2 --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxvid --enable-libaom --enable-libopenjpeg --enable-libvpx --enable-mediafoundation --enable-libass --enable-libfreetype --enable-libfribidi --enable-libharfbuzz --enable-libvidstab --enable-libvmaf --enable-libzimg --enable-amf --enable-cuda-llvm --enable-cuvid --enable-dxva2 --enable-d3d11va --enable-d3d12va --enable-ffnvcodec --enable-libvpl --enable-nvdec --enable-nvenc --enable-vaapi --enable-openal --enable-libgme --enable-libopenmpt --enable-libopencore-amrwb --enable-libmp3lame --enable-libtheora --enable-libvo-amrwbenc --enable-libgsm --enable-libopencore-amrnb --enable-libopus --enable-libspeex --enable-libvorbis --enable-librubberband\n  libavutil      60.  8.100 / 60.  8.100\n  libavcodec     62. 11.100 / 62. 11.100\n  libavformat    62.  3.100 / 62.  3.100\n  libavdevice    62.  1.100 / 62.  1.100\n  libavfilter    11.  4.100 / 11.  4.100\n  libswscale      9.  1.100 /  9.  1.100\n  libswresample   6.  1.100 /  6.  1.100\n[concat @ 00000223843947c0] Impossible to open 'C:\\Users\\RYZEN5~1\\AppData\\Local\\Temp\\storage\\videos\\001.mp4'\n[in#0 @ 0000022384394540] Error opening input: No such file or directory\nError opening input file C:\\Users\\RYZEN5~1\\AppData\\Local\\Temp\\tmps94cdaez.txt.\nError opening input files: No such file or directory\n",
+        "Error al concatenar videos con reencoding: ffmpeg version 8.0-essentials_build-www.gyan.dev Copyright (c) 2000-2025 the FFmpeg developers\n  built with gcc 15.2.0 (Rev8, Built by MSYS2 project)\n  configuration: --enable-gpl --enable-version3 --enable-static --disable-w32threads --disable-autodetect --enable-fontconfig --enable-iconv --enable-gnutls --enable-libxml2 --enable-gmp --enable-bzlib --enable-lzma --enable-zlib --enable-libsrt --enable-libssh --enable-libzmq --enable-avisynth --enable-sdl2 --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxvid --enable-libaom --enable-libopenjpeg --enable-libvpx --enable-mediafoundation --enable-libass --enable-libfreetype --enable-libfribidi --enable-libharfbuzz --enable-libvidstab --enable-libvmaf --enable-libzimg --enable-amf --enable-cuda-llvm --enable-cuvid --enable-dxva2 --enable-d3d11va --enable-d3d12va --enable-ffnvcodec --enable-libvpl --enable-nvdec --enable-nvenc --enable-vaapi --enable-openal --enable-libgme --enable-libopenmpt --enable-libopencore-amrwb --enable-libmp3lame --enable-libtheora --enable-libvo-amrwbenc --enable-libgsm --enable-libopencore-amrnb --enable-libopus --enable-libspeex --enable-libvorbis --enable-librubberband\n  libavutil      60.  8.100 / 60.  8.100\n  libavcodec     62. 11.100 / 62. 11.100\n  libavformat    62.  3.100 / 62.  3.100\n  libavdevice    62.  1.100 / 62.  1.100\n  libavfilter    11.  4.100 / 11.  4.100\n  libswscale      9.  1.100 /  9.  1.100\n  libswresample   6.  1.100 /  6.  1.100\n[concat @ 00000224e17f47c0] Impossible to open 'C:\\Users\\RYZEN5~1\\AppData\\Local\\Temp\\storage\\videos\\001.mp4'\n[in#0 @ 00000224e17f4540] Error opening input: No such file or directory\nError opening input file C:\\Users\\RYZEN5~1\\AppData\\Local\\Temp\\tmpkb2hht2h.txt.\nError opening input files: No such file or directory\n",
+        "Error al concatenar videos con reencoding: ffmpeg version 8.0-essentials_build-www.gyan.dev Copyright (c) 2000-2025 the FFmpeg developers\n  built with gcc 15.2.0 (Rev8, Built by MSYS2 project)\n  configuration: --enable-gpl --enable-version3 --enable-static --disable-w32threads --disable-autodetect --enable-fontconfig --enable-iconv --enable-gnutls --enable-libxml2 --enable-gmp --enable-bzlib --enable-lzma --enable-zlib --enable-libsrt --enable-libssh --enable-libzmq --enable-avisynth --enable-sdl2 --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxvid --enable-libaom --enable-libopenjpeg --enable-libvpx --enable-mediafoundation --enable-libass --enable-libfreetype --enable-libfribidi --enable-libharfbuzz --enable-libvidstab --enable-libvmaf --enable-libzimg --enable-amf --enable-cuda-llvm --enable-cuvid --enable-dxva2 --enable-d3d11va --enable-d3d12va --enable-ffnvcodec --enable-libvpl --enable-nvdec --enable-nvenc --enable-vaapi --enable-openal --enable-libgme --enable-libopenmpt --enable-libopencore-amrwb --enable-libmp3lame --enable-libtheora --enable-libvo-amrwbenc --enable-libgsm --enable-libopencore-amrnb --enable-libopus --enable-libspeex --enable-libvorbis --enable-librubberband\n  libavutil      60.  8.100 / 60.  8.100\n  libavcodec     62. 11.100 / 62. 11.100\n  libavformat    62.  3.100 / 62.  3.100\n  libavdevice    62.  1.100 / 62.  1.100\n  libavfilter    11.  4.100 / 11.  4.100\n  libswscale      9.  1.100 /  9.  1.100\n  libswresample   6.  1.100 /  6.  1.100\n[concat @ 000001c31aaa47c0] Impossible to open 'C:\\Users\\RYZEN5~1\\AppData\\Local\\Temp\\storage\\videos\\001.mp4'\n[in#0 @ 000001c31aaa4540] Error opening input: No such file or directory\nError opening input file C:\\Users\\RYZEN5~1\\AppData\\Local\\Temp\\tmpmxztgt9t.txt.\nError opening input files: No such file or directory\n",
+        "[WinError 2] The system cannot find the file specified",
+        "[WinError 2] The system cannot find the file specified",
+        "[WinError 2] The system cannot find the file specified",
+        "<HttpError 403 when requesting None returned \"YouTube Data API v3 has not been used in project 72566953865 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/youtube.googleapis.com/overview?project=72566953865 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.\". Details: \"[{'message': 'YouTube Data API v3 has not been used in project 72566953865 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/youtube.googleapis.com/overview?project=72566953865 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.', 'domain': 'usageLimits', 'reason': 'accessNotConfigured', 'extendedHelp': 'https://console.developers.google.com'}]\">"
+      ],
+      "yt_video_id": "test_video_id",
+      "yt_url": "https://www.youtube.com/watch?v=test_video_id",
+      "yt_publish_at": "2025-10-13T10:00:00-05:00",
+      "scheduled_at": "2025-10-13T10:00:00-05:00",
+      "title": "Updated Video Title from Sheets",
+      "status": "skipped"
+    },
+    {
+      "output_path": "storage/salida/Semana01_Dia02.mp4",
+      "created_at": "2025-10-16T01:57:15.068322",
+      "errors": [
+        "[WinError 2] The system cannot find the file specified",
+        "[WinError 2] The system cannot find the file specified",
+        "[WinError 2] The system cannot find the file specified",
+        "[WinError 2] The system cannot find the file specified",
+        "[WinError 2] The system cannot find the file specified",
+        "[WinError 2] The system cannot find the file specified",
+        "[WinError 2] The system cannot find the file specified",
+        "Error al concatenar videos con reencoding: ffmpeg version 8.0-essentials_build-www.gyan.dev Copyright (c) 2000-2025 the FFmpeg developers\n  built with gcc 15.2.0 (Rev8, Built by MSYS2 project)\n  configuration: --enable-gpl --enable-version3 --enable-static --disable-w32threads --disable-autodetect --enable-fontconfig --enable-iconv --enable-gnutls --enable-libxml2 --enable-gmp --enable-bzlib --enable-lzma --enable-zlib --enable-libsrt --enable-libssh --enable-libzmq --enable-avisynth --enable-sdl2 --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxvid --enable-libaom --enable-libopenjpeg --enable-libvpx --enable-mediafoundation --enable-libass --enable-libfreetype --enable-libfribidi --enable-libharfbuzz --enable-libvidstab --enable-libvmaf --enable-libzimg --enable-amf --enable-cuda-llvm --enable-cuvid --enable-dxva2 --enable-d3d11va --enable-d3d12va --enable-ffnvcodec --enable-libvpl --enable-nvdec --enable-nvenc --enable-vaapi --enable-openal --enable-libgme --enable-libopenmpt --enable-libopencore-amrwb --enable-libmp3lame --enable-libtheora --enable-libvo-amrwbenc --enable-libgsm --enable-libopencore-amrnb --enable-libopus --enable-libspeex --enable-libvorbis --enable-librubberband\n  libavutil      60.  8.100 / 60.  8.100\n  libavcodec     62. 11.100 / 62. 11.100\n  libavformat    62.  3.100 / 62.  3.100\n  libavdevice    62.  1.100 / 62.  1.100\n  libavfilter    11.  4.100 / 11.  4.100\n  libswscale      9.  1.100 /  9.  1.100\n  libswresample   6.  1.100 /  6.  1.100\n[concat @ 0000029cf68a47c0] Impossible to open 'C:\\Users\\RYZEN5~1\\AppData\\Local\\Temp\\storage\\videos\\004.mp4'\n[in#0 @ 0000029cf68a4540] Error opening input: No such file or directory\nError opening input file C:\\Users\\RYZEN5~1\\AppData\\Local\\Temp\\tmpjl34gdhs.txt.\nError opening input files: No such file or directory\n",
+        "Error al concatenar videos con reencoding: ffmpeg version 8.0-essentials_build-www.gyan.dev Copyright (c) 2000-2025 the FFmpeg developers\n  built with gcc 15.2.0 (Rev8, Built by MSYS2 project)\n  configuration: --enable-gpl --enable-version3 --enable-static --disable-w32threads --disable-autodetect --enable-fontconfig --enable-iconv --enable-gnutls --enable-libxml2 --enable-gmp --enable-bzlib --enable-lzma --enable-zlib --enable-libsrt --enable-libssh --enable-libzmq --enable-avisynth --enable-sdl2 --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxvid --enable-libaom --enable-libopenjpeg --enable-libvpx --enable-mediafoundation --enable-libass --enable-libfreetype --enable-libfribidi --enable-libharfbuzz --enable-libvidstab --enable-libvmaf --enable-libzimg --enable-amf --enable-cuda-llvm --enable-cuvid --enable-dxva2 --enable-d3d11va --enable-d3d12va --enable-ffnvcodec --enable-libvpl --enable-nvdec --enable-nvenc --enable-vaapi --enable-openal --enable-libgme --enable-libopenmpt --enable-libopencore-amrwb --enable-libmp3lame --enable-libtheora --enable-libvo-amrwbenc --enable-libgsm --enable-libopencore-amrnb --enable-libopus --enable-libspeex --enable-libvorbis --enable-librubberband\n  libavutil      60.  8.100 / 60.  8.100\n  libavcodec     62. 11.100 / 62. 11.100\n  libavformat    62.  3.100 / 62.  3.100\n  libavdevice    62.  1.100 / 62.  1.100\n  libavfilter    11.  4.100 / 11.  4.100\n  libswscale      9.  1.100 /  9.  1.100\n  libswresample   6.  1.100 /  6.  1.100\n[concat @ 0000025b9a7247c0] Impossible to open 'C:\\Users\\RYZEN5~1\\AppData\\Local\\Temp\\storage\\videos\\004.mp4'\n[in#0 @ 0000025b9a724540] Error opening input: No such file or directory\nError opening input file C:\\Users\\RYZEN5~1\\AppData\\Local\\Temp\\tmp2tkzbz8g.txt.\nError opening input files: No such file or directory\n",
+        "Error al concatenar videos con reencoding: ffmpeg version 8.0-essentials_build-www.gyan.dev Copyright (c) 2000-2025 the FFmpeg developers\n  built with gcc 15.2.0 (Rev8, Built by MSYS2 project)\n  configuration: --enable-gpl --enable-version3 --enable-static --disable-w32threads --disable-autodetect --enable-fontconfig --enable-iconv --enable-gnutls --enable-libxml2 --enable-gmp --enable-bzlib --enable-lzma --enable-zlib --enable-libsrt --enable-libssh --enable-libzmq --enable-avisynth --enable-sdl2 --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxvid --enable-libaom --enable-libopenjpeg --enable-libvpx --enable-mediafoundation --enable-libass --enable-libfreetype --enable-libfribidi --enable-libharfbuzz --enable-libvidstab --enable-libvmaf --enable-libzimg --enable-amf --enable-cuda-llvm --enable-cuvid --enable-dxva2 --enable-d3d11va --enable-d3d12va --enable-ffnvcodec --enable-libvpl --enable-nvdec --enable-nvenc --enable-vaapi --enable-openal --enable-libgme --enable-libopenmpt --enable-libopencore-amrwb --enable-libmp3lame --enable-libtheora --enable-libvo-amrwbenc --enable-libgsm --enable-libopencore-amrnb --enable-libopus --enable-libspeex --enable-libvorbis --enable-librubberband\n  libavutil      60.  8.100 / 60.  8.100\n  libavcodec     62. 11.100 / 62. 11.100\n  libavformat    62.  3.100 / 62.  3.100\n  libavdevice    62.  1.100 / 62.  1.100\n  libavfilter    11.  4.100 / 11.  4.100\n  libswscale      9.  1.100 /  9.  1.100\n  libswresample   6.  1.100 /  6.  1.100\n[concat @ 0000029cf76047c0] Impossible to open 'C:\\Users\\RYZEN5~1\\AppData\\Local\\Temp\\storage\\videos\\004.mp4'\n[in#0 @ 0000029cf7604540] Error opening input: No such file or directory\nError opening input file C:\\Users\\RYZEN5~1\\AppData\\Local\\Temp\\tmpjkxuchk7.txt.\nError opening input files: No such file or directory\n",
+        "Error al concatenar videos con reencoding: ffmpeg version 8.0-essentials_build-www.gyan.dev Copyright (c) 2000-2025 the FFmpeg developers\n  built with gcc 15.2.0 (Rev8, Built by MSYS2 project)\n  configuration: --enable-gpl --enable-version3 --enable-static --disable-w32threads --disable-autodetect --enable-fontconfig --enable-iconv --enable-gnutls --enable-libxml2 --enable-gmp --enable-bzlib --enable-lzma --enable-zlib --enable-libsrt --enable-libssh --enable-libzmq --enable-avisynth --enable-sdl2 --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxvid --enable-libaom --enable-libopenjpeg --enable-libvpx --enable-mediafoundation --enable-libass --enable-libfreetype --enable-libfribidi --enable-libharfbuzz --enable-libvidstab --enable-libvmaf --enable-libzimg --enable-amf --enable-cuda-llvm --enable-cuvid --enable-dxva2 --enable-d3d11va --enable-d3d12va --enable-ffnvcodec --enable-libvpl --enable-nvdec --enable-nvenc --enable-vaapi --enable-openal --enable-libgme --enable-libopenmpt --enable-libopencore-amrwb --enable-libmp3lame --enable-libtheora --enable-libvo-amrwbenc --enable-libgsm --enable-libopencore-amrnb --enable-libopus --enable-libspeex --enable-libvorbis --enable-librubberband\n  libavutil      60.  8.100 / 60.  8.100\n  libavcodec     62. 11.100 / 62. 11.100\n  libavformat    62.  3.100 / 62.  3.100\n  libavdevice    62.  1.100 / 62.  1.100\n  libavfilter    11.  4.100 / 11.  4.100\n  libswscale      9.  1.100 /  9.  1.100\n  libswresample   6.  1.100 /  6.  1.100\n[concat @ 00000263da9547c0] Impossible to open 'C:\\Users\\RYZEN5~1\\AppData\\Local\\Temp\\storage\\videos\\004.mp4'\n[in#0 @ 00000263da954540] Error opening input: No such file or directory\nError opening input file C:\\Users\\RYZEN5~1\\AppData\\Local\\Temp\\tmpuf5tvov9.txt.\nError opening input files: No such file or directory\n",
+        "[WinError 2] The system cannot find the file specified",
+        "[WinError 2] The system cannot find the file specified",
+        "[WinError 2] The system cannot find the file specified",
+        "<HttpError 403 when requesting None returned \"YouTube Data API v3 has not been used in project 72566953865 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/youtube.googleapis.com/overview?project=72566953865 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.\". Details: \"[{'message': 'YouTube Data API v3 has not been used in project 72566953865 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/youtube.googleapis.com/overview?project=72566953865 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.', 'domain': 'usageLimits', 'reason': 'accessNotConfigured', 'extendedHelp': 'https://console.developers.google.com'}]\">"
+      ],
+      "yt_video_id": "H7xdXMrH0mo",
+      "yt_url": "https://www.youtube.com/watch?v=H7xdXMrH0mo",
+      "yt_publish_at": "2025-10-13T14:00:00-05:00",
+      "scheduled_at": "2025-10-13T14:00:00-05:00"
+    },
+    {
+      "output_path": "storage\\salida\\religion\\Semana01_Dia01.mp4",
+      "created_at": "2025-10-16T12:36:54.117690",
+      "errors": []
+    },
+    {
+      "output_path": "storage\\salida\\religion\\Semana01_Dia02.mp4",
+      "created_at": "2025-10-16T11:59:48.048773",
+      "errors": []
+    },
+    {
+      "output_path": "storage\\salida\\religion\\Semana01_Dia03.mp4",
+      "created_at": "2025-10-16T11:43:10.313028",
+      "errors": []
+    },
+    {
+      "output_path": "storage/salida/religion/Semana01_Dia01.mp4",
+      "yt_video_id": "GKw5cJuX-ko",
+      "yt_url": "https://www.youtube.com/watch?v=GKw5cJuX-ko",
+      "yt_publish_at": "2025-10-17T12:00:00-05:00",
+      "scheduled_at": "2025-10-17T12:00:00-05:00",
+      "created_at": "2025-10-16T08:52:11.242689",
+      "errors": [
+        "The read operation timed out"
+      ],
+      "title": "La oración del amanecer 🌅🙏",
+      "status": "skipped",
+      "verified": true
+    },
+    {
+      "output_path": "storage/salida/religion/Semana01_Dia02.mp4",
+      "yt_video_id": "WFh7ET21CH0",
+      "yt_url": "https://www.youtube.com/watch?v=WFh7ET21CH0",
+      "yt_publish_at": null,
+      "scheduled_at": null,
+      "created_at": "2025-10-16T08:52:24.807671",
+      "errors": [],
+      "title": "El agua que da vida 💧🌈",
+      "status": "skipped",
+      "verified": false
+    },
+    {
+      "output_path": "storage/salida/religion/Semana01_Dia03.mp4",
+      "yt_video_id": "SnLi9I7TXzI",
+      "yt_url": "https://www.youtube.com/watch?v=SnLi9I7TXzI",
+      "yt_publish_at": null,
+      "scheduled_at": null,
+      "created_at": "2025-10-16T08:52:29.802582",
+      "errors": [],
+      "title": "El taller de la fe 🔨✨",
+      "status": "skipped",
+      "verified": true
+    },
+    {
+      "output_path": "storage\\salida\\beto\\Semana01_Dia01.mp4",
+      "created_at": "2025-10-16T12:35:22.350888",
+      "errors": []
+    },
+    {
+      "output_path": "storage\\salida\\beto\\Semana01_Dia02.mp4",
+      "created_at": "2025-10-16T12:35:22.571078",
+      "errors": []
+    },
+    {
+      "output_path": "storage\\salida\\beto\\Semana01_Dia03.mp4",
+      "created_at": "2025-10-16T12:35:22.661353",
+      "errors": []
+    },
+    {
+      "output_path": "storage/salida/phrases/Semana01_Dia03.mp4",
+      "title": "💫 Comienza Donde Estás 🌅",
+      "yt_video_id": "fgAApE2Ixc0",
+      "yt_url": "https://www.youtube.com/watch?v=fgAApE2Ixc0",
+      "yt_publish_at": null,
+      "scheduled_at": null,
+      "verified": true,
+      "created_at": "2025-10-16T12:07:55.816857",
+      "errors": []
+    },
+    {
+      "output_path": "storage/salida/beto/Semana01_Dia01.mp4",
+      "title": "Video 1",
+      "yt_video_id": "1FPQ57r_p4o",
+      "yt_url": "https://www.youtube.com/watch?v=1FPQ57r_p4o",
+      "yt_publish_at": "2025-10-16T20:00:00-05:00",
+      "scheduled_at": "2025-10-16T20:00:00-05:00",
+      "verified": true,
+      "created_at": "2025-10-16T12:20:22.266953",
+      "errors": []
+    },
+    {
+      "output_path": "storage/salida/beto/Semana01_Dia02.mp4",
+      "title": "Video 2",
+      "yt_video_id": "hHpa95nvBVA",
+      "yt_url": "https://www.youtube.com/watch?v=hHpa95nvBVA",
+      "yt_publish_at": "2025-10-16T21:00:00-05:00",
+      "scheduled_at": "2025-10-16T21:00:00-05:00",
+      "verified": true,
+      "created_at": "2025-10-16T12:20:33.524616",
+      "errors": []
+    },
+    {
+      "output_path": "storage/salida/beto/Semana01_Dia03.mp4",
+      "title": "Video 3",
+      "yt_video_id": "5PPOr4HYh2w",
+      "yt_url": "https://www.youtube.com/watch?v=5PPOr4HYh2w",
+      "yt_publish_at": "2025-10-16T22:00:00-05:00",
+      "scheduled_at": "2025-10-16T22:00:00-05:00",
+      "verified": true,
+      "created_at": "2025-10-16T12:20:38.801479",
+      "errors": []
+    }
+  ]
+}
