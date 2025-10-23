@@ -20,8 +20,9 @@ class TestYouTubeService:
     @pytest.fixture
     def youtube_service(self, mock_config):
         """YouTube service instance with mocked config."""
+        mock_db = Mock()
         with patch.object(YouTubeService, '_authenticate'):
-            service = YouTubeService(mock_config, "test_channel")
+            service = YouTubeService(mock_config, 1, mock_db)  # user_id=1, db=mock_db
             service.youtube = Mock()
             return service
 

@@ -1,43 +1,68 @@
 """
-Authentication endpoints for YouTube OAuth.
+Authentication endpoints for Google OAuth.
 
-This module handles OAuth 2.0 authentication flow for YouTube API access.
+This module handles OAuth 2.0 authentication flow for Google API access.
 """
 
 from pathlib import Path
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 from loguru import logger
 from google_auth_oauthlib.flow import Flow
+from googleapiclient.discovery import build
+from sqlalchemy.orm import Session
 
-from app.core.config import Settings
+from app.core.config import get_settings
+from app.db.session import get_db
+from app.services.oauth_service import OAuthService
+from app.models.user import User
 
 router = APIRouter()
 
 class OAuthResponse(BaseModel):
     """Response model for OAuth callback."""
     message: str
+    user_id: int
+    email: str
     token_saved: bool
-    channel: str
 
-@router.get("/oauth2/authorize/youtube/{channel}")
-def authorize_youtube(channel: str):
-    """Initiate YouTube OAuth flow for a specific channel."""
+@router.get("/oauth2/authorize/google")
+def authorize_google(db: Session = Depends(get_db)):
+    """Initiate Google OAuth flow."""
     try:
-        config = Settings()
-        flow = Flow.from_client_secrets_file(
-            str(Path("credentials.json")),
-            scopes=["https://www.googleapis.com/auth/youtube.upload", "https://www.googleapis.com/auth/youtube"],
+        config = get_settings()
+        if not config.yt_client_id or not config.yt_client_secret:
+            raise HTTPException(status_code=500, detail="Google OAuth credentials not configured")
+
+        flow = Flow.from_client_config(
+            {
+                "web": {
+                    "client_id": config.yt_client_id,
+                    "client_secret": config.yt_client_secret,
+                    "redirect_uris": [config.yt_redirect_uri],
+                    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                    "token_uri": "https://oauth2.googleapis.com/token",
+                }
+            },
+            scopes=[
+                "https://www.googleapis.com/auth/userinfo.profile",
+                "https://www.googleapis.com/auth/userinfo.email",
+                "https://www.googleapis.com/auth/youtube.upload",
+                "https://www.googleapis.com/auth/youtube"
+            ],
             redirect_uri=config.yt_redirect_uri
         )
+
         authorization_url, state = flow.authorization_url(
             access_type='offline',
-            include_granted_scopes='true'
+            include_granted_scopes='true',
+            prompt='consent'  # Force consent screen to get refresh token
         )
-        # Store channel in state for callback
-        state_with_channel = f"{channel}:{state}"
-        authorization_url = authorization_url.replace(f"state={state}", f"state={state_with_channel}")
+
+        # Store state in session (simplified - in production use proper session storage)
+        # For now, we'll handle state in memory, but this should be stored securely
+        logger.info(f"OAuth flow initiated with state: {state}")
         return RedirectResponse(authorization_url)
     except Exception as e:
         logger.error(f"Error initiating OAuth: {e}")
@@ -46,40 +71,28 @@ def authorize_youtube(channel: str):
             detail=f"Failed to initiate OAuth: {str(e)}"
         )
 
-@router.get("/oauth2/callback/youtube", response_model=OAuthResponse)
-def oauth2_callback_youtube(code: str, state: str | None = None) -> OAuthResponse:
-    """Handle YouTube OAuth callback."""
-    try:
-        # Extract channel from state (format: "channel:original_state")
-        if not state or ":" not in state:
-            raise HTTPException(status_code=400, detail="Invalid state parameter")
+@router.get("/user/me")
+def get_current_user(user_id: int, db: Session = Depends(get_db)):
+    """Get current authenticated user info."""
+    # In a real app, you'd get user_id from JWT token
+    # For now, this is a placeholder - you'd need JWT authentication
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
 
-        channel, original_state = state.split(":", 1)
+    return {
+        "id": user.id,
+        "email": user.email,
+        "name": user.name,
+        "picture": user.picture,
+        "has_oauth_token": OAuthService.get_oauth_token(db, user.id) is not None
+    }
 
-        config = Settings()
-        flow = Flow.from_client_secrets_file(
-            str(Path("credentials.json")),
-            scopes=["https://www.googleapis.com/auth/youtube.upload", "https://www.googleapis.com/auth/youtube"],
-            redirect_uri=config.yt_redirect_uri
-        )
+@router.post("/oauth2/refresh/{user_id}")
+def refresh_oauth_token(user_id: int, db: Session = Depends(get_db)):
+    """Manually refresh OAuth token for a user."""
+    creds = OAuthService.refresh_token_if_needed(db, user_id)
+    if not creds:
+        raise HTTPException(status_code=400, detail="No valid token found or refresh failed")
 
-        # Set the state back to the original state for flow.fetch_token
-        flow._state = original_state
-
-        flow.fetch_token(code=code)
-        creds = flow.credentials
-
-        # Ensure token directory exists
-        token_dir = Path(f".tokens/{channel}")
-        token_dir.mkdir(parents=True, exist_ok=True)
-        with open(token_dir / "token.json", 'w') as token:
-            token.write(creds.to_json())
-
-        logger.info(f"YouTube OAuth successful for channel {channel}")
-        return OAuthResponse(message=f"OAuth successful for channel {channel}", token_saved=True, channel=channel)
-    except Exception as e:
-        logger.error(f"Error in OAuth callback: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"OAuth callback failed: {str(e)}"
-        )
+    return {"message": "Token refreshed successfully"}

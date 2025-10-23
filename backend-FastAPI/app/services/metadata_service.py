@@ -56,35 +56,25 @@ class GoogleSheetsMetadataService(MetadataService):
 
     SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
-    def __init__(self, channel: str):
+    def __init__(self, sheet_id: str, range_name: str, column_mapping: dict = None):
         """
-        Inicializa el servicio de Google Sheets para un canal específico.
+        Inicializa el servicio de Google Sheets con configuración específica.
 
         Args:
-            channel: Canal para el que obtener metadatos ('religion' o 'phrases')
+            sheet_id: ID del Google Sheet
+            range_name: Rango de celdas (ej: 'A2:D22')
+            column_mapping: Mapeo de columnas {'title': 0, 'hashtags_tiktok': 1, 'hashtags_youtube': 2}
         """
-        self.channel = channel
+        self.sheet_id = sheet_id
+        self.range_name = range_name
         self.settings = Settings()
 
-        # Configurar sheet_id y range según el canal
-        if channel == "religion":
-            self.sheet_id = self.settings.sheets_id_religion
-            self.range_name = self.settings.sheets_range_religion
-            self.column_mapping = {
-                'title': 0,      # Columna I (índice 0 en el rango I2:L)
-                'hashtags_tiktok': 2,  # Columna K (índice 2)
-                'hashtags_youtube': 3  # Columna L (índice 3)
-            }
-        elif channel == "phrases":
-            self.sheet_id = self.settings.sheets_id_phrases
-            self.range_name = self.settings.sheets_range_phrases
-            self.column_mapping = {
-                'title': 0,      # Columna C (índice 0 en el rango C2:G)
-                'hashtags_tiktok': 3,  # Columna F (índice 3)
-                'hashtags_youtube': 4  # Columna G (índice 4)
-            }
-        else:
-            raise ValueError(f"Canal no soportado: {channel}. Use 'religion' o 'phrases'.")
+        # Mapeo de columnas por defecto (genérico)
+        self.column_mapping = column_mapping or {
+            'title': 0,      # Columna A
+            'hashtags_tiktok': 1,  # Columna B
+            'hashtags_youtube': 2  # Columna C
+        }
 
         self.creds = None
         self._ensure_credentials()
@@ -466,13 +456,16 @@ class MetadataServiceFactory:
     """Factory para crear servicios de metadatos."""
 
     @staticmethod
-    def create_service(config: Settings, force_source: Optional[str] = None) -> MetadataService:
+    def create_service(config: Settings, force_source: Optional[str] = None, sheet_id: Optional[str] = None, sheets_range: Optional[str] = None, column_mapping: Optional[dict] = None) -> MetadataService:
         """
         Crea el servicio de metadatos apropiado basado en la configuración.
 
         Args:
             config: Configuración de la aplicación
             force_source: Forzar tipo de fuente (opcional)
+            sheet_id: ID específico del Google Sheet (opcional)
+            sheets_range: Rango específico del Google Sheet (opcional)
+            column_mapping: Mapeo específico de columnas (opcional)
 
         Returns:
             Instancia del servicio de metadatos apropiado
@@ -483,9 +476,14 @@ class MetadataServiceFactory:
         source_type = force_source or config.metadata_source_type
 
         if source_type == 'sheets':
-            if not config.sheets_id or not config.sheets_range:
+            # Usar parámetros específicos o valores por defecto de config
+            final_sheet_id = sheet_id or config.sheets_id or config.default_sheets_id
+            final_range = sheets_range or config.sheets_range or config.default_sheets_range
+
+            if not final_sheet_id or not final_range:
                 raise ValueError("SHEETS_ID y SHEETS_RANGE son requeridos para fuente 'sheets'")
-            return GoogleSheetsMetadataService('religion')  # Default to religion for legacy compatibility
+
+            return GoogleSheetsMetadataService(final_sheet_id, final_range, column_mapping)
 
         elif source_type == 'csv':
             if not config.csv_path:

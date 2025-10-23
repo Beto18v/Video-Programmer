@@ -21,6 +21,11 @@ httpx = "*"
 pandas = "*"
 pytest = "*"
 loguru = "*"
+sqlalchemy = "*"
+alembic = "*"
+authlib = "*"
+python-jose = {extras = ["cryptography"], version = "*"}
+passlib = {extras = ["bcrypt"], version = "*"}
 
 [tool.poetry.group.dev.dependencies]
 mypy = "*"

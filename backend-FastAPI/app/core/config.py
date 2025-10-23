@@ -3,12 +3,14 @@ from pathlib import Path
 from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pytz import timezone
+from typing import Optional
 
 
 class Settings(BaseSettings):
-    # Directorios
-    source_dir: Path = Field(default=Path("D:\\Proyects\\Religion\\videos"))
-    output_dir: Path = Field(default=Path("D:\\Proyects\\Religion\\salida"))
+    # Directorios base (generales, no específicos de proyecto)
+    base_source_dir: Path = Field(default=Path("./videos"))
+    base_output_dir: Path = Field(default=Path("./output"))
+    base_report_path: Path = Field(default=Path("./output/report.json"))
 
     # Configuración general
     ordering: str = Field(default="name")  # name|date
@@ -24,12 +26,10 @@ class Settings(BaseSettings):
     csv_path: Path | None = Field(default=None)
     json_path: Path | None = Field(default=None)
 
-    # Configuración específica por canal para Google Sheets
-    sheets_id_religion: str = Field(default="1vBXtJuJR_faNGFBMSqW9U_1izibSQrrDNZLMtb5ViqE")
-    sheets_range_religion: str = Field(default="1102627582!I2:L")  # gid=1102627582, columnas I(título), K(hashtags_tiktok), L(hashtags_youtube)
-
-    sheets_id_phrases: str = Field(default="1vBXtJuJR_faNGFBMSqW9U_1izibSQrrDNZLMtb5ViqE")
-    sheets_range_phrases: str = Field(default="929149575!C2:G")  # gid=929149575, columnas C(título), F(hashtags_tiktok), G(hashtags_youtube)
+    # Configuración de Google Sheets (genérica, no por canal específico)
+    # Cada usuario/proyecto puede tener su propia configuración
+    default_sheets_id: str = Field(default="")
+    default_sheets_range: str = Field(default="A2:D22")
 
     # Google Service Account para Sheets API
     google_service_account_file: Path | None = Field(default=None)
@@ -39,10 +39,16 @@ class Settings(BaseSettings):
     start_date: str = Field(default="2025-10-13")
     times: str | list[str] = Field(default="10:00,14:00,18:00")
 
+    # Base de datos
+    database_url: str = Field(default="sqlite:///./video_programmer.db")
+    secret_key: str = Field(default="your-secret-key-here")
+    algorithm: str = Field(default="HS256")
+    access_token_expire_minutes: int = Field(default=30)
+
     # YouTube
-    yt_client_id: str | None = Field(default=None)
-    yt_client_secret: str | None = Field(default=None)
-    yt_redirect_uri: str = Field(default="http://localhost:8000/oauth2/callback/youtube")
+    yt_client_id: str = Field(default="your-google-client-id-here")  # Hardcoded for automatic handling
+    yt_client_secret: str = Field(default="your-google-client-secret-here")  # Hardcoded for automatic handling
+    yt_redirect_uri: str = "http://localhost:8000/api/v1/oauth2/callback/google"
     yt_category_id: str = Field(default="22")
     yt_privacy_status: str = Field(default="private")  # private|public|unlisted
     yt_made_for_kids: bool = Field(default=False)
@@ -56,11 +62,12 @@ class Settings(BaseSettings):
     tt_publish_mode: str = Field(default="auto")  # direct|inbox|auto
 
     # Reporte
-    report_path: Path = Field(default=Path("D:\\Proyects\\Religion\\salida\\report.json"))
+    report_path: Path = Field(default=Path("./output/report.json"))
 
     model_config = SettingsConfigDict(
         env_file=".env",
-        env_file_encoding="utf-8"
+        env_file_encoding="utf-8",
+        extra="ignore"  # Permitir campos extra en .env para compatibilidad
     )
 
     @model_validator(mode="after")
@@ -71,7 +78,7 @@ class Settings(BaseSettings):
             self.yt_tags_extra = [item.strip() for item in self.yt_tags_extra.split(",") if item.strip()]
         return self
 
-    @field_validator("source_dir", "output_dir", "csv_path", "json_path", "report_path", mode="before")
+    @field_validator("base_source_dir", "base_output_dir", "csv_path", "json_path", "base_report_path", "report_path", "google_service_account_file", mode="before")
     @classmethod
     def validate_paths(cls, v):
         if v is None:
@@ -80,11 +87,12 @@ class Settings(BaseSettings):
             return Path(v)
         return v
 
-    @field_validator("source_dir", "output_dir")
+    @field_validator("base_source_dir", "base_output_dir")
     @classmethod
     def validate_directories(cls, v):
         if not v.exists():
-            raise ValueError(f"El directorio {v} no existe")
+            # Crear directorio si no existe
+            v.mkdir(parents=True, exist_ok=True)
         if not v.is_dir():
             raise ValueError(f"{v} no es un directorio")
         return v
@@ -148,3 +156,252 @@ def get_settings() -> Settings:
 
 # Alias for backward compatibility
 Config = Settings
+
+
+class ProjectConfig:
+    """Configuración específica por proyecto/usuario/canal."""
+
+    def __init__(self, user_id: int | None = None, channel_id: str | None = None, project_name: str | None = None, db_session = None):
+        self.user_id: int | None = user_id
+        self.channel_id: str | None = channel_id
+        self.project_name: str = project_name or f"user_{user_id}_channel_{channel_id}"
+        self.db_session = db_session
+        self._config_data = None
+
+    def _load_config(self):
+        """Carga la configuración desde la base de datos."""
+        if self._config_data is not None:
+            return self._config_data
+
+        if not self.db_session or not self.user_id:
+            # Fallback a configuración por defecto
+            base_config = get_settings()
+            self._config_data = {
+                'source_dir': base_config.base_source_dir / self.project_name,
+                'output_dir': base_config.base_output_dir / self.project_name,
+                'report_path': base_config.base_output_dir / self.project_name / "report.json",
+                'sheets_id': base_config.default_sheets_id,
+                'sheets_range': base_config.default_sheets_range,
+                'metadata_source_type': base_config.metadata_source_type,
+                'ordering': base_config.ordering,
+                'group_size': base_config.group_size,
+                'output_pattern': base_config.output_pattern,
+                'timezone': base_config.timezone,
+                'start_date': base_config.start_date,
+                'times': base_config.times,
+                'yt_category_id': base_config.yt_category_id,
+                'yt_privacy_status': base_config.yt_privacy_status,
+                'yt_made_for_kids': base_config.yt_made_for_kids,
+                'yt_tags_extra': base_config.yt_tags_extra,
+                'tt_enabled': base_config.tt_enabled,
+                'tt_publish_mode': base_config.tt_publish_mode,
+            }
+        else:
+            # Buscar configuración específica en BD
+            from app.models.user import ProjectConfig as ProjectConfigModel
+            config_query = self.db_session.query(ProjectConfigModel).filter(
+                ProjectConfigModel.user_id == self.user_id
+            )
+
+            if self.channel_id:
+                # Buscar configuración específica del canal
+                config_record = config_query.filter(
+                    ProjectConfigModel.channel_id == self.channel_id
+                ).first()
+            else:
+                # Buscar configuración global del usuario (channel_id is None)
+                config_record = config_query.filter(
+                    ProjectConfigModel.channel_id.is_(None)
+                ).first()
+
+            if config_record:
+                # Usar configuración de BD
+                self._config_data = {
+                    'source_dir': Path(config_record.source_dir) if config_record.source_dir else None,
+                    'output_dir': Path(config_record.output_dir) if config_record.output_dir else None,
+                    'report_path': Path(config_record.report_path) if config_record.report_path else None,
+                    'sheets_id': config_record.sheets_id,
+                    'sheets_range': config_record.sheets_range,
+                    'metadata_source_type': config_record.metadata_source_type,
+                    'ordering': config_record.ordering,
+                    'group_size': config_record.group_size,
+                    'output_pattern': config_record.output_pattern,
+                    'timezone': config_record.timezone,
+                    'start_date': config_record.start_date,
+                    'times': config_record.times,
+                    'yt_category_id': config_record.yt_category_id,
+                    'yt_privacy_status': config_record.yt_privacy_status,
+                    'yt_made_for_kids': config_record.yt_made_for_kids,
+                    'yt_tags_extra': config_record.yt_tags_extra,
+                    'tt_enabled': config_record.tt_enabled,
+                    'tt_publish_mode': config_record.tt_publish_mode,
+                }
+            else:
+                # Fallback a configuración por defecto
+                base_config = get_settings()
+                self._config_data = {
+                    'source_dir': base_config.base_source_dir / self.project_name,
+                    'output_dir': base_config.base_output_dir / self.project_name,
+                    'report_path': base_config.base_output_dir / self.project_name / "report.json",
+                    'sheets_id': base_config.default_sheets_id,
+                    'sheets_range': base_config.default_sheets_range,
+                    'metadata_source_type': base_config.metadata_source_type,
+                    'ordering': base_config.ordering,
+                    'group_size': base_config.group_size,
+                    'output_pattern': base_config.output_pattern,
+                    'timezone': base_config.timezone,
+                    'start_date': base_config.start_date,
+                    'times': base_config.times,
+                    'yt_category_id': base_config.yt_category_id,
+                    'yt_privacy_status': base_config.yt_privacy_status,
+                    'yt_made_for_kids': base_config.yt_made_for_kids,
+                    'yt_tags_extra': base_config.yt_tags_extra,
+                    'tt_enabled': base_config.tt_enabled,
+                    'tt_publish_mode': base_config.tt_publish_mode,
+                }
+
+        return self._config_data
+
+    @property
+    def source_dir(self) -> Path:
+        """Directorio de videos específico del proyecto."""
+        config = self._load_config()
+        return config['source_dir']
+
+    @property
+    def output_dir(self) -> Path:
+        """Directorio de salida específico del proyecto."""
+        config = self._load_config()
+        return config['output_dir']
+
+    @property
+    def report_path(self) -> Path:
+        """Archivo de reporte específico del proyecto."""
+        config = self._load_config()
+        return config['report_path']
+
+    @property
+    def sheets_id(self) -> str:
+        """ID de Google Sheets específico del proyecto."""
+        config = self._load_config()
+        return config['sheets_id']
+
+    @property
+    def sheets_range(self) -> str:
+        """Rango de Google Sheets específico del proyecto."""
+        config = self._load_config()
+        return config['sheets_range']
+
+    @property
+    def metadata_source_type(self) -> str:
+        """Tipo de fuente de metadatos."""
+        config = self._load_config()
+        return config['metadata_source_type']
+
+    @property
+    def ordering(self) -> str:
+        """Ordenamiento de archivos."""
+        config = self._load_config()
+        return config['ordering']
+
+    @property
+    def group_size(self) -> int:
+        """Tamaño de grupo."""
+        config = self._load_config()
+        return config['group_size']
+
+    @property
+    def output_pattern(self) -> str:
+        """Patrón de salida."""
+        config = self._load_config()
+        return config['output_pattern']
+
+    @property
+    def timezone(self) -> str:
+        """Zona horaria."""
+        config = self._load_config()
+        return config['timezone']
+
+    @property
+    def start_date(self) -> str:
+        """Fecha de inicio."""
+        config = self._load_config()
+        return config['start_date']
+
+    @property
+    def times(self) -> str:
+        """Horarios."""
+        config = self._load_config()
+        return config['times']
+
+    @property
+    def yt_category_id(self) -> str:
+        """ID de categoría de YouTube."""
+        config = self._load_config()
+        return config['yt_category_id']
+
+    @property
+    def yt_privacy_status(self) -> str:
+        """Estado de privacidad de YouTube."""
+        config = self._load_config()
+        return config['yt_privacy_status']
+
+    @property
+    def yt_made_for_kids(self) -> bool:
+        """Contenido hecho para niños."""
+        config = self._load_config()
+        return config['yt_made_for_kids']
+
+    @property
+    def yt_tags_extra(self) -> str:
+        """Tags extra de YouTube."""
+        config = self._load_config()
+        return config['yt_tags_extra']
+
+    @property
+    def tt_enabled(self) -> bool:
+        """TikTok habilitado."""
+        config = self._load_config()
+        return config['tt_enabled']
+
+    @property
+    def tt_publish_mode(self) -> str:
+        """Modo de publicación de TikTok."""
+        config = self._load_config()
+        return config['tt_publish_mode']
+
+    @property
+    def source_dir(self) -> Path:
+        """Directorio de videos específico del proyecto."""
+        base_settings = get_settings()
+        return base_settings.base_source_dir / self.project_name
+
+    @property
+    def output_dir(self) -> Path:
+        """Directorio de salida específico del proyecto."""
+        base_settings = get_settings()
+        return base_settings.base_output_dir / self.project_name
+
+    @property
+    def report_path(self) -> Path:
+        """Archivo de reporte específico del proyecto."""
+        return self.output_dir / "report.json"
+
+    @property
+    def sheets_id(self) -> str:
+        """ID de Google Sheets específico del proyecto (desde BD o config por defecto)."""
+        # TODO: Implementar lógica para obtener desde BD por user_id/channel_id
+        # Por ahora retorna el valor por defecto
+        return get_settings().default_sheets_id
+
+    @property
+    def sheets_range(self) -> str:
+        """Rango de Google Sheets específico del proyecto."""
+        # TODO: Implementar lógica para obtener desde BD por user_id/channel_id
+        # Por ahora retorna el valor por defecto
+        return get_settings().default_sheets_range
+
+
+def get_project_config(user_id: int | None = None, channel_id: str | None = None, project_name: str | None = None, db_session = None) -> ProjectConfig:
+    """Obtiene configuración específica para un proyecto/usuario/canal."""
+    return ProjectConfig(user_id=user_id, channel_id=channel_id, project_name=project_name, db_session=db_session)

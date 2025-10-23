@@ -12,8 +12,10 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload
 from loguru import logger
+from sqlalchemy.orm import Session
 
 from app.core.config import Config
+from app.services.oauth_service import OAuthService
 
 
 class YouTubeService:
@@ -22,54 +24,25 @@ class YouTubeService:
     SCOPES: list[str] = ["https://www.googleapis.com/auth/youtube.upload", "https://www.googleapis.com/auth/youtube"]
     API_SERVICE_NAME: str = "youtube"
     API_VERSION: str = "v3"
-    CREDENTIALS_FILE: Path = Path("credentials.json")  # Should be in project root
 
-    def __init__(self, config: Config, channel: str):
+    def __init__(self, config: Config, user_id: int, db: Session, channel_id: Union[str, None] = None):
         self.config: Config = config
-        self.channel: str = channel
+        self.user_id: int = user_id
+        self.db: Session = db
+        self.channel_id: Union[str, None] = channel_id
         self.youtube: Any = None
-        self.TOKEN_DIR: Path = Path(f".tokens/{channel}")
-        self.TOKEN_FILE: Path = self.TOKEN_DIR / "token.json"
         self._authenticate()
 
     def _authenticate(self) -> None:
-        """Authenticate with YouTube API using OAuth 2.0."""
-        creds = None
-
-        # Ensure token directory exists
-        self.TOKEN_DIR.mkdir(parents=True, exist_ok=True)
-        logger.info(f"Token directory ensured: {self.TOKEN_DIR}")
-
-        # Load existing token if available
-        if self.TOKEN_FILE.exists():
-            try:
-                with open(self.TOKEN_FILE, 'r') as token:
-                    creds_data = json.load(token)
-                    creds = Credentials.from_authorized_user_info(creds_data)
-                logger.info("Existing token loaded successfully")
-            except Exception as e:
-                logger.warning(f"Failed to load token: {e}")
-
-        # Refresh or re-authenticate if needed
-        if creds and creds.expired and creds.refresh_token:
-            try:
-                creds.refresh(Request())
-                logger.info("Token refreshed successfully")
-            except Exception as e:
-                logger.warning(f"Failed to refresh token: {e}")
-                creds = None
+        """Authenticate with YouTube API using OAuth 2.0 from database."""
+        creds = OAuthService.refresh_token_if_needed(self.db, self.user_id, self.channel_id)
 
         if not creds:
-            raise Exception(f"No valid credentials found for channel '{self.channel}'. Please authenticate via /oauth2/authorize/youtube/{self.channel} first.")
-
-        # Save token
-        with open(self.TOKEN_FILE, 'w') as token:
-            token.write(creds.to_json())
-        logger.info(f"Token saved to {self.TOKEN_FILE}")
+            raise Exception(f"No valid credentials found for user {self.user_id} and channel {self.channel_id}. Please authenticate first.")
 
         # Build YouTube API client
         self.youtube = build(self.API_SERVICE_NAME, self.API_VERSION, credentials=creds)
-        logger.info("YouTube authentication successful")
+        logger.info(f"YouTube authentication successful for channel {self.channel_id}")
 
     def _normalize_tags(self, hashtags: list[str]) -> list[str]:
         """Normalize tags by combining with TAGS_EXTRA, removing #, deduplicating, and limiting to 500 chars."""

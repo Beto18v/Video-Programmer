@@ -13,3 +13,8 @@ pandas
 pytest
 loguru
 mypy
+sqlalchemy
+alembic
+authlib
+python-jose[cryptography]
+passlib[bcrypt]
