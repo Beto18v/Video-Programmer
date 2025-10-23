@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 from datetime import datetime, date
 
 from fastapi import APIRouter, HTTPException, status, Depends
@@ -12,12 +12,9 @@ from sqlalchemy.orm import Session
 # Global state storage for OAuth (in production, use Redis or similar)
 states = {}
 
-# Global state storage for OAuth (in production, use Redis or similar)
-states = {}
-
-
 from app.db.session import get_db
 from app.services.metadata_service import MetadataServiceFactory
+from app.core.config import Settings
 from app.services.grouping_service import GroupingService
 from app.services.scheduler_service import SchedulerService
 from app.services.youtube_service import YouTubeService
@@ -283,11 +280,37 @@ def publish_youtube(request: PublishYouTubeRequest) -> PublishYouTubeResponse:
     """Publish videos to YouTube with metadata and scheduling."""
     try:
         from app.services.oauth_service import OAuthService
+        from app.services.plan_service import PlanService
         from app.db.session import get_db
         from app.core.config import get_project_config, get_settings
+        from app.models.user import User
 
         db = next(get_db())
         results = []
+
+        # Get user and check plan limits
+        user = db.query(User).filter(User.id == request.user_id).first()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        plan_service = PlanService(db)
+
+        # Check if user can upload videos
+        videos_to_upload = len([output for output in request.outputs
+                               if not (report_service.get_entry_by_output_path(output.path) and
+                                      report_service.get_entry_by_output_path(output.path).get("yt_video_id") and
+                                      not request.reupload)])
+
+        if videos_to_upload > 0:
+            # Check if user has enough quota for new uploads
+            current_count = user.uploaded_videos_count
+            if user.plan and user.plan.max_videos > 0:
+                remaining_quota = user.plan.max_videos - current_count
+                if videos_to_upload > remaining_quota:
+                    raise HTTPException(
+                        status_code=403,
+                        detail=f"Plan limit exceeded. You can upload {remaining_quota} more videos. Current plan: {user.plan.display_name}"
+                    )
 
         # Get active channel for user
         active_channel = OAuthService.get_active_channel_token(db, request.user_id)
@@ -435,6 +458,9 @@ def publish_youtube(request: PublishYouTubeRequest) -> PublishYouTubeResponse:
                     "scheduled_at": scheduled_at,
                     "verified": verified
                 })
+
+                # Increment user's uploaded videos count
+                plan_service.increment_user_video_count(user)
 
             except Exception as e:
                 error_str = str(e)
@@ -873,3 +899,62 @@ def get_user_role(request, db: Session = Depends(get_db)):
     from app.services.oauth_service import OAuthService
     role = OAuthService.get_user_role(db, request.user_id)
     return {"role": role}
+
+# Plan management endpoints
+@router.get("/plans")
+def get_available_plans(db: Session = Depends(get_db)):
+    """Get all available subscription plans."""
+    from app.services.plan_service import PlanService
+    plan_service = PlanService(db)
+    plans = plan_service.get_all_plans()
+    return [
+        {
+            "id": plan.id,
+            "name": plan.name,
+            "display_name": plan.display_name,
+            "description": plan.description,
+            "max_videos": plan.max_videos,
+            "price": plan.price
+        }
+        for plan in plans
+    ]
+
+@router.get("/user/plan")
+def get_user_plan(request, db: Session = Depends(get_db)):
+    """Get the current user's plan information."""
+    from app.services.plan_service import PlanService
+    from app.models.user import User
+
+    user = db.query(User).filter(User.id == request.user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    plan_service = PlanService(db)
+    return plan_service.get_user_plan_info(user)
+
+@router.put("/user/plan")
+def update_user_plan(plan_id: int, request, db: Session = Depends(get_db)):
+    """Update the current user's subscription plan."""
+    from app.services.plan_service import PlanService
+    from app.models.user import User
+
+    user = db.query(User).filter(User.id == request.user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    plan_service = PlanService(db)
+    updated_user = plan_service.update_user_plan(user, plan_id)
+    return {"message": "Plan updated successfully", "plan": plan_service.get_user_plan_info(updated_user)}
+
+@router.get("/user/can-upload")
+def can_user_upload_video(request, db: Session = Depends(get_db)):
+    """Check if the current user can upload more videos."""
+    from app.services.plan_service import PlanService
+    from app.models.user import User
+
+    user = db.query(User).filter(User.id == request.user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    plan_service = PlanService(db)
+    return {"can_upload": plan_service.can_user_upload_video(user)}

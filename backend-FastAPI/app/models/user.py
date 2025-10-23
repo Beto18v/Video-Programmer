@@ -13,6 +13,8 @@ class User(Base):
     picture = Column(String, nullable=True)
     role_id = Column(Integer, ForeignKey("roles.id"), default=2)  # 1=admin, 2=cliente (only 2 roles allowed)
     active_channel_id = Column(String, nullable=True)  # ID of the currently active YouTube channel
+    plan_id = Column(Integer, ForeignKey("subscription_plans.id"), default=1)  # Default to Free plan
+    uploaded_videos_count = Column(Integer, default=0)  # Count of videos uploaded by user
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -20,6 +22,7 @@ class User(Base):
     role = relationship("Role", back_populates="users")
     oauth_tokens = relationship("OAuthToken", back_populates="user")
     project_configs = relationship("ProjectConfig", back_populates="user")
+    plan = relationship("SubscriptionPlan", back_populates="users")
 
 class OAuthToken(Base):
     __tablename__ = "oauth_tokens"
