@@ -1,7 +1,11 @@
 from sqlalchemy import Column, Integer, String, DateTime, Text, Boolean
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timezone
 from . import Base
+
+
+def utcnow():
+    return datetime.now(timezone.utc)
 
 class SubscriptionPlan(Base):
     __tablename__ = "subscription_plans"
@@ -13,8 +17,8 @@ class SubscriptionPlan(Base):
     max_videos = Column(Integer, default=0)  # 0 = unlimited
     price = Column(Integer, default=0)  # Price in cents
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=utcnow)
+    updated_at = Column(DateTime, default=utcnow, onupdate=utcnow)
 
     # Relationships
     users = relationship("User", back_populates="plan")

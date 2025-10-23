@@ -1,7 +1,11 @@
 from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timezone
 from . import Base
+
+
+def utcnow():
+    return datetime.now(timezone.utc)
 
 class User(Base):
     __tablename__ = "users"
@@ -14,9 +18,16 @@ class User(Base):
     role_id = Column(Integer, ForeignKey("roles.id"), default=2)  # 1=admin, 2=cliente (only 2 roles allowed)
     active_channel_id = Column(String, nullable=True)  # ID of the currently active YouTube channel
     plan_id = Column(Integer, ForeignKey("subscription_plans.id"), default=1)  # Default to Free plan
-    uploaded_videos_count = Column(Integer, default=0)  # Count of videos uploaded by user
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    # Monthly count of videos uploaded by user (resets every billing month)
+    uploaded_videos_count = Column(Integer, default=0)
+    # Start of the current counting period (month), anchored by card registration date if available
+    video_count_period_start = Column(DateTime, nullable=True)
+    # Stripe customer identifier (no sensitive card data is stored)
+    stripe_customer_id = Column(String, nullable=True, index=True)
+    # Date when the user registered a card (used as monthly anchor)
+    card_registered_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=utcnow)
+    updated_at = Column(DateTime, default=utcnow, onupdate=utcnow)
 
     # Relationships
     role = relationship("Role", back_populates="users")
@@ -38,8 +49,8 @@ class OAuthToken(Base):
     channel_id = Column(String, nullable=True)  # YouTube channel ID
     channel_title = Column(String, nullable=True)  # YouTube channel title
     is_primary = Column(Integer, default=0)  # 1 for primary channel, 0 for additional
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=utcnow)
+    updated_at = Column(DateTime, default=utcnow, onupdate=utcnow)
 
     # Relationship back to user
     user = relationship("User", back_populates="oauth_tokens")
@@ -88,8 +99,8 @@ class ProjectConfig(Base):
     tt_publish_mode = Column(String, default="auto")
 
     # Metadata
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=utcnow)
+    updated_at = Column(DateTime, default=utcnow, onupdate=utcnow)
 
     # Relationship back to user
     user = relationship("User", back_populates="project_configs")

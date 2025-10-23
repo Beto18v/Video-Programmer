@@ -32,6 +32,7 @@ starlette = "^0.48.0"
 [tool.poetry.group.dev.dependencies]
 mypy = "*"
 pytest-asyncio = "*"
+alembic = "^1.17.0"
 
 [tool.pytest.ini_options]
 addopts = "-ra -q"

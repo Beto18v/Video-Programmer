@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 from sqlalchemy.orm import Session
 from google.oauth2.credentials import Credentials
@@ -59,7 +59,7 @@ class OAuthService:
             existing_token.expires_at = expires_at
             existing_token.scope = creds.scopes
             existing_token.channel_title = channel_title
-            existing_token.updated_at = datetime.utcnow()
+            existing_token.updated_at = datetime.now(timezone.utc)
             db.commit()
             db.refresh(existing_token)
             return existing_token
@@ -147,7 +147,7 @@ class OAuthService:
         )
 
         # Check if token is expired or will expire soon (within 5 minutes)
-        if creds.expired or (creds.expiry and creds.expiry < datetime.utcnow() + timedelta(minutes=5)):
+        if creds.expired or (creds.expiry and creds.expiry < datetime.now(timezone.utc) + timedelta(minutes=5)):
             try:
                 creds.refresh(Request())
                 # Update the token in DB

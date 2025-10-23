@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 
 from fastapi import APIRouter, HTTPException, status, Depends
 from fastapi.responses import RedirectResponse
@@ -302,7 +302,9 @@ def publish_youtube(request: PublishYouTubeRequest) -> PublishYouTubeResponse:
                                       not request.reupload)])
 
         if videos_to_upload > 0:
-            # Check if user has enough quota for new uploads
+            # Ensure we are in the current monthly cycle
+            plan_service.ensure_user_monthly_counter(user)
+            # Check if user has enough quota for new uploads (monthly)
             current_count = user.uploaded_videos_count
             if user.plan and user.plan.max_videos > 0:
                 remaining_quota = user.plan.max_videos - current_count
@@ -838,7 +840,7 @@ def update_project_config(config_id: int, request: ProjectConfigRequest, db: Ses
         if hasattr(config, field):
             setattr(config, field, value)
     
-    config.updated_at = datetime.utcnow()
+    config.updated_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(config)
     

@@ -56,6 +56,22 @@ backend-FastAPI/
 - Pruebas unitarias en `tests/` para servicios principales.
 - Documentación de endpoints en los archivos de rutas.
 
+## Planes y Renovación Mensual
+
+- Renovación automática mensual del límite de videos de cada plan.
+- El plan "Free" permite subir hasta 5 videos por mes.
+- El conteo mensual se ancla a la fecha en que el usuario registra una tarjeta. Si no hay tarjeta, se ancla a la fecha de creación del usuario.
+- Campos agregados al modelo `users`:
+  - `stripe_customer_id` (String, nullable)
+  - `card_registered_at` (DateTime, nullable)
+  - `video_count_period_start` (DateTime, nullable) – inicio del ciclo mensual actual.
+
+Lógica clave (servicio `PlanService`):
+- `ensure_user_monthly_counter(user)`: resetea `uploaded_videos_count` al iniciar un nuevo ciclo mensual.
+- `can_user_upload_video(user)`: valida el cupo mensual según el plan.
+- `increment_user_video_count(user)`: incrementa el contador mensual de subidas.
+- `set_card_registered(user, stripe_customer_id, registered_at)`: guarda el cliente de Stripe, fija el ancla del ciclo mensual a esa fecha y resetea el conteo.
+
 ## Endpoints principales
 
 Consultar en `app/api/routes.py` y `app/api/salida_routes.py` para ver los endpoints disponibles y su documentación.
@@ -177,6 +193,35 @@ The application supports multiple database backends with automatic table creatio
 - **Encrypted Token Storage**: OAuth tokens are encrypted using Fernet symmetric encryption
 - **Environment-Based Configuration**: All sensitive data loaded from environment variables
 - **Automatic Database Setup**: Tables created securely on first run
+
+## Migraciones (Alembic)
+
+Para agregar los nuevos campos en `users` (`stripe_customer_id`, `card_registered_at`, `video_count_period_start`) y sincronizar descripciones/cupos de planes:
+
+1. Instala Alembic (con Poetry):
+   `poetry add alembic --group dev`
+
+2. Inicializa Alembic (una sola vez):
+   `alembic init migrations`
+
+3. Genera una revisión con autogeneración:
+   `alembic revision --autogenerate -m "add stripe + monthly fields to users"`
+
+4. Revisa el script generado (debería incluir las 3 columnas nuevas). No almacenes datos sensibles de tarjetas.
+
+5. Aplica la migración:
+   `alembic upgrade head`
+
+Producción: ejecuta `PlanService.create_default_plans()` para ajustar el plan "free" (5 videos/mes) y descripciones.
+
+## Ejemplo de Integración con Stripe
+
+- Frontend: usa Stripe.js/Elements para crear un `PaymentMethod` (no envíes datos de tarjeta al backend).
+- Backend: registra el cliente y adjunta el `PaymentMethod`.
+
+Consulta `app/services/stripe_service.py`:
+- `create_or_get_customer_for_user(db, user, stripe_api_key)` crea/recupera el cliente y guarda `stripe_customer_id`.
+- `attach_payment_method(db, user, payment_method_id, stripe_api_key, registered_at)` adjunta la tarjeta y establece el ancla del ciclo mensual, reseteando el conteo.
 
 ## Running the Application
 

@@ -4,12 +4,15 @@ from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 
 # Import the database URL from config
 from app.core.config import settings
 
 Base = declarative_base()
+
+def utcnow():
+    return datetime.now(timezone.utc)
 
 class ProjectConfig(Base):
     """Project configuration model for database migration"""
@@ -57,8 +60,8 @@ class ProjectConfig(Base):
     tt_publish_mode = Column(String(50), default="auto")  # auto, manual
 
     # Timestamps
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=utcnow)
+    updated_at = Column(DateTime, default=utcnow, onupdate=utcnow)
 
 def create_project_config_table():
     """Create the project_configs table"""
