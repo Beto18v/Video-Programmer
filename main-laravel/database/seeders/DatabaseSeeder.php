@@ -13,6 +13,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Ejecutar seeders en orden
+        $this->call([
+            PlansSeeder::class,
+        ]);
+
         // User::factory(10)->create();
 
         User::firstOrCreate(

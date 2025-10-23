@@ -16,9 +16,23 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
+            $table->foreignId('current_plan_id')->nullable()->constrained('plans')->onDelete('set null');
+            $table->string('first_name')->nullable();
+            $table->string('last_name')->nullable();
+            $table->string('avatar_url')->nullable();
+            $table->string('timezone', 50)->default('UTC');
+            $table->string('locale', 10)->default('en');
+            $table->boolean('is_active')->default(true);
+            $table->timestamp('last_login_at')->nullable();
+            $table->json('preferences')->nullable();
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();
+
+            // Índices
+            $table->index('current_plan_id');
+            $table->index('is_active');
+            $table->index('last_login_at');
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
