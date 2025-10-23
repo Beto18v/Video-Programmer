@@ -1,0 +1,49 @@
+# Dockerfile seguro para producción
+FROM python:3.11-slim as base
+
+# Crear usuario no-root para mayor seguridad
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+
+# Instalar dependencias del sistema y limpiar cache
+RUN apt-get update && apt-get install -y \
+    --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Crear directorios necesarios
+RUN mkdir -p /app /app/logs /app/ssl && \
+    chown -R appuser:appuser /app
+
+# Establecer directorio de trabajo
+WORKDIR /app
+
+# Copiar requirements y instalar dependencias Python
+COPY requirements.txt pyproject.toml ./
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Copiar código fuente
+COPY . .
+
+# Cambiar permisos
+RUN chown -R appuser:appuser /app && \
+    chmod +x run_server.py
+
+# Cambiar a usuario no-root
+USER appuser
+
+# Variables de entorno para seguridad
+ENV PYTHONPATH=/app
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV ENVIRONMENT=production
+
+# Exponer puerto
+EXPOSE 8000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Comando por defecto
+CMD ["python", "run_server.py"]

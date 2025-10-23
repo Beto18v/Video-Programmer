@@ -16,16 +16,24 @@ from sqlalchemy.orm import Session
 from app.core.config import get_settings
 from app.db.session import get_db
 from app.services.oauth_service import OAuthService
+from app.services.auth_service import AuthService
 from app.models.user import User
 
 router = APIRouter()
 
-class OAuthResponse(BaseModel):
-    """Response model for OAuth callback."""
-    message: str
-    user_id: int
-    email: str
-    token_saved: bool
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+@router.post("/login")
+def login(request: LoginRequest, db: Session = Depends(get_db)):
+    """Login endpoint for JWT token."""
+    # For demo purposes - in production, verify against database
+    # This is a placeholder; implement proper user authentication
+    if request.username == "admin" and request.password == "password":  # Change this!
+        token = AuthService.create_access_token({"sub": request.username, "role": "admin"})
+        return {"access_token": token, "token_type": "bearer"}
+    raise HTTPException(status_code=401, detail="Invalid credentials")
 
 @router.get("/oauth2/authorize/google")
 def authorize_google(db: Session = Depends(get_db)):

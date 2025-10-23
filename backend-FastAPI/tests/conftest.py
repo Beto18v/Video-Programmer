@@ -8,6 +8,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from app.db.session import Base
 
+# Import all models to register them with Base.metadata
+from app.models import user, role, plan, subscription_plan, video
+
 
 @pytest.fixture(scope="session", autouse=True)
 def set_test_database():

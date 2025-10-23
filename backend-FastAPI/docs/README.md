@@ -1,196 +1,104 @@
-# 🚀 Video Programmer API# 🚀 Video Programmer API - Guía de Inicio Rápido
+# 🚀 Video Programmer API - Guía de Inicio Rápido
 
-[![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org)[![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org)
+[![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com)
+[![Tests](https://img.shields.io/badge/Tests-34%20passing-brightgreen.svg)](./tests)
+[![Security](https://img.shields.io/badge/Security-Enhanced-red.svg)](./docs/SECURITY.md)
 
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com)[![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com)
+> Plataforma automatizada para programación, procesamiento y publicación de videos en YouTube con características avanzadas de seguridad.
 
-[![Tests](https://img.shields.io/badge/Tests-34%20passing-brightgreen.svg)](./tests)[![Tests](https://img.shields.io/badge/Tests-34%20passing-brightgreen.svg)](./tests)
+## ⚡ Instalación en 5 Minutos
 
-[![Security](https://img.shields.io/badge/Security-Enhanced-red.svg)](./docs/security)[![Security](https://img.shields.io/badge/Security-Enhanced-red.svg)](./docs/SECURITY.md)
-
-> Plataforma automatizada para programación, procesamiento y publicación de videos en YouTube con características avanzadas de seguridad.> Plataforma automatizada para programación, procesamiento y publicación de videos en YouTube con características avanzadas de seguridad.
-
-## 📚 Documentación## ⚡ Instalación en 5 Minutos
-
-### 🚀 Inicio Rápido```bash
-
-- **[Guía de Inicio Rápido](./docs/README.md)** - Instalación y primeros pasos en 5 minutos# 1. Clonar repositorio
-
+```bash
+# 1. Clonar repositorio
 git clone https://github.com/Beto18v/Video-Programmer.git
+cd Video-Programmer/backend-FastAPI
 
-### 👥 Para Usuarioscd Video-Programmer/backend-FastAPI
-
-- **[Manual de Usuario](./docs/user-manual/USER_MANUAL.md)** - Guía completa para usar la plataforma
-
-- **[Primeros Pasos](./docs/user-manual/getting-started.md)** - Configuración inicial# 2. Ejecutar instalador automático
-
-- **[Referencia de API](./docs/user-manual/api-reference.md)** - Endpoints disponiblespython scripts/install_security_features.py
-
-- **[Solución de Problemas](./docs/user-manual/troubleshooting.md)** - Problemas comunes y soluciones
+# 2. Ejecutar instalador automático
+python scripts/install_security_features.py
 
 # 3. Configurar variables de entorno
+cp .env.example .env
+# Editar .env con tus configuraciones
 
-### 🛠️ Para Desarrolladorescp .env.example .env
+# 4. Ejecutar aplicación
+python -m app.main_secure
+```
 
-- **[Documentación Completa](./docs/README_COMPLETE.md)** - Guía técnica detallada# Editar .env con tus configuraciones
+🎉 **¡Listo!** Tu API está corriendo en `http://localhost:8000`
 
-- **[Arquitectura del Sistema](./docs/developer/architecture.md)** - Diseño y componentes
+## 📚 Documentación Completa
 
-- **[API Endpoints](./docs/developer/api-endpoints.md)** - Referencia técnica completa# 4. Ejecutar aplicación
-
-- **[Despliegue](./docs/developer/deployment.md)** - Guías de deploymentpython -m app.main_secure
-
-````
-
-### 🔒 Seguridad
-
-- **[Resumen de Seguridad](./docs/security/overview.md)** - Características implementadas🎉 **¡Listo!** Tu API está corriendo en `http://localhost:8000`
-
-- **[Implementación Detallada](./docs/security/implementation.md)** - Configuración técnica
-
-- **[OAuth2 con Google](./docs/security/oauth.md)** - Autenticación externa## 📚 Documentación Completa
-
-
-
-### 🔗 Integraciones- **📖 [Documentación Completa](./README_COMPLETE.md)** - Guía detallada con todos los endpoints y ejemplos
-
-- **[YouTube API](./docs/integrations/youtube-api.md)** - Publicación automática- **🔐 [Guía de Seguridad](./docs/SECURITY.md)** - Características de seguridad implementadas
-
-- **[MercadoPago](./docs/integrations/mercado-pago.md)** - Sistema de pagos
+- **📖 [Documentación Completa](./README_COMPLETE.md)** - Guía detallada con todos los endpoints y ejemplos
+- **🔐 [Guía de Seguridad](./docs/SECURITY.md)** - Características de seguridad implementadas
+- **🐳 [Despliegue Docker](./docker-compose.secure.yml)** - Configuración para producción
 
 ## 🎯 Características Principales
 
-### ⚙️ Configuración
-
-- **[Nginx SSL](./docs/config/nginx-ssl.conf)** - Configuración de proxy reverso### 🔒 Seguridad Avanzada
-
-- **[Docker Compose](./docker-compose.secure.yml)** - Despliegue containerizado
+### 🔒 Seguridad Avanzada
 
 - ✅ Autenticación JWT con roles (Admin/Cliente)
-
-## ⚡ Instalación Rápida- ✅ Rate limiting inteligente
-
+- ✅ Rate limiting inteligente
 - ✅ Headers de seguridad HTTP
-
-```bash- ✅ Sanitización automática de datos
-
-# 1. Clonar repositorio- ✅ Logging de auditoría completo
-
-git clone https://github.com/Beto18v/Video-Programmer.git
-
-cd Video-Programmer/backend-FastAPI### 📺 Gestión de Videos
-
-
-
-# 2. Ejecutar instalador automático- ✅ Procesamiento automático con FFmpeg
-
-python scripts/install_security_features.py- ✅ Subida directa a YouTube
-
-- ✅ Programación de publicaciones
-
-# 3. Configurar variables de entorno- ✅ Gestión de metadatos
-
-cp .env.example .env
-
-# Editar .env con tus configuraciones### 💳 Sistema de Pagos
-
-
-
-# 4. Ejecutar aplicación- ✅ Integración MercadoPago
-
-python -m app.main_secure- ✅ Planes de suscripción
-
-```- ✅ Webhooks automáticos
-
-
-
-🎉 **¡Listo!** Tu API está corriendo en `http://localhost:8000`### 📊 Monitoreo
-
-
-
-## 🎯 Características Principales- ✅ Métricas Prometheus
-
-- ✅ Logs estructurados JSON
-
-### 🔒 Seguridad Avanzada- ✅ Health checks para Kubernetes
-
-- ✅ Autenticación JWT con roles (Admin/Cliente)
-
-- ✅ Rate limiting inteligente## 🏃‍♂️ Inicio Rápido
-
-- ✅ Headers de seguridad HTTP
-
-- ✅ Sanitización automática de datos### Opción 1: Desarrollo Local
-
+- ✅ Sanitización automática de datos
 - ✅ Logging de auditoría completo
 
-```bash
+### 📺 Gestión de Videos
 
-### 📺 Gestión de Videos# Instalar dependencias
-
-- ✅ Procesamiento automático con FFmpegpip install -r requirements.txt
-
+- ✅ Procesamiento automático con FFmpeg
 - ✅ Subida directa a YouTube
+- ✅ Programación de publicaciones
+- ✅ Gestión de metadatos
 
-- ✅ Programación de publicaciones# Configurar base de datos
+### 💳 Sistema de Pagos
 
-- ✅ Metadatos dinámicospython scripts/initialize_roles.py
-
-- ✅ Conversión de formatospython scripts/initialize_plans.py
-
-
-
-### 💰 Sistema de Pagos# Ejecutar servidor
-
-- ✅ Integración MercadoPagouvicorn app.main:app --reload
-
-- ✅ Integración Stripe```
-
+- ✅ Integración MercadoPago
 - ✅ Planes de suscripción
+- ✅ Webhooks automáticos
 
-- ✅ Gestión de facturación### Opción 2: Con Docker
+### 📊 Monitoreo
 
+- ✅ Métricas Prometheus
+- ✅ Logs estructurados JSON
+- ✅ Health checks para Kubernetes
 
+## 🏃‍♂️ Inicio Rápido
 
-### 📊 Monitoreo```bash
+### Opción 1: Desarrollo Local
 
-- ✅ Logging estructurado JSON# Levantar stack completo
+```bash
+# Instalar dependencias
+pip install -r requirements.txt
 
-- ✅ Métricas Prometheusdocker-compose -f docker-compose.secure.yml up -d
+# Configurar base de datos
+python scripts/initialize_roles.py
+python scripts/initialize_plans.py
 
-- ✅ Alertas automáticas
+# Ejecutar servidor
+uvicorn app.main:app --reload
+```
 
-- ✅ Dashboard de analytics# Ver logs
+### Opción 2: Con Docker
 
+```bash
+# Levantar stack completo
+docker-compose -f docker-compose.secure.yml up -d
+
+# Ver logs
 docker-compose logs -f api
+```
 
-## 📞 Soporte```
+### Opción 3: Con SSL (Desarrollo)
 
-
-
-- **📧 Email**: soporte@video-programmer.com### Opción 3: Con SSL (Desarrollo)
-
-- **💬 Chat en vivo**: Disponible en el panel de usuario
-
-- **📋 Tickets**: Sistema de tickets en el dashboard```bash
-
-- **📖 Documentación**: [docs.video-programmer.com](https://docs.video-programmer.com)# Generar certificados
-
+```bash
+# Generar certificados
 python scripts/generate_ssl_cert.py
 
-## 📄 Licencia
-
 # Ejecutar con HTTPS
-
-Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para más detalles.python run_server_ssl.py --ssl
-
-````
-
----
+python run_server_ssl.py --ssl
+```
 
 ## 🧪 Verificar Instalación
-
-_Documentación organizada - Octubre 2025_
 
 ```bash
 # Ejecutar tests

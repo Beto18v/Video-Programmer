@@ -21,8 +21,8 @@ class PlanService:
         return datetime.now(timezone.utc)
 
     def _get_billing_anchor(self, user: User) -> datetime:
-        """Anchor for monthly cycles: card_registered_at if present, else created_at."""
-        return user.card_registered_at or user.created_at
+        """Anchor for monthly cycles: payment_registered_at if present, else created_at."""
+        return user.payment_registered_at or user.created_at
 
     def _add_months(self, dt: datetime, months: int) -> datetime:
         """Add months to dt, clamping the day to the last day of the resulting month."""
@@ -169,13 +169,13 @@ class PlanService:
         self.db.refresh(user)
         return user
 
-    def set_card_registered(self, user: User, stripe_customer_id: str, registered_at: Optional[datetime] = None) -> User:
-        """Register a card and set Stripe customer ID; don't store sensitive card data.
+    def set_card_registered(self, user: User, mercado_pago_customer_id: str, registered_at: Optional[datetime] = None) -> User:
+        """Register a payment method and set MercadoPago customer ID; don't store sensitive payment data.
         Resets the monthly cycle anchor to the registration date and resets the counter.
         """
-        user.stripe_customer_id = stripe_customer_id
-        user.card_registered_at = registered_at or self._utcnow()
-        new_cycle_start = self._current_cycle_start(user.card_registered_at, self._utcnow())
+        user.mercado_pago_customer_id = mercado_pago_customer_id
+        user.payment_registered_at = registered_at or self._utcnow()
+        new_cycle_start = self._current_cycle_start(user.payment_registered_at, self._utcnow())
         user.video_count_period_start = new_cycle_start
         user.uploaded_videos_count = 0
         self.db.commit()

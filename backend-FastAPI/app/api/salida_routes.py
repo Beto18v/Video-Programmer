@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, Form, UploadFile, File, HTTPException
+from fastapi import APIRouter, Request, UploadFile, File, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from pathlib import Path

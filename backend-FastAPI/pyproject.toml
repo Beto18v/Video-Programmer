@@ -29,6 +29,14 @@ python-jose = {extras = ["cryptography"], version = "*"}
 passlib = {extras = ["bcrypt"], version = "*"}
 python-multipart = "*"
 starlette = "^0.48.0"
+# Security and performance enhancements
+redis = "*"                    # For distributed rate limiting
+bleach = "*"                   # For HTML sanitization
+python-magic = "*"             # For file type detection
+cryptography = "*"             # For enhanced encryption
+slowapi = "*"                  # Alternative rate limiting
+prometheus-client = "*"        # For monitoring metrics
+email-validator = "*"          # For email validation
 
 [tool.poetry.group.dev.dependencies]
 mypy = "*"

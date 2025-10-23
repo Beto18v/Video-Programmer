@@ -63,6 +63,10 @@ class Settings(BaseSettings):
     tt_redirect_uri: str = Field(default="http://localhost:8080/oauth2/callback/tiktok")
     tt_publish_mode: str = Field(default="auto")  # direct|inbox|auto
 
+    # Mercado Pago
+    mp_access_token: str = Field(default="")
+    base_url: str = Field(default="http://localhost:8000")
+
     # Reporte
     report_path: Path = Field(default=Path("./output/report.json"))
 

@@ -22,10 +22,10 @@ class User(Base):
     uploaded_videos_count = Column(Integer, default=0)
     # Start of the current counting period (month), anchored by card registration date if available
     video_count_period_start = Column(DateTime, nullable=True)
-    # Stripe customer identifier (no sensitive card data is stored)
-    stripe_customer_id = Column(String, nullable=True, index=True)
-    # Date when the user registered a card (used as monthly anchor)
-    card_registered_at = Column(DateTime, nullable=True)
+    # MercadoPago customer identifier (no sensitive payment data is stored)
+    mercado_pago_customer_id = Column(String, nullable=True, index=True)
+    # Date when the user registered payment method (used as monthly anchor)
+    payment_registered_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=utcnow)
     updated_at = Column(DateTime, default=utcnow, onupdate=utcnow)
 

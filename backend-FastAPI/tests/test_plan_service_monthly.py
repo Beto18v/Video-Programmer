@@ -85,9 +85,9 @@ def test_reanchor_on_card_registration():
 
         # Card registered Mar 10 -> anchor changes to Mar 10; counter resets
         svc._utcnow = lambda: datetime(2025, 3, 10, 12, 0, 0)  # type: ignore
-        svc.set_card_registered(user, stripe_customer_id="cus_test", registered_at=datetime(2025, 3, 10, 12, 0, 0))
-        assert user.stripe_customer_id == "cus_test"
-        assert user.card_registered_at == datetime(2025, 3, 10, 12, 0, 0)
+        svc.set_card_registered(user, mercado_pago_customer_id="cus_test", registered_at=datetime(2025, 3, 10, 12, 0, 0))
+        assert user.mercado_pago_customer_id == "cus_test"
+        assert user.payment_registered_at == datetime(2025, 3, 10, 12, 0, 0)
         assert user.uploaded_videos_count == 0
         assert user.video_count_period_start == datetime(2025, 3, 10, 12, 0, 0)
 

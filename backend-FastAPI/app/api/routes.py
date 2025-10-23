@@ -1,26 +1,20 @@
-from pathlib import Path
 from typing import Any, Dict, List, Optional
-from datetime import datetime, date, timezone
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, HTTPException, status, Depends
 from fastapi.responses import RedirectResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from loguru import logger
-from google_auth_oauthlib.flow import Flow
 from sqlalchemy.orm import Session
 
 # Global state storage for OAuth (in production, use Redis or similar)
 states = {}
 
 from app.db.session import get_db
-from app.services.metadata_service import MetadataServiceFactory
 from app.core.config import Settings
-from app.services.grouping_service import GroupingService
-from app.services.scheduler_service import SchedulerService
 from app.services.youtube_service import YouTubeService
-from app.services.ffmpeg_service import FFmpegService
 from app.services.report_service import ReportService
-from app.models.plan import Plan, MediaGroup
+from app.models.plan import Plan
 from app.models.video import Video
 
 
@@ -32,6 +26,28 @@ class PlanRequest(BaseModel):
     ordering: str = Field(default="name", description="name|date")
     group_size: int = Field(default=3, gt=0)
     output_pattern: str = Field(default="Semana{week:02d}_Dia{day:02d}.mp4")
+
+    @field_validator("source_dir", "output_dir")
+    @classmethod
+    def validate_paths(cls, v):
+        """Validate and sanitize directory paths."""
+        if not v:
+            raise ValueError("Path cannot be empty")
+        # Prevent directory traversal
+        if ".." in v or v.startswith("/"):
+            raise ValueError("Invalid path: directory traversal not allowed")
+        # Basic sanitization: remove dangerous characters
+        import re
+        if re.search(r'[<>:"|?*]', v):
+            raise ValueError("Invalid characters in path")
+        return v
+
+    @field_validator("ordering")
+    @classmethod
+    def validate_ordering(cls, v):
+        if v not in ["name", "date"]:
+            raise ValueError("ordering must be 'name' or 'date'")
+        return v
 
 class PlanResponse(BaseModel):
     plan: Plan
@@ -167,347 +183,6 @@ def require_admin(request, db: Session = Depends(get_db)):
 def health() -> Dict[str, str]:
     """Health check endpoint."""
     return {"status": "ok"}
-
-@router.post("/plan", response_model=PlanResponse)
-def create_plan(request: PlanRequest) -> PlanResponse:
-    """Create a grouping plan and calculate publication slots."""
-    try:
-        logger.info(f"Received plan request: source_dir={request.source_dir}, output_dir={request.output_dir}")
-        # Get configuration
-        config = Settings()
-
-        # Create plan
-        grouping_service = GroupingService()
-        plan = grouping_service.build_plan(
-            source_dir=Path(request.source_dir),
-            output_dir=Path(request.output_dir),
-            ordering=request.ordering,
-            group_size=request.group_size,
-            output_pattern=request.output_pattern
-        )
-
-        # Calculate slots
-        # Convert config values to correct types
-        start_date_obj = date.fromisoformat(config.start_date)
-        times_list = config.times if isinstance(config.times, list) else config.times.split(',')
-        
-        slots = SchedulerService.slots_for_plan(
-            plan=plan,
-            start_date=start_date_obj,
-            times=times_list,
-            timezone=config.timezone
-        )
-
-        # Convert slots to dict with string indices
-        slots_dict = {str(group_index): slot.isoformat() for group_index, slot in slots.items()}
-
-        # Get metadata preview (first 5 rows)
-        metadata_service = MetadataServiceFactory.create_service(config)
-        metadata_preview = metadata_service.get_metadata_for_outputs(5)
-
-        return PlanResponse(plan=plan, slots=slots_dict, metadata_preview=metadata_preview)
-
-    except Exception as e:
-        logger.error(f"Error creating plan: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to create plan: {str(e)}"
-        )
-
-@router.post("/group", response_model=GroupResponse)
-def group_videos(request: GroupRequest) -> GroupResponse:
-    """Concatenate video groups using FFmpeg safe concat."""
-    try:
-        config = Settings()
-        report_service = ReportService(config.report_path)
-        items = []
-        ffmpeg_service = FFmpegService()
-
-        for i, group in enumerate(request.plan.groups):
-            try:
-                output_path = Path(group.output)
-                
-                # Check if output file exists and force is not set
-                if output_path.exists() and not request.force:
-                    items.append(GroupItem(
-                        index=i+1,
-                        mode="skipped",
-                        ok=False,
-                        output=group.output,
-                        error="Output file already exists. Use force=true to overwrite."
-                    ))
-                    continue
-
-                # Use safe_concat to concatenate videos
-                result = ffmpeg_service.safe_concat(
-                    input_files=[Path(f) for f in group.inputs],
-                    output_file=output_path
-                )
-
-                ok = bool(result.get("ok", False))
-                error = str(result.get("error")) if result.get("error") else None
-
-                items.append(GroupItem(
-                    index=i+1,
-                    mode=str(result.get("mode", "unknown")),
-                    ok=ok,
-                    output=group.output,
-                    error=error
-                ))
-
-                # Report entry
-                report_entry = {
-                    "output_path": group.output,
-                    "created_at": datetime.now().isoformat()
-                }
-                if error:
-                    report_entry["error"] = error
-                report_service.append_entry(report_entry)
-
-            except Exception as e:
-                logger.error(f"Error concatenating group {i+1}: {e}")
-                error_str = str(e)
-                items.append(GroupItem(
-                    index=i+1,
-                    mode="unknown",
-                    ok=False,
-                    output="",
-                    error=error_str
-                ))
-
-                # Report entry for error
-                report_service.append_entry({
-                    "output_path": group.output,
-                    "created_at": datetime.now().isoformat(),
-                    "errors": [error_str]
-                })
-
-        return GroupResponse(items=items)
-
-    except Exception as e:
-        logger.error(f"Error in group operation: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to group videos: {str(e)}"
-        )
-
-@router.post("/publish/youtube", response_model=PublishYouTubeResponse)
-def publish_youtube(request: PublishYouTubeRequest) -> PublishYouTubeResponse:
-    """Publish videos to YouTube with metadata and scheduling."""
-    try:
-        from app.services.oauth_service import OAuthService
-        from app.services.plan_service import PlanService
-        from app.db.session import get_db
-        from app.core.config import get_project_config, get_settings
-        from app.models.user import User
-
-        db = next(get_db())
-        results = []
-
-        # Get user and check plan limits
-        user = db.query(User).filter(User.id == request.user_id).first()
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-
-        plan_service = PlanService(db)
-
-        # Check if user can upload videos
-        videos_to_upload = len([output for output in request.outputs
-                               if not (report_service.get_entry_by_output_path(output.path) and
-                                      report_service.get_entry_by_output_path(output.path).get("yt_video_id") and
-                                      not request.reupload)])
-
-        if videos_to_upload > 0:
-            # Ensure we are in the current monthly cycle
-            plan_service.ensure_user_monthly_counter(user)
-            # Check if user has enough quota for new uploads (monthly)
-            current_count = user.uploaded_videos_count
-            if user.plan and user.plan.max_videos > 0:
-                remaining_quota = user.plan.max_videos - current_count
-                if videos_to_upload > remaining_quota:
-                    raise HTTPException(
-                        status_code=403,
-                        detail=f"Plan limit exceeded. You can upload {remaining_quota} more videos. Current plan: {user.plan.display_name}"
-                    )
-
-        # Get active channel for user
-        active_channel = OAuthService.get_active_channel_token(db, request.user_id)
-        if not active_channel:
-            raise HTTPException(status_code=400, detail="No active channel found for user")
-
-        # Get project-specific configuration
-        project_config = get_project_config(
-            user_id=request.user_id,
-            channel_id=active_channel.channel_id,
-            db_session=db
-        )
-
-        # Create services with project-specific config
-        youtube_service = YouTubeService(get_settings(), request.user_id, db, active_channel.channel_id)
-        report_service = ReportService(project_config.report_path)
-
-        # Get metadata for all outputs
-        if request.metadata:
-            # Use custom metadata from request
-            metadata_list = request.metadata
-        else:
-            # Get metadata from service
-            metadata_source = "sheets" if request.use_sheets else project_config.metadata_source_type
-            metadata_service = MetadataServiceFactory.create_service(
-                get_settings(),
-                force_source=metadata_source,
-                sheet_id=project_config.sheets_id,
-                sheets_range=project_config.sheets_range
-            )
-            num_outputs = len(request.outputs)
-            metadata_list = metadata_service.get_metadata_for_outputs(num_outputs)
-
-        for output in request.outputs:
-            logs = []
-            try:
-                logs.append(f"Procesando video {output.index}: {output.path}")
-
-                # Check if video already has a YouTube ID and reupload is not enabled
-                existing_entry = report_service.get_entry_by_output_path(output.path)
-                if existing_entry and existing_entry.get("yt_video_id") and not request.reupload:
-                    # Get metadata for this output to show current title
-                    meta_index = output.index - 1
-                    if meta_index < len(metadata_list):
-                        current_metadata = metadata_list[meta_index]
-                        current_title = current_metadata.get("title", f"Video {output.index}")
-                    else:
-                        current_title = f"Video {output.index}"
-
-                    logs.append("Video ya existe en reporte, omitiendo subida")
-                    results.append({
-                        "index": output.index,
-                        "title": current_title,
-                        "video_id": existing_entry["yt_video_id"],
-                        "url": existing_entry.get("yt_url"),
-                        "status": "skipped",
-                        "reason": "Video already uploaded. Use reupload=true to upload again.",
-                        "logs": "\n".join(logs)
-                    })
-
-                    # Update report with current title
-                    report_service.append_entry({
-                        "output_path": output.path,
-                        "title": current_title,
-                        "yt_video_id": existing_entry["yt_video_id"],
-                        "yt_url": existing_entry.get("yt_url"),
-                        "status": "skipped"
-                    })
-                    continue
-
-                # Get metadata for this output
-                meta_index = output.index - 1
-                if meta_index < len(metadata_list):
-                    metadata = metadata_list[meta_index]
-                    logs.append(f"Metadatos obtenidos: {metadata.get('title', 'Sin título')}")
-                else:
-                    metadata = {"title": f"Video {output.index}", "description": "", "hashtags": [], "thumbnail": None}
-                    logs.append("Usando metadatos por defecto")
-
-                # Upload video
-                logs.append("Iniciando subida a YouTube...")
-                upload_result = youtube_service.upload_video(
-                    file_path=output.path,
-                    title=metadata["title"],
-                    description=metadata["description"],
-                    tags=metadata["hashtags"],
-                    category_id=project_config.yt_category_id,
-                    privacy_status="private",  # Will be scheduled
-                    made_for_kids=project_config.yt_made_for_kids
-                )
-
-                video_id = upload_result["video_id"]
-                logs.append(f"Video subido exitosamente con ID: {video_id}")
-
-                # Set thumbnail if available
-                if metadata.get("thumbnail"):
-                    try:
-                        logs.append("Configurando thumbnail...")
-                        youtube_service.set_thumbnail(video_id, metadata["thumbnail"])
-                        logs.append("Thumbnail configurado")
-                    except Exception as e:
-                        logs.append(f"Error configurando thumbnail: {e}")
-
-                # Schedule publication
-                scheduled_at = None
-                yt_publish_at = None
-                if str(output.index) in request.slots:
-                    slot_str = request.slots[str(output.index)]
-                    try:
-                        logs.append(f"Programando publicación para: {slot_str}")
-                        # Parse ISO datetime
-                        publish_at = datetime.fromisoformat(slot_str.replace('Z', '+00:00'))
-                        youtube_service.schedule_publish(video_id, publish_at)
-                        scheduled_at = slot_str
-                        yt_publish_at = publish_at.isoformat()
-                        logs.append("Publicación programada exitosamente")
-                    except Exception as e:
-                        logs.append(f"Error programando publicación: {e}")
-
-                # Verify video exists
-                logs.append("Verificando que el video existe en YouTube...")
-                verified = youtube_service.verify_video_exists(video_id)
-                if verified:
-                    logs.append("✅ Video verificado en canal")
-                else:
-                    logs.append("❌ Video no encontrado en canal")
-                   
-                # Create video entry
-                video_entry = {
-                    "video_id": video_id,
-                    "url": upload_result["url"],
-                    "status": "success",
-                    "scheduled_at": scheduled_at,
-                    "verified": verified,
-                    "logs": "\n".join(logs)
-                }
-
-                # Update report
-                report_service.append_entry({
-                    "output_path": output.path,
-                    "title": metadata["title"],
-                    "yt_video_id": video_id,
-                    "yt_url": upload_result["url"],
-                    "yt_publish_at": yt_publish_at,
-                    "scheduled_at": scheduled_at,
-                    "verified": verified
-                })
-
-                # Increment user's uploaded videos count
-                plan_service.increment_user_video_count(user)
-
-            except Exception as e:
-                error_str = str(e)
-                logs.append(f"ERROR: {error_str}")
-                logger.error(f"Failed to publish output {output.index}: {e}")
-                results.append({
-                    "index": output.index,
-                    "title": f"Video {output.index}",
-                    "video_id": None,
-                    "url": None,
-                    "status": "error",
-                    "error": error_str,
-                    "logs": "\n".join(logs)
-                })
-
-                # Update report with error
-                report_service.append_entry({
-                    "output_path": output.path,
-                    "errors": [error_str]
-                })
-
-        return PublishYouTubeResponse(results=results)
-
-    except Exception as e:
-        logger.error(f"Error in YouTube publish: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to publish to YouTube: {str(e)}"
-        )
 
 @router.get("/report", response_model=ReportResponse)
 def get_report() -> ReportResponse:
@@ -667,7 +342,7 @@ def add_channel(db: Session = Depends(get_db)):
     # In production, you'd get user_id from JWT token
     # For this demo, we'll use a hardcoded user_id or get from session
     # TODO: Implement proper user authentication
-    user_id = 1  # Placeholder
+    # user_id = 1  # Placeholder
     
     # Start OAuth flow for adding channel
     return RedirectResponse(url=f"/api/v1/oauth2/authorize/google?add_channel=true")
