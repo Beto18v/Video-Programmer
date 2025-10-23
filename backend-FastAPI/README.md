@@ -1,6 +1,7 @@
 # Video Programmer Backend
 
 ## Estado del Proyecto (Octubre 2025)
+
 El backend está desarrollado con **FastAPI** y actualmente cuenta con los siguientes módulos y funcionalidades principales:
 
 - **Autenticación OAuth**: Integración con Google para login seguro.
@@ -11,9 +12,11 @@ El backend está desarrollado con **FastAPI** y actualmente cuenta con los sigui
 - **Integración con Google Sheets**: Scripts y endpoints para sincronizar datos con hojas de cálculo.
 
 ## Instalación
+
 1. Clona el repositorio.
 2. Instala las dependencias con `pip install -r requirements.txt`.
 3. Configura las variables de entorno en `.env` (ver ejemplo en `.env.example`).
+
 ## Estructura del proyecto
 
 ```
@@ -63,7 +66,9 @@ Consultar en `app/api/routes.py` y `app/api/salida_routes.py` para ver los endpo
 - La carpeta `ffmpeg/` incluye binarios y documentación para procesamiento multimedia.
 
 ---
+
 Actualizado: Octubre 2025
+
 # Video Programmer
 
 A FastAPI application for automated video programming with multi-channel YouTube publishing, dynamic project configurations, and comprehensive metadata management.
