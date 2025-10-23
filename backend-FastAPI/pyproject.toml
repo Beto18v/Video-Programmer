@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "video-programmer"
 version = "0.1.0"
-description = "Video Programmer App"
+description = "FastAPI backend for automated video programming with YouTube upload, scheduling, and multi-channel management"
 authors = ["Your Name <your.email@example.com>"]
 readme = "README.md"
 

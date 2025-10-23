@@ -10,6 +10,7 @@ El backend está desarrollado con **FastAPI** y actualmente cuenta con los sigui
 - **Servicios de agrupamiento y metadatos**: Lógica para organizar videos y extraer información relevante.
 - **Programación de tareas**: Scheduler para tareas automáticas y workers para procesamiento en segundo plano.
 - **Integración con Google Sheets**: Scripts y endpoints para sincronizar datos con hojas de cálculo.
+- **Subida y programación de videos a YouTube**: API completa para subir videos a YouTube con scheduling opcional, validación de límites de plan y historial completo.
 
 ## Instalación
 
@@ -55,6 +56,7 @@ backend-FastAPI/
 - Scripts para inicialización y migración de datos.
 - Pruebas unitarias en `tests/` para servicios principales.
 - Documentación de endpoints en los archivos de rutas.
+- **Nueva funcionalidad**: Endpoint completo para subida de videos a YouTube con scheduling, validación de planes y historial en BD.
 
 ## Planes y Renovación Mensual
 
@@ -74,12 +76,81 @@ Lógica clave (servicio `PlanService`):
 
 ## Endpoints principales
 
-Consultar en `app/api/routes.py` y `app/api/salida_routes.py` para ver los endpoints disponibles y su documentación.
+### Gestión de Videos en YouTube
+
+#### `POST /api/v1/upload/video`
+Sube un video a YouTube con opción de scheduling (programación).
+
+**Parámetros:**
+- `user_id` (query parameter): ID del usuario autenticado
+
+**Body (JSON):**
+```json
+{
+  "title": "string",           // Título del video (requerido)
+  "description": "string",     // Descripción del video (opcional)
+  "tags": ["string"],          // Lista de tags/hashtags (opcional)
+  "category_id": "string",     // ID de categoría de YouTube (default: "22")
+  "privacy_status": "string",  // "public", "private", "unlisted" (default: "private")
+  "made_for_kids": boolean,    // Si el video es para niños (default: false)
+  "scheduled_at": "datetime",  // Fecha/hora de publicación programada (opcional, formato ISO)
+  "file_path": "string"        // Ruta absoluta al archivo de video en el servidor (requerido)
+}
+```
+
+**Respuesta exitosa (200):**
+```json
+{
+  "video_id": "string",        // ID del video en YouTube
+  "url": "string",            // URL completa del video
+  "scheduled_at": "datetime"  // Fecha de programación (si aplica)
+}
+```
+
+**Validaciones:**
+- ✅ Usuario debe tener tokens OAuth válidos
+- ✅ Usuario no debe exceder límite mensual de videos según su plan
+- ✅ Archivo de video debe existir en la ruta especificada
+- ✅ Si `scheduled_at` está presente, el video se sube como privado y se programa
+
+**Errores comunes:**
+- `403 Forbidden`: Límite de videos excedido
+- `404 Not Found`: Usuario no encontrado
+- `500 Internal Server Error`: Error en la subida a YouTube
+
+#### `GET /api/v1/user/can-upload`
+Verifica si un usuario puede subir más videos según su plan.
+
+**Parámetros:**
+- `user_id` (query parameter): ID del usuario
+
+**Respuesta:**
+```json
+{
+  "can_upload": boolean
+}
+```
+
+### Otros Endpoints
+Consultar en `app/api/routes.py` para ver los endpoints adicionales disponibles y su documentación completa.
 
 ## Notas
 
 - Para más información sobre la integración OAuth, ver `README_OAUTH.md`.
 - La carpeta `ffmpeg/` incluye binarios y documentación para procesamiento multimedia.
+
+## Changelog
+
+### v0.1.0 - Octubre 2025
+- ✅ **Nueva funcionalidad**: Endpoint `POST /api/v1/upload/video` para subida de videos a YouTube
+  - Validación de límites de plan mensual
+  - Scheduling opcional de publicación
+  - Autenticación OAuth automática
+  - Historial completo en base de datos
+  - Manejo robusto de errores
+- ✅ **Nuevo modelo**: Tabla `videos` para historial de subidas
+- ✅ **Mejoras en documentación**: API completa documentada
+- ✅ **Tests**: Cobertura completa con 34 tests pasando
 
 ---
 
@@ -87,12 +158,13 @@ Actualizado: Octubre 2025
 
 # Video Programmer
 
-A FastAPI application for automated video programming with multi-channel YouTube publishing, dynamic project configurations, and comprehensive metadata management.
+A FastAPI application for automated video programming with YouTube upload & scheduling, multi-channel YouTube publishing, dynamic project configurations, and comprehensive metadata management.
 
 ## Features
 
 - 🔐 **Automatic Google OAuth2 Authentication** - No manual setup required
 - 📺 **Multi-Channel YouTube Support** - Manage multiple YouTube channels per user
+- ⬆️ **YouTube Video Upload & Scheduling** - Direct video upload to YouTube with optional scheduling and plan validation
 - ⚙️ **Dynamic Project Configurations** - Per-user, per-channel customizable settings
 - 🎬 **Automated Video Processing** - FFmpeg integration for video editing and grouping
 - 📊 **Metadata Management** - Support for Google Sheets, CSV, and JSON metadata sources
@@ -391,6 +463,19 @@ project_configs (Per-user, per-channel configurations)
 ├── timezone, start_date, times
 ├── yt_category_id, yt_privacy_status, yt_made_for_kids, yt_tags_extra
 └── tt_enabled, tt_client_key, tt_client_secret, tt_publish_mode
+
+videos (Video upload history)
+├── id (Primary Key)
+├── user_id (Foreign Key → users.id)
+├── youtube_video_id (YouTube video ID)
+├── title, description
+├── tags (JSON string)
+├── category_id, privacy_status, made_for_kids
+├── thumbnail_url
+├── scheduled_at (Optional)
+├── uploaded_at (Timestamp)
+├── youtube_url
+└── status ("uploaded"/"scheduled"/"published"/"failed")
 ```
 
 ### Database Security
