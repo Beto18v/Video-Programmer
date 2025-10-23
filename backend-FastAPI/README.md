@@ -69,6 +69,7 @@ backend-FastAPI/
   - `video_count_period_start` (DateTime, nullable) – inicio del ciclo mensual actual.
 
 Lógica clave (servicio `PlanService`):
+
 - `ensure_user_monthly_counter(user)`: resetea `uploaded_videos_count` al iniciar un nuevo ciclo mensual.
 - `can_user_upload_video(user)`: valida el cupo mensual según el plan.
 - `increment_user_video_count(user)`: incrementa el contador mensual de subidas.
@@ -79,12 +80,15 @@ Lógica clave (servicio `PlanService`):
 ### Gestión de Videos en YouTube
 
 #### `POST /api/v1/upload/video`
+
 Sube un video a YouTube con opción de scheduling (programación).
 
 **Parámetros:**
+
 - `user_id` (query parameter): ID del usuario autenticado
 
 **Body (JSON):**
+
 ```json
 {
   "title": "string",           // Título del video (requerido)
@@ -99,32 +103,38 @@ Sube un video a YouTube con opción de scheduling (programación).
 ```
 
 **Respuesta exitosa (200):**
+
 ```json
 {
-  "video_id": "string",        // ID del video en YouTube
-  "url": "string",            // URL completa del video
-  "scheduled_at": "datetime"  // Fecha de programación (si aplica)
+  "video_id": "string", // ID del video en YouTube
+  "url": "string", // URL completa del video
+  "scheduled_at": "datetime" // Fecha de programación (si aplica)
 }
 ```
 
 **Validaciones:**
+
 - ✅ Usuario debe tener tokens OAuth válidos
 - ✅ Usuario no debe exceder límite mensual de videos según su plan
 - ✅ Archivo de video debe existir en la ruta especificada
 - ✅ Si `scheduled_at` está presente, el video se sube como privado y se programa
 
 **Errores comunes:**
+
 - `403 Forbidden`: Límite de videos excedido
 - `404 Not Found`: Usuario no encontrado
 - `500 Internal Server Error`: Error en la subida a YouTube
 
 #### `GET /api/v1/user/can-upload`
+
 Verifica si un usuario puede subir más videos según su plan.
 
 **Parámetros:**
+
 - `user_id` (query parameter): ID del usuario
 
 **Respuesta:**
+
 ```json
 {
   "can_upload": boolean
@@ -132,6 +142,7 @@ Verifica si un usuario puede subir más videos según su plan.
 ```
 
 ### Otros Endpoints
+
 Consultar en `app/api/routes.py` para ver los endpoints adicionales disponibles y su documentación completa.
 
 ## Notas
@@ -142,6 +153,7 @@ Consultar en `app/api/routes.py` para ver los endpoints adicionales disponibles 
 ## Changelog
 
 ### v0.1.0 - Octubre 2025
+
 - ✅ **Nueva funcionalidad**: Endpoint `POST /api/v1/upload/video` para subida de videos a YouTube
   - Validación de límites de plan mensual
   - Scheduling opcional de publicación
@@ -292,6 +304,7 @@ Producción: ejecuta `PlanService.create_default_plans()` para ajustar el plan "
 - Backend: registra el cliente y adjunta el `PaymentMethod`.
 
 Consulta `app/services/stripe_service.py`:
+
 - `create_or_get_customer_for_user(db, user, stripe_api_key)` crea/recupera el cliente y guarda `stripe_customer_id`.
 - `attach_payment_method(db, user, payment_method_id, stripe_api_key, registered_at)` adjunta la tarjeta y establece el ancla del ciclo mensual, reseteando el conteo.
 
