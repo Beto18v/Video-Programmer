@@ -1,8 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey, Boolean
-from sqlalchemy.orm import relationship, declarative_base
+from sqlalchemy.orm import relationship
 from datetime import datetime
-
-Base = declarative_base()
+from . import Base
 
 class User(Base):
     __tablename__ = "users"
@@ -12,11 +11,13 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     name = Column(String)
     picture = Column(String, nullable=True)
+    role_id = Column(Integer, ForeignKey("roles.id"), default=2)  # 1=admin, 2=cliente (only 2 roles allowed)
     active_channel_id = Column(String, nullable=True)  # ID of the currently active YouTube channel
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     # Relationships
+    role = relationship("Role", back_populates="users")
     oauth_tokens = relationship("OAuthToken", back_populates="user")
     project_configs = relationship("ProjectConfig", back_populates="user")
 

@@ -27,7 +27,13 @@ class TestMetadataService:
 
         mock_build.return_value = mock_service
 
-        service = GoogleSheetsMetadataService('religion')
+        # Mapeo de columnas para el test: título en col 0, hashtags en col 2
+        column_mapping = {
+            'title': 0,
+            'hashtags_tiktok': 2,  # Usar columna 2 para hashtags
+            'hashtags_youtube': 2  # Misma columna para evitar requerir columna extra
+        }
+        service = GoogleSheetsMetadataService('general', 'A1:D', column_mapping)
 
         # Ejecutar
         metadata = service.get_metadata_for_outputs(3)
@@ -35,8 +41,8 @@ class TestMetadataService:
         # Verificar hashtags procesados (simplificado para test básico)
         assert isinstance(metadata[0]['hashtags'], list)
         assert len(metadata[0]['hashtags']) >= 0  # Al menos es una lista
-        assert metadata[1]['hashtags'] == []
-        assert metadata[2]['hashtags'] == []
+        assert metadata[1]['hashtags'] == ['tag5', 'tag6', 'tag5', 'tag6']  # Segundo elemento tiene hashtags duplicados
+        assert metadata[2]['hashtags'] == []  # Tercer elemento está vacío
 
     @patch('app.services.metadata_service.build')
     @patch.object(GoogleSheetsMetadataService, '_ensure_credentials')
@@ -58,7 +64,7 @@ class TestMetadataService:
 
         mock_build.return_value = mock_service
 
-        service = GoogleSheetsMetadataService('religion')
+        service = GoogleSheetsMetadataService('general', 'A1:D')
 
         # Ejecutar pidiendo 5
         metadata = service.get_metadata_for_outputs(5)
@@ -90,7 +96,7 @@ class TestMetadataService:
 
         mock_build.return_value = mock_service
 
-        service = GoogleSheetsMetadataService('religion')
+        service = GoogleSheetsMetadataService('general', 'A1:D')
 
         # Ejecutar
         metadata = service.get_metadata_for_outputs(5)

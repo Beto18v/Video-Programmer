@@ -25,11 +25,11 @@ def test_google_sheets_integration():
         print("❌ No se puede conectar al servidor")
         return False
 
-    # 2. Probar carga de metadatos para canal religion
-    print("\n2. Probando carga de metadatos para canal 'religion'...")
+    # 2. Probar carga de metadatos para canal general
+    print("\n2. Probando carga de metadatos para canal 'general'...")
     try:
-        # Crear algunos archivos de prueba en storage/salida/religion
-        test_dir = Path("storage/salida/religion")
+        # Crear algunos archivos de prueba en storage/salida/general
+        test_dir = Path("storage/salida/general")
         test_dir.mkdir(parents=True, exist_ok=True)
 
         # Crear archivos de prueba
@@ -38,7 +38,7 @@ def test_google_sheets_integration():
             test_file.write_text("fake video content")
 
         # Hacer request a la página de edición de metadatos
-        response = requests.get(f"{base_url}/panel/publish/religion/edit")
+        response = requests.get(f"{base_url}/panel/publish/general/edit")
         if response.status_code == 200:
             print("✅ Página de edición de metadatos accesible")
 

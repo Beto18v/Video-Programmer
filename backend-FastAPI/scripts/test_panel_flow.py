@@ -21,17 +21,17 @@ def test_panel_flow():
     assert "Seleccionar Canal" in response.text, "No se encuentra título de selección"
     print("✅ Página principal OK")
 
-    # 2. Verificar selección de canal (religion)
-    print("\n2. Verificando selección de canal 'religion'...")
-    response = requests.get(f"{BASE_URL}/panel/channel/religion")
+    # 2. Verificar selección de canal (general)
+    print("\n2. Verificando selección de canal 'general'...")
+    response = requests.get(f"{BASE_URL}/panel/channel/general")
     if response.status_code == 302:  # Redirect to OAuth
         print("⚠️  Redirigiendo a OAuth (token no existe) - esto es esperado")
         oauth_url = response.headers.get('location', '')
-        assert 'oauth2/authorize/youtube/religion' in oauth_url, f"Redirect incorrecto: {oauth_url}"
+        assert 'oauth2/authorize/youtube/general' in oauth_url, f"Redirect incorrecto: {oauth_url}"
         print("✅ Redirect a OAuth correcto")
     else:
-        assert response.status_code == 200, f"Error en /panel/channel/religion: {response.status_code}"
-        assert "religion" in response.text, "Canal no aparece en la página"
+        assert response.status_code == 200, f"Error en /panel/channel/general: {response.status_code}"
+        assert "general" in response.text, "Canal no aparece en la página"
         print("✅ Selección de canal OK")
 
     # 3. Verificar navegación en base.html

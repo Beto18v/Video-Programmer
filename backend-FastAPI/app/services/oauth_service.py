@@ -5,6 +5,7 @@ from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
 from app.models.user import User, OAuthToken
 from app.core.config import get_settings
+from app.core.roles import CLIENT_ROLE_ID
 
 settings = get_settings()
 
@@ -19,12 +20,26 @@ class OAuthService:
             google_id=google_id,
             email=email,
             name=name,
-            picture=picture
+            picture=picture,
+            role_id=CLIENT_ROLE_ID  # Default to CLIENT role
         )
         db.add(user)
         db.commit()
         db.refresh(user)
         return user
+
+    @staticmethod
+    def get_user_role(db: Session, user_id: int) -> Optional[str]:
+        user = db.query(User).filter(User.id == user_id).first()
+        if user and user.role:
+            return user.role.name
+        return None
+
+    @staticmethod
+    def is_admin(db: Session, user_id: int) -> bool:
+        from app.core.roles import ADMIN_ROLE_NAME
+        role = OAuthService.get_user_role(db, user_id)
+        return role == ADMIN_ROLE_NAME
 
     @staticmethod
     def save_oauth_token(db: Session, user_id: int, creds: Credentials, channel_id: Optional[str] = None, channel_title: Optional[str] = None, is_primary: bool = False) -> OAuthToken:

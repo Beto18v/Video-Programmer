@@ -141,6 +141,13 @@ class ProjectConfigResponse(BaseModel):
 
 router = APIRouter()
 
+# Dependency to check if user is admin
+def require_admin(request, db: Session = Depends(get_db)):
+    from app.services.oauth_service import OAuthService
+    if not OAuthService.is_admin(db, request.user_id):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return request.user_id
+
 # Global config instance - removed to avoid issues
 
 @router.get("/health")
@@ -859,3 +866,10 @@ def delete_project_config(config_id: int, db: Session = Depends(get_db)):
     db.commit()
     
     return {"message": "Configuration deleted successfully"}
+
+@router.get("/user/role")
+def get_user_role(request, db: Session = Depends(get_db)):
+    """Get the role of the current user."""
+    from app.services.oauth_service import OAuthService
+    role = OAuthService.get_user_role(db, request.user_id)
+    return {"role": role}

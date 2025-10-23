@@ -40,7 +40,9 @@ class Settings(BaseSettings):
     times: str | list[str] = Field(default="10:00,14:00,18:00")
 
     # Base de datos
-    database_url: str = Field(default="sqlite:///./video_programmer.db")
+    database_url: str = Field(default="postgresql://postgres@localhost:5432/video_programmer")
+    postgres_password: str = Field(default="postgres")
+    # database_url: str = Field(default="sqlite:///./video_programmer.db")  # Fallback para desarrollo
     secret_key: str = Field(default="your-secret-key-here")
     algorithm: str = Field(default="HS256")
     access_token_expire_minutes: int = Field(default=30)
@@ -71,11 +73,11 @@ class Settings(BaseSettings):
     )
 
     @model_validator(mode="after")
-    def convert_strings_to_lists(self):
-        if isinstance(self.times, str):
-            self.times = [item.strip() for item in self.times.split(",") if item.strip()]
-        if isinstance(self.yt_tags_extra, str):
-            self.yt_tags_extra = [item.strip() for item in self.yt_tags_extra.split(",") if item.strip()]
+    def build_database_url(self):
+        """Construir la database_url usando la contraseña."""
+        if "postgres" in self.database_url and self.postgres_password:
+            # Reemplazar la URL para incluir la contraseña
+            self.database_url = f"postgresql://postgres:{self.postgres_password}@localhost:5432/video_programmer"
         return self
 
     @field_validator("base_source_dir", "base_output_dir", "csv_path", "json_path", "base_report_path", "report_path", "google_service_account_file", mode="before")

@@ -53,7 +53,7 @@ def test_sheets_integration():
     print("\n3. Probando carga de metadatos...")
 
     # Crear archivos de prueba
-    for channel in ['religion', 'phrases']:
+    for channel in ['general', 'phrases']:
         test_dir = Path(f"storage/salida/{channel}")
         test_dir.mkdir(parents=True, exist_ok=True)
 
@@ -61,19 +61,19 @@ def test_sheets_integration():
             test_file = test_dir / f"test_video_{i+1}.mp4"
             test_file.write_text("fake video content")
 
-    # Probar religion
+    # Probar general
     try:
-        response = requests.get("http://127.0.0.1:8000/panel/publish/religion/edit")
+        response = requests.get("http://127.0.0.1:8000/panel/publish/general/edit")
         if response.status_code == 200:
             content = response.text
             if "hashtags_tiktok" in content and "hashtags_youtube" in content:
-                print("✅ Religion: Metadatos cargados correctamente")
+                print("✅ General: Metadatos cargados correctamente")
             else:
-                print("⚠️ Religion: Template actualizado pero posible error en carga")
+                print("⚠️ General: Template actualizado pero posible error en carga")
         else:
-            print(f"❌ Religion: Error HTTP {response.status_code}")
+            print(f"❌ General: Error HTTP {response.status_code}")
     except Exception as e:
-        print(f"❌ Religion: Error de conexión - {e}")
+        print(f"❌ General: Error de conexión - {e}")
 
     # Probar phrases
     try:

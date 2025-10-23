@@ -44,9 +44,9 @@ async def edit_metadata(request: Request, channel: str):
 
     # Cargar metadatos desde Google Sheets si el canal está soportado
     metadata = []
-    if channel in ["religion", "phrases"]:
+    if channel in ["general", "phrases"]:
         try:
-            sheets_service = GoogleSheetsMetadataService(channel)
+            sheets_service = GoogleSheetsMetadataService(channel, 'A1:D')
             sheets_metadata = sheets_service.get_metadata_for_outputs(len(files))
 
             for idx, f in enumerate(sorted(files)):
@@ -130,9 +130,9 @@ async def save_metadata_and_publish(request: Request, channel: str):
         })
 
     # Actualizar metadatos en Google Sheets si el canal está soportado
-    if channel in ["religion", "phrases", "beto"]:
+    if channel in ["general", "phrases", "beto"]:
         try:
-            sheets_service = GoogleSheetsMetadataService(channel)
+            sheets_service = GoogleSheetsMetadataService(channel, 'A1:D')
             success = sheets_service.update_metadata(metadatos)
             if success:
                 logger.info(f"Metadatos actualizados exitosamente en Google Sheets para canal {channel}")

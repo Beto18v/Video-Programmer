@@ -17,7 +17,7 @@ google-api-python-client = "*"
 google-auth = "*"
 google-auth-oauthlib = "*"
 google-auth-httplib2 = "*"
-httpx = "*"
+httpx = "^0.24.0"
 pandas = "*"
 pytest = "*"
 loguru = "*"
@@ -26,10 +26,16 @@ alembic = "*"
 authlib = "*"
 python-jose = {extras = ["cryptography"], version = "*"}
 passlib = {extras = ["bcrypt"], version = "*"}
+python-multipart = "*"
+starlette = "^0.48.0"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "*"
+pytest-asyncio = "*"
 
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[tool.pytest.ini_options]
+addopts = "-ra -q"
+testpaths = [
+    "tests",
+]
+asyncio_mode = "auto"
