@@ -1,0 +1,198 @@
+{
+  "common": {
+    "appName": "Video Programmer",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "search": "Search",
+    "filter": "Filter",
+    "clear": "Clear",
+    "confirm": "Confirm",
+    "close": "Close",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "info": "Information"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "forgotPassword": "Forgot your password?",
+    "loginWithGoogle": "Login with Google",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "welcome": "Welcome to Video Programmer",
+    "welcomeBack": "Welcome back!",
+    "loginDescription": "Login to manage and schedule your YouTube videos",
+    "registerDescription": "Create an account to start scheduling your videos"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "videos": "Videos",
+    "upload": "Upload Video",
+    "schedule": "Schedule",
+    "plans": "Plans",
+    "settings": "Settings",
+    "profile": "Profile",
+    "help": "Help"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome, {{name}}",
+    "stats": {
+      "totalVideos": "Total Videos",
+      "scheduled": "Scheduled",
+      "published": "Published",
+      "views": "Total Views"
+    },
+    "recentVideos": "Recent Videos",
+    "scheduledVideos": "Scheduled Videos",
+    "quickActions": "Quick Actions"
+  },
+  "videos": {
+    "title": "My Videos",
+    "upload": "Upload Video",
+    "uploadNew": "Upload New Video",
+    "noVideos": "You don't have any videos yet",
+    "uploadFirst": "Upload your first video to get started",
+    "status": {
+      "draft": "Draft",
+      "scheduled": "Scheduled",
+      "published": "Published",
+      "processing": "Processing",
+      "failed": "Failed"
+    },
+    "fields": {
+      "title": "Title",
+      "description": "Description",
+      "category": "Category",
+      "tags": "Tags",
+      "thumbnail": "Thumbnail",
+      "privacy": "Privacy",
+      "publishDate": "Publish Date",
+      "file": "Video File"
+    },
+    "privacy": {
+      "public": "Public",
+      "unlisted": "Unlisted",
+      "private": "Private"
+    }
+  },
+  "schedule": {
+    "title": "Schedule Videos",
+    "selectVideo": "Select Video",
+    "selectDate": "Select Date and Time",
+    "scheduleVideo": "Schedule Video",
+    "reschedule": "Reschedule",
+    "cancelSchedule": "Cancel Schedule",
+    "scheduled": "Video scheduled successfully",
+    "calendar": "Calendar",
+    "upcoming": "Upcoming",
+    "past": "Past"
+  },
+  "plans": {
+    "title": "Plans and Pricing",
+    "currentPlan": "Current Plan",
+    "selectPlan": "Select Plan",
+    "upgrade": "Upgrade Plan",
+    "downgrade": "Change Plan",
+    "features": "Features",
+    "free": {
+      "name": "Free",
+      "price": "$0",
+      "period": "per month",
+      "features": [
+        "Up to 5 videos per month",
+        "Basic scheduling",
+        "Email support"
+      ]
+    },
+    "basic": {
+      "name": "Basic",
+      "price": "$9.99",
+      "period": "per month",
+      "features": [
+        "Up to 20 videos per month",
+        "Advanced scheduling",
+        "Basic analytics",
+        "Priority support"
+      ]
+    },
+    "pro": {
+      "name": "Professional",
+      "price": "$29.99",
+      "period": "per month",
+      "features": [
+        "Unlimited videos",
+        "Advanced scheduling",
+        "Complete analytics",
+        "API access",
+        "24/7 support"
+      ]
+    }
+  },
+  "payments": {
+    "title": "Payments",
+    "method": "Payment Method",
+    "addCard": "Add Card",
+    "cardNumber": "Card Number",
+    "expiryDate": "Expiry Date",
+    "cvv": "CVV",
+    "billingAddress": "Billing Address",
+    "payNow": "Pay Now",
+    "processing": "Processing payment...",
+    "success": "Payment successful",
+    "failed": "Payment failed",
+    "history": "Payment History"
+  },
+  "settings": {
+    "title": "Settings",
+    "account": "Account",
+    "security": "Security",
+    "notifications": "Notifications",
+    "language": "Language",
+    "theme": "Theme",
+    "changePassword": "Change Password",
+    "twoFactor": "Two-Factor Authentication",
+    "deleteAccount": "Delete Account",
+    "saveChanges": "Save Changes"
+  },
+  "profile": {
+    "title": "My Profile",
+    "editProfile": "Edit Profile",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "bio": "Bio",
+    "avatar": "Avatar",
+    "changeAvatar": "Change Avatar"
+  },
+  "errors": {
+    "generic": "An unexpected error occurred",
+    "network": "Connection error",
+    "unauthorized": "Unauthorized",
+    "notFound": "Not found",
+    "serverError": "Server error",
+    "invalidCredentials": "Invalid credentials",
+    "emailRequired": "Email is required",
+    "passwordRequired": "Password is required",
+    "passwordTooShort": "Password must be at least 8 characters",
+    "passwordsMismatch": "Passwords don't match",
+    "invalidEmail": "Invalid email"
+  },
+  "success": {
+    "saved": "Saved successfully",
+    "uploaded": "Uploaded successfully",
+    "deleted": "Deleted successfully",
+    "updated": "Updated successfully"
+  }
+}

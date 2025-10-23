@@ -1,0 +1,198 @@
+{
+  "common": {
+    "appName": "Video Programmer",
+    "loading": "Cargando...",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "back": "Volver",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "clear": "Limpiar",
+    "confirm": "Confirmar",
+    "close": "Cerrar",
+    "error": "Error",
+    "success": "Éxito",
+    "warning": "Advertencia",
+    "info": "Información"
+  },
+  "auth": {
+    "login": "Iniciar Sesión",
+    "logout": "Cerrar Sesión",
+    "register": "Registrarse",
+    "email": "Correo Electrónico",
+    "password": "Contraseña",
+    "confirmPassword": "Confirmar Contraseña",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "loginWithGoogle": "Iniciar Sesión con Google",
+    "noAccount": "¿No tienes cuenta?",
+    "hasAccount": "¿Ya tienes cuenta?",
+    "welcome": "Bienvenido a Video Programmer",
+    "welcomeBack": "¡Bienvenido de nuevo!",
+    "loginDescription": "Inicia sesión para gestionar y programar tus videos de YouTube",
+    "registerDescription": "Crea una cuenta para comenzar a programar tus videos"
+  },
+  "nav": {
+    "dashboard": "Panel de Control",
+    "videos": "Videos",
+    "upload": "Subir Video",
+    "schedule": "Programar",
+    "plans": "Planes",
+    "settings": "Configuración",
+    "profile": "Perfil",
+    "help": "Ayuda"
+  },
+  "dashboard": {
+    "title": "Panel de Control",
+    "welcome": "Bienvenido, {{name}}",
+    "stats": {
+      "totalVideos": "Total de Videos",
+      "scheduled": "Programados",
+      "published": "Publicados",
+      "views": "Vistas Totales"
+    },
+    "recentVideos": "Videos Recientes",
+    "scheduledVideos": "Videos Programados",
+    "quickActions": "Acciones Rápidas"
+  },
+  "videos": {
+    "title": "Mis Videos",
+    "upload": "Subir Video",
+    "uploadNew": "Subir Nuevo Video",
+    "noVideos": "No tienes videos aún",
+    "uploadFirst": "Sube tu primer video para comenzar",
+    "status": {
+      "draft": "Borrador",
+      "scheduled": "Programado",
+      "published": "Publicado",
+      "processing": "Procesando",
+      "failed": "Fallido"
+    },
+    "fields": {
+      "title": "Título",
+      "description": "Descripción",
+      "category": "Categoría",
+      "tags": "Etiquetas",
+      "thumbnail": "Miniatura",
+      "privacy": "Privacidad",
+      "publishDate": "Fecha de Publicación",
+      "file": "Archivo de Video"
+    },
+    "privacy": {
+      "public": "Público",
+      "unlisted": "No listado",
+      "private": "Privado"
+    }
+  },
+  "schedule": {
+    "title": "Programar Videos",
+    "selectVideo": "Seleccionar Video",
+    "selectDate": "Seleccionar Fecha y Hora",
+    "scheduleVideo": "Programar Video",
+    "reschedule": "Reprogramar",
+    "cancelSchedule": "Cancelar Programación",
+    "scheduled": "Video programado exitosamente",
+    "calendar": "Calendario",
+    "upcoming": "Próximos",
+    "past": "Pasados"
+  },
+  "plans": {
+    "title": "Planes y Precios",
+    "currentPlan": "Plan Actual",
+    "selectPlan": "Seleccionar Plan",
+    "upgrade": "Mejorar Plan",
+    "downgrade": "Cambiar Plan",
+    "features": "Características",
+    "free": {
+      "name": "Gratuito",
+      "price": "$0",
+      "period": "por mes",
+      "features": [
+        "Hasta 5 videos por mes",
+        "Programación básica",
+        "Soporte por email"
+      ]
+    },
+    "basic": {
+      "name": "Básico",
+      "price": "$9.99",
+      "period": "por mes",
+      "features": [
+        "Hasta 20 videos por mes",
+        "Programación avanzada",
+        "Análisis básicos",
+        "Soporte prioritario"
+      ]
+    },
+    "pro": {
+      "name": "Profesional",
+      "price": "$29.99",
+      "period": "por mes",
+      "features": [
+        "Videos ilimitados",
+        "Programación avanzada",
+        "Análisis completos",
+        "API access",
+        "Soporte 24/7"
+      ]
+    }
+  },
+  "payments": {
+    "title": "Pagos",
+    "method": "Método de Pago",
+    "addCard": "Agregar Tarjeta",
+    "cardNumber": "Número de Tarjeta",
+    "expiryDate": "Fecha de Expiración",
+    "cvv": "CVV",
+    "billingAddress": "Dirección de Facturación",
+    "payNow": "Pagar Ahora",
+    "processing": "Procesando pago...",
+    "success": "Pago exitoso",
+    "failed": "Pago fallido",
+    "history": "Historial de Pagos"
+  },
+  "settings": {
+    "title": "Configuración",
+    "account": "Cuenta",
+    "security": "Seguridad",
+    "notifications": "Notificaciones",
+    "language": "Idioma",
+    "theme": "Tema",
+    "changePassword": "Cambiar Contraseña",
+    "twoFactor": "Autenticación de Dos Factores",
+    "deleteAccount": "Eliminar Cuenta",
+    "saveChanges": "Guardar Cambios"
+  },
+  "profile": {
+    "title": "Mi Perfil",
+    "editProfile": "Editar Perfil",
+    "name": "Nombre",
+    "email": "Correo Electrónico",
+    "phone": "Teléfono",
+    "bio": "Biografía",
+    "avatar": "Avatar",
+    "changeAvatar": "Cambiar Avatar"
+  },
+  "errors": {
+    "generic": "Ocurrió un error inesperado",
+    "network": "Error de conexión",
+    "unauthorized": "No autorizado",
+    "notFound": "No encontrado",
+    "serverError": "Error del servidor",
+    "invalidCredentials": "Credenciales inválidas",
+    "emailRequired": "El correo electrónico es requerido",
+    "passwordRequired": "La contraseña es requerida",
+    "passwordTooShort": "La contraseña debe tener al menos 8 caracteres",
+    "passwordsMismatch": "Las contraseñas no coinciden",
+    "invalidEmail": "Correo electrónico inválido"
+  },
+  "success": {
+    "saved": "Guardado exitosamente",
+    "uploaded": "Subido exitosamente",
+    "deleted": "Eliminado exitosamente",
+    "updated": "Actualizado exitosamente"
+  }
+}

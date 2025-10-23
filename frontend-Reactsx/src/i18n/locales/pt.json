@@ -1,0 +1,198 @@
+{
+  "common": {
+    "appName": "Video Programmer",
+    "loading": "Carregando...",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "back": "Voltar",
+    "next": "Próximo",
+    "previous": "Anterior",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "clear": "Limpar",
+    "confirm": "Confirmar",
+    "close": "Fechar",
+    "error": "Erro",
+    "success": "Sucesso",
+    "warning": "Aviso",
+    "info": "Informação"
+  },
+  "auth": {
+    "login": "Entrar",
+    "logout": "Sair",
+    "register": "Cadastrar",
+    "email": "E-mail",
+    "password": "Senha",
+    "confirmPassword": "Confirmar Senha",
+    "forgotPassword": "Esqueceu sua senha?",
+    "loginWithGoogle": "Entrar com Google",
+    "noAccount": "Não tem uma conta?",
+    "hasAccount": "Já tem uma conta?",
+    "welcome": "Bem-vindo ao Video Programmer",
+    "welcomeBack": "Bem-vindo de volta!",
+    "loginDescription": "Entre para gerenciar e agendar seus vídeos do YouTube",
+    "registerDescription": "Crie uma conta para começar a agendar seus vídeos"
+  },
+  "nav": {
+    "dashboard": "Painel de Controle",
+    "videos": "Vídeos",
+    "upload": "Enviar Vídeo",
+    "schedule": "Agendar",
+    "plans": "Planos",
+    "settings": "Configurações",
+    "profile": "Perfil",
+    "help": "Ajuda"
+  },
+  "dashboard": {
+    "title": "Painel de Controle",
+    "welcome": "Bem-vindo, {{name}}",
+    "stats": {
+      "totalVideos": "Total de Vídeos",
+      "scheduled": "Agendados",
+      "published": "Publicados",
+      "views": "Visualizações Totais"
+    },
+    "recentVideos": "Vídeos Recentes",
+    "scheduledVideos": "Vídeos Agendados",
+    "quickActions": "Ações Rápidas"
+  },
+  "videos": {
+    "title": "Meus Vídeos",
+    "upload": "Enviar Vídeo",
+    "uploadNew": "Enviar Novo Vídeo",
+    "noVideos": "Você ainda não tem vídeos",
+    "uploadFirst": "Envie seu primeiro vídeo para começar",
+    "status": {
+      "draft": "Rascunho",
+      "scheduled": "Agendado",
+      "published": "Publicado",
+      "processing": "Processando",
+      "failed": "Falhou"
+    },
+    "fields": {
+      "title": "Título",
+      "description": "Descrição",
+      "category": "Categoria",
+      "tags": "Tags",
+      "thumbnail": "Miniatura",
+      "privacy": "Privacidade",
+      "publishDate": "Data de Publicação",
+      "file": "Arquivo de Vídeo"
+    },
+    "privacy": {
+      "public": "Público",
+      "unlisted": "Não listado",
+      "private": "Privado"
+    }
+  },
+  "schedule": {
+    "title": "Agendar Vídeos",
+    "selectVideo": "Selecionar Vídeo",
+    "selectDate": "Selecionar Data e Hora",
+    "scheduleVideo": "Agendar Vídeo",
+    "reschedule": "Reagendar",
+    "cancelSchedule": "Cancelar Agendamento",
+    "scheduled": "Vídeo agendado com sucesso",
+    "calendar": "Calendário",
+    "upcoming": "Próximos",
+    "past": "Passados"
+  },
+  "plans": {
+    "title": "Planos e Preços",
+    "currentPlan": "Plano Atual",
+    "selectPlan": "Selecionar Plano",
+    "upgrade": "Melhorar Plano",
+    "downgrade": "Mudar Plano",
+    "features": "Características",
+    "free": {
+      "name": "Gratuito",
+      "price": "$0",
+      "period": "por mês",
+      "features": [
+        "Até 5 vídeos por mês",
+        "Agendamento básico",
+        "Suporte por e-mail"
+      ]
+    },
+    "basic": {
+      "name": "Básico",
+      "price": "$9.99",
+      "period": "por mês",
+      "features": [
+        "Até 20 vídeos por mês",
+        "Agendamento avançado",
+        "Análises básicas",
+        "Suporte prioritário"
+      ]
+    },
+    "pro": {
+      "name": "Profissional",
+      "price": "$29.99",
+      "period": "por mês",
+      "features": [
+        "Vídeos ilimitados",
+        "Agendamento avançado",
+        "Análises completas",
+        "Acesso à API",
+        "Suporte 24/7"
+      ]
+    }
+  },
+  "payments": {
+    "title": "Pagamentos",
+    "method": "Método de Pagamento",
+    "addCard": "Adicionar Cartão",
+    "cardNumber": "Número do Cartão",
+    "expiryDate": "Data de Validade",
+    "cvv": "CVV",
+    "billingAddress": "Endereço de Cobrança",
+    "payNow": "Pagar Agora",
+    "processing": "Processando pagamento...",
+    "success": "Pagamento bem-sucedido",
+    "failed": "Pagamento falhou",
+    "history": "Histórico de Pagamentos"
+  },
+  "settings": {
+    "title": "Configurações",
+    "account": "Conta",
+    "security": "Segurança",
+    "notifications": "Notificações",
+    "language": "Idioma",
+    "theme": "Tema",
+    "changePassword": "Mudar Senha",
+    "twoFactor": "Autenticação de Dois Fatores",
+    "deleteAccount": "Excluir Conta",
+    "saveChanges": "Salvar Alterações"
+  },
+  "profile": {
+    "title": "Meu Perfil",
+    "editProfile": "Editar Perfil",
+    "name": "Nome",
+    "email": "E-mail",
+    "phone": "Telefone",
+    "bio": "Biografia",
+    "avatar": "Avatar",
+    "changeAvatar": "Mudar Avatar"
+  },
+  "errors": {
+    "generic": "Ocorreu um erro inesperado",
+    "network": "Erro de conexão",
+    "unauthorized": "Não autorizado",
+    "notFound": "Não encontrado",
+    "serverError": "Erro do servidor",
+    "invalidCredentials": "Credenciais inválidas",
+    "emailRequired": "O e-mail é obrigatório",
+    "passwordRequired": "A senha é obrigatória",
+    "passwordTooShort": "A senha deve ter pelo menos 8 caracteres",
+    "passwordsMismatch": "As senhas não correspondem",
+    "invalidEmail": "E-mail inválido"
+  },
+  "success": {
+    "saved": "Salvo com sucesso",
+    "uploaded": "Enviado com sucesso",
+    "deleted": "Excluído com sucesso",
+    "updated": "Atualizado com sucesso"
+  }
+}
