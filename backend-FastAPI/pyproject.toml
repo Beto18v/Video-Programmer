@@ -23,6 +23,7 @@ pytest = "*"
 loguru = "*"
 sqlalchemy = "*"
 alembic = "*"
+psycopg2-binary = "*"
 authlib = "*"
 python-jose = {extras = ["cryptography"], version = "*"}
 passlib = {extras = ["bcrypt"], version = "*"}

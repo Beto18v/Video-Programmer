@@ -100,15 +100,19 @@ class YouTubeService:
         tags: list[str],
         category_id: Union[str, int],
         privacy_status: str,
-        made_for_kids: bool
+        made_for_kids: bool,
+        scheduled_at: Union[datetime, None] = None
     ) -> dict[str, str]:
-        """Upload a video to YouTube and return video ID and URL."""
+        """Upload a video to YouTube and return video ID and URL. If scheduled_at is provided, schedule for later publication."""
         if not Path(file_path).exists():
             raise FileNotFoundError(f"Video file not found: {file_path}")
 
         logger.info(f"Starting upload for video: {file_path}, title: {title}")
         normalized_tags = self._normalize_tags(tags)
         logger.debug(f"Normalized tags: {normalized_tags}")
+
+        # If scheduling, upload as private first
+        upload_privacy_status = "private" if scheduled_at else privacy_status
 
         body = {
             "snippet": {
@@ -118,7 +122,7 @@ class YouTubeService:
                 "categoryId": str(category_id)
             },
             "status": {
-                "privacyStatus": privacy_status,
+                "privacyStatus": upload_privacy_status,
                 "madeForKids": made_for_kids
             }
         }
@@ -138,6 +142,11 @@ class YouTubeService:
 
         video_id = response["id"]
         url = f"https://www.youtube.com/watch?v={video_id}"
+
+        # If scheduled, schedule the video for publication
+        if scheduled_at:
+            self.schedule_publish(video_id, scheduled_at)
+            logger.info(f"Video {video_id} scheduled for publication at {scheduled_at}")
 
         logger.info(f"Video uploaded successfully: {video_id}, URL: {url}")
         return {"video_id": video_id, "url": url}

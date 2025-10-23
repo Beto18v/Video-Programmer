@@ -34,6 +34,7 @@ class User(Base):
     oauth_tokens = relationship("OAuthToken", back_populates="user")
     project_configs = relationship("ProjectConfig", back_populates="user")
     plan = relationship("SubscriptionPlan", back_populates="users")
+    videos = relationship("Video", back_populates="user")
 
 class OAuthToken(Base):
     __tablename__ = "oauth_tokens"

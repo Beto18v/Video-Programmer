@@ -21,6 +21,7 @@ from app.services.youtube_service import YouTubeService
 from app.services.ffmpeg_service import FFmpegService
 from app.services.report_service import ReportService
 from app.models.plan import Plan, MediaGroup
+from app.models.video import Video
 
 
 # Pydantic models for requests/responses
@@ -65,6 +66,21 @@ class PublishYouTubeRequest(BaseModel):
 
 class PublishYouTubeResponse(BaseModel):
     results: List[Dict[str, Any]]
+
+class UploadVideoRequest(BaseModel):
+    title: str
+    description: Optional[str] = None
+    tags: List[str] = Field(default_factory=list)
+    category_id: str = "22"  # Default to People & Blogs
+    privacy_status: str = "private"
+    made_for_kids: bool = False
+    scheduled_at: Optional[datetime] = None
+    file_path: str  # Path to the video file on the server
+
+class UploadVideoResponse(BaseModel):
+    video_id: str
+    url: str
+    scheduled_at: Optional[datetime] = None
 
 class ReportResponse(BaseModel):
     items: List[Dict[str, Any]]
@@ -960,3 +976,71 @@ def can_user_upload_video(request, db: Session = Depends(get_db)):
 
     plan_service = PlanService(db)
     return {"can_upload": plan_service.can_user_upload_video(user)}
+
+@router.post("/upload/video", response_model=UploadVideoResponse)
+def upload_video_to_youtube(user_id: int, request: UploadVideoRequest, db: Session = Depends(get_db)):
+    """Upload a video to YouTube with optional scheduling."""
+    from app.services.plan_service import PlanService
+    from app.models.user import User
+    import json
+
+    # Get user
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Check if user can upload
+    plan_service = PlanService(db)
+    if not plan_service.can_user_upload_video(user):
+        raise HTTPException(
+            status_code=403,
+            detail="Upload limit exceeded for your current plan"
+        )
+
+    try:
+        # Initialize YouTube service
+        config = Settings()
+        youtube_service = YouTubeService(config, user.id, db, user.active_channel_id)
+
+        # Upload video
+        result = youtube_service.upload_video(
+            file_path=request.file_path,
+            title=request.title,
+            description=request.description or "",
+            tags=request.tags,
+            category_id=request.category_id,
+            privacy_status=request.privacy_status,
+            made_for_kids=request.made_for_kids,
+            scheduled_at=request.scheduled_at
+        )
+
+        # Save to database
+        video = Video(
+            user_id=user.id,
+            youtube_video_id=result["video_id"],
+            title=request.title,
+            description=request.description,
+            tags=json.dumps(request.tags) if request.tags else None,
+            category_id=request.category_id,
+            privacy_status=request.privacy_status,
+            made_for_kids=request.made_for_kids,
+            scheduled_at=request.scheduled_at,
+            youtube_url=result["url"],
+            status="scheduled" if request.scheduled_at else "uploaded"
+        )
+        db.add(video)
+        db.commit()
+        db.refresh(video)
+
+        # Increment user's video count
+        plan_service.increment_user_video_count(user)
+
+        return UploadVideoResponse(
+            video_id=result["video_id"],
+            url=result["url"],
+            scheduled_at=request.scheduled_at
+        )
+
+    except Exception as e:
+        logger.error(f"Error uploading video: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to upload video: {str(e)}")
