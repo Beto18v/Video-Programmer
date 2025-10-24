@@ -66,4 +66,10 @@ class UserController extends Controller
         $user->delete();
         return response()->json(null, 204);
     }
+
+    public function restore(User $user)
+    {
+        $user->restore();
+        return response()->json(['message' => 'Usuario restaurado'], 200);
+    }
 }

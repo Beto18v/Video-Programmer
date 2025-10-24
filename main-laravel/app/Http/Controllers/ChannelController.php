@@ -77,4 +77,10 @@ class ChannelController extends Controller
         $channel->delete();
         return redirect()->route('channels.index')->with('success', 'Canal desconectado exitosamente.');
     }
+
+    public function restore(Channel $channel)
+    {
+        $channel->restore();
+        return redirect()->route('account-management.index')->with('success', 'Canal restaurado exitosamente.');
+    }
 }

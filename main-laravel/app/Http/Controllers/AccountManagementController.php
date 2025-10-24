@@ -12,7 +12,7 @@ class AccountManagementController extends Controller
 {
     public function index(Request $request)
     {
-        $usersQuery = User::with('currentPlan');
+        $usersQuery = User::withTrashed()->with('currentPlan');
 
         if ($request->filled('email')) {
             $usersQuery->where('email', 'like', '%' . $request->email . '%');
@@ -25,7 +25,7 @@ class AccountManagementController extends Controller
         }
 
         $users = $usersQuery->get();
-        $channels = Channel::with('user')->get();
+        $channels = Channel::withTrashed()->with('user')->get();
         $videos = Video::with('channel')->get();
 
         return Inertia::render('dashboard/account-management/index', [

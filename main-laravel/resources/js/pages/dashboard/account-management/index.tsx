@@ -34,6 +34,7 @@ interface User {
     current_plan?: {
         name: string;
     };
+    deleted_at?: string;
 }
 
 interface Channel {
@@ -45,6 +46,7 @@ interface Channel {
     subscriber_count: number;
     video_count: number;
     view_count: number;
+    deleted_at?: string;
 }
 
 interface Video {
@@ -137,6 +139,7 @@ export default function AccountManagementIndex({
                                     <TableHead>Nombre</TableHead>
                                     <TableHead>Email</TableHead>
                                     <TableHead>Plan</TableHead>
+                                    <TableHead>Estado</TableHead>
                                     <TableHead>Acciones</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -148,14 +151,24 @@ export default function AccountManagementIndex({
                                         <TableCell>{user.email}</TableCell>
                                         <TableCell>
                                             <Badge variant="outline">
-                                                {user.current_plan?.name ||
-                                                    'Sin plan'}
+                                                {user.current_plan?.name || 'Sin plan'}
                                             </Badge>
                                         </TableCell>
                                         <TableCell>
-                                            <Button size="sm" variant="outline">
-                                                <Eye className="h-4 w-4" />
-                                            </Button>
+                                            <Badge variant={user.deleted_at ? 'destructive' : 'default'}>
+                                                {user.deleted_at ? 'Eliminado' : 'Activo'}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell>
+                                            {user.deleted_at ? (
+                                                <Button size="sm" onClick={() => router.patch(`/users/${user.id}/restore`)}>
+                                                    Restaurar
+                                                </Button>
+                                            ) : (
+                                                <Button size="sm" variant="outline">
+                                                    <Eye className="h-4 w-4" />
+                                                </Button>
+                                            )}
                                         </TableCell>
                                     </TableRow>
                                 ))}
@@ -182,6 +195,8 @@ export default function AccountManagementIndex({
                                     <TableHead>Suscriptores</TableHead>
                                     <TableHead>Videos</TableHead>
                                     <TableHead>Vistas</TableHead>
+                                    <TableHead>Estado</TableHead>
+                                    <TableHead>Acciones</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -189,17 +204,25 @@ export default function AccountManagementIndex({
                                     <TableRow key={channel.id}>
                                         <TableCell>{channel.id}</TableCell>
                                         <TableCell>{channel.name}</TableCell>
+                                        <TableCell>{channel.user?.name}</TableCell>
+                                        <TableCell>{channel.subscriber_count.toLocaleString()}</TableCell>
+                                        <TableCell>{channel.video_count.toLocaleString()}</TableCell>
+                                        <TableCell>{channel.view_count.toLocaleString()}</TableCell>
                                         <TableCell>
-                                            {channel.user?.name}
+                                            <Badge variant={channel.deleted_at ? 'destructive' : 'default'}>
+                                                {channel.deleted_at ? 'Eliminado' : 'Activo'}
+                                            </Badge>
                                         </TableCell>
                                         <TableCell>
-                                            {channel.subscriber_count.toLocaleString()}
-                                        </TableCell>
-                                        <TableCell>
-                                            {channel.video_count.toLocaleString()}
-                                        </TableCell>
-                                        <TableCell>
-                                            {channel.view_count.toLocaleString()}
+                                            {channel.deleted_at ? (
+                                                <Button size="sm" onClick={() => router.patch(`/channels/${channel.id}/restore`)}>
+                                                    Restaurar
+                                                </Button>
+                                            ) : (
+                                                <Button size="sm" variant="outline">
+                                                    <Eye className="h-4 w-4" />
+                                                </Button>
+                                            )}
                                         </TableCell>
                                     </TableRow>
                                 ))}

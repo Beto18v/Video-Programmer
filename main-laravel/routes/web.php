@@ -37,6 +37,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::group(['as' => 'channels.'], function () {
         Route::resource('channels', ChannelController::class);
+        Route::patch('channels/{channel}/restore', [ChannelController::class, 'restore'])->name('channels.restore');
     });
 
     Route::group(['as' => 'plans.'], function () {
@@ -49,6 +50,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::group(['as' => 'users.'], function () {
         Route::resource('users', UserController::class);
+        Route::patch('users/{user}/restore', [UserController::class, 'restore'])->name('users.restore');
     });
 
     Route::get('account-management', [AccountManagementController::class, 'index'])->middleware('admin')->name('account-management.index');
