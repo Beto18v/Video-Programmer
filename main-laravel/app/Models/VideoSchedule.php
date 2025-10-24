@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class VideoSchedule extends Model
 {
@@ -40,8 +41,12 @@ class VideoSchedule extends Model
     }
 
     /**
-     * Verificar si la programación está pendiente
+     * Los logs de actividad relacionados con esta programación
      */
+    public function activityLogs(): MorphMany
+    {
+        return $this->morphMany(ActivityLog::class, 'entity');
+    }
     public function isPending(): bool
     {
         return $this->status === 'pending';

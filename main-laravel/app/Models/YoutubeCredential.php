@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Support\Facades\Crypt;
 
@@ -43,8 +44,12 @@ class YoutubeCredential extends Model
     }
 
     /**
-     * Encriptar y desencriptar access_token
+     * Los logs de actividad relacionados con estas credenciales
      */
+    public function activityLogs(): MorphMany
+    {
+        return $this->morphMany(ActivityLog::class, 'entity');
+    }
     protected function accessToken(): Attribute
     {
         return Attribute::make(

@@ -1,10 +1,16 @@
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Plus, Eye, Edit, Trash2, Calendar, Clock } from 'lucide-react';
+import { Calendar, Clock, Edit, Eye, Plus, Trash2 } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -28,7 +34,7 @@ interface VideoSchedule {
     video: {
         title: string;
         thumbnail_url: string | null;
-    };
+    } | null;
 }
 
 export default function VideoSchedulesIndex({
@@ -44,7 +50,9 @@ export default function VideoSchedulesIndex({
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-bold">Video Schedules</h1>
-                        <p className="text-muted-foreground">Manage scheduled video uploads and actions</p>
+                        <p className="text-muted-foreground">
+                            Manage scheduled video uploads and actions
+                        </p>
                     </div>
                     <Button asChild>
                         <Link href="/video-schedules/create">
@@ -59,63 +67,89 @@ export default function VideoSchedulesIndex({
                         <Card key={schedule.id}>
                             <CardHeader>
                                 <div className="flex items-center gap-3">
-                                    {schedule.video.thumbnail_url ? (
+                                    {schedule.video?.thumbnail_url ? (
                                         <img
                                             src={schedule.video.thumbnail_url}
                                             alt={schedule.video.title}
                                             className="h-12 w-12 rounded object-cover"
                                         />
                                     ) : (
-                                        <div className="h-12 w-12 rounded bg-muted flex items-center justify-center">
+                                        <div className="flex h-12 w-12 items-center justify-center rounded bg-muted">
                                             <Calendar className="h-6 w-6" />
                                         </div>
                                     )}
-                                    <div className="flex-1 min-w-0">
-                                        <CardTitle className="text-sm truncate">{schedule.video.title}</CardTitle>
+                                    <div className="min-w-0 flex-1">
+                                        <CardTitle className="truncate text-sm">
+                                            {schedule.video?.title ||
+                                                'Video not found'}
+                                        </CardTitle>
                                         <CardDescription className="text-xs">
-                                            {new Date(schedule.scheduled_at).toLocaleString()}
+                                            {new Date(
+                                                schedule.scheduled_at,
+                                            ).toLocaleString()}
                                         </CardDescription>
                                     </div>
                                 </div>
                             </CardHeader>
                             <CardContent>
-                                <div className="space-y-2 mb-4">
+                                <div className="mb-4 space-y-2">
                                     <div className="flex items-center justify-between">
                                         <span className="text-sm">Action:</span>
-                                        <Badge variant="outline">{schedule.action}</Badge>
+                                        <Badge variant="outline">
+                                            {schedule.action}
+                                        </Badge>
                                     </div>
                                     <div className="flex items-center justify-between">
                                         <span className="text-sm">Status:</span>
-                                        <Badge variant={
-                                            schedule.status === 'completed' ? 'default' :
-                                            schedule.status === 'failed' ? 'destructive' :
-                                            schedule.status === 'pending' ? 'secondary' : 'outline'
-                                        }>
+                                        <Badge
+                                            variant={
+                                                schedule.status === 'completed'
+                                                    ? 'default'
+                                                    : schedule.status ===
+                                                        'failed'
+                                                      ? 'destructive'
+                                                      : schedule.status ===
+                                                          'pending'
+                                                        ? 'secondary'
+                                                        : 'outline'
+                                            }
+                                        >
                                             {schedule.status}
                                         </Badge>
                                     </div>
                                     {schedule.retry_count > 0 && (
                                         <div className="flex items-center justify-between">
-                                            <span className="text-sm">Retries:</span>
-                                            <span className="text-sm">{schedule.retry_count}</span>
+                                            <span className="text-sm">
+                                                Retries:
+                                            </span>
+                                            <span className="text-sm">
+                                                {schedule.retry_count}
+                                            </span>
                                         </div>
                                     )}
                                     {schedule.executed_at && (
                                         <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                             <Clock className="h-3 w-3" />
-                                            Executed {new Date(schedule.executed_at).toLocaleString()}
+                                            Executed{' '}
+                                            {new Date(
+                                                schedule.executed_at,
+                                            ).toLocaleString()}
                                         </div>
                                     )}
                                 </div>
 
                                 <div className="flex gap-2">
                                     <Button asChild size="sm" variant="outline">
-                                        <Link href={`/video-schedules/${schedule.id}`}>
+                                        <Link
+                                            href={`/video-schedules/${schedule.id}`}
+                                        >
                                             <Eye className="h-4 w-4" />
                                         </Link>
                                     </Button>
                                     <Button asChild size="sm" variant="outline">
-                                        <Link href={`/video-schedules/${schedule.id}/edit`}>
+                                        <Link
+                                            href={`/video-schedules/${schedule.id}/edit`}
+                                        >
                                             <Edit className="h-4 w-4" />
                                         </Link>
                                     </Button>
@@ -130,9 +164,13 @@ export default function VideoSchedulesIndex({
 
                 {videoSchedules.length === 0 && (
                     <div className="flex flex-col items-center justify-center py-12">
-                        <p className="text-muted-foreground">No schedules found</p>
+                        <p className="text-muted-foreground">
+                            No schedules found
+                        </p>
                         <Button asChild className="mt-4">
-                            <Link href="/video-schedules/create">Create your first schedule</Link>
+                            <Link href="/video-schedules/create">
+                                Create your first schedule
+                            </Link>
                         </Button>
                     </div>
                 )}

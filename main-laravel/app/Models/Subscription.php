@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Carbon\Carbon;
 
 class Subscription extends Model
@@ -59,8 +60,12 @@ class Subscription extends Model
     }
 
     /**
-     * Verificar si la suscripción está activa
+     * Los logs de actividad relacionados con esta suscripción
      */
+    public function activityLogs(): MorphMany
+    {
+        return $this->morphMany(ActivityLog::class, 'entity');
+    }
     public function isActive(): bool
     {
         return $this->status === 'active' &&

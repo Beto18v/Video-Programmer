@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Channel extends Model
 {
@@ -60,8 +61,12 @@ class Channel extends Model
     }
 
     /**
-     * Verificar si el canal está activo
+     * Los logs de actividad relacionados con este canal
      */
+    public function activityLogs(): MorphMany
+    {
+        return $this->morphMany(ActivityLog::class, 'entity');
+    }
     public function isActive(): bool
     {
         return $this->status === 'active';

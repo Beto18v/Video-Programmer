@@ -13,7 +13,7 @@ class VideoScheduleController extends Controller
      */
     public function index()
     {
-        $videoSchedules = VideoSchedule::all();
+        $videoSchedules = VideoSchedule::with('video')->get();
         return Inertia::render('dashboard/videoSchedules/index', [
             'videoSchedules' => $videoSchedules,
         ]);
@@ -42,7 +42,7 @@ class VideoScheduleController extends Controller
     public function show(VideoSchedule $videoSchedule)
     {
         return Inertia::render('dashboard/videoSchedules/show', [
-            'videoSchedule' => $videoSchedule,
+            'videoSchedule' => $videoSchedule->load('video'),
         ]);
     }
 
@@ -52,7 +52,7 @@ class VideoScheduleController extends Controller
     public function edit(VideoSchedule $videoSchedule)
     {
         return Inertia::render('dashboard/videoSchedules/edit', [
-            'videoSchedule' => $videoSchedule,
+            'videoSchedule' => $videoSchedule->load('video'),
         ]);
     }
 

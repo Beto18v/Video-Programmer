@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Plan extends Model
 {
@@ -35,8 +36,12 @@ class Plan extends Model
     }
 
     /**
-     * Verificar si el plan es gratuito
+     * Los logs de actividad relacionados con este plan
      */
+    public function activityLogs(): MorphMany
+    {
+        return $this->morphMany(ActivityLog::class, 'entity');
+    }
     public function isFree(): bool
     {
         return $this->name === 'free' || $this->price == 0;

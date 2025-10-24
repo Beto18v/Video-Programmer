@@ -13,20 +13,19 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Ejecutar seeders en orden
+        // Ejecutar seeders en orden correcto para mantener las relaciones de foreign keys
         $this->call([
-            PlansSeeder::class,
+            PlansSeeder::class,           // Primero los planes
+            UsersSeeder::class,           // Luego los usuarios (referencian planes)
+            ChannelsSeeder::class,        // Canales (referencian usuarios)
+            YoutubeCredentialsSeeder::class, // Credenciales (referencian canales)
+            VideosSeeder::class,          // Videos (referencian usuarios y canales)
+            VideoSchedulesSeeder::class,  // Schedules (referencian videos)
+            SubscriptionsSeeder::class,   // Suscripciones (referencian usuarios y planes)
+            ActivityLogsSeeder::class,    // Logs de actividad (referencian varias entidades)
         ]);
 
-        // User::factory(10)->create();
-
-        User::firstOrCreate(
-            ['email' => 'test@example.com'],
-            [
-                'name' => 'Test User',
-                'password' => 'password',
-                'email_verified_at' => now(),
-            ]
-        );
+        // El usuario de prueba ya se crea en UsersSeeder
+        // User::firstOrCreate(...) - Removido para evitar duplicados
     }
 }

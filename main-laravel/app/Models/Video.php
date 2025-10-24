@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\Storage;
 
 class Video extends Model
@@ -72,8 +73,12 @@ class Video extends Model
     }
 
     /**
-     * Verificar si el video está programado
+     * Los logs de actividad relacionados con este video
      */
+    public function activityLogs(): MorphMany
+    {
+        return $this->morphMany(ActivityLog::class, 'entity');
+    }
     public function isScheduled(): bool
     {
         return !is_null($this->scheduled_for) && $this->scheduled_for > now();

@@ -13,7 +13,7 @@ class YoutubeCredentialController extends Controller
      */
     public function index()
     {
-        $youtubeCredentials = YoutubeCredential::all();
+        $youtubeCredentials = YoutubeCredential::with('channel')->get();
         return Inertia::render('dashboard/youtubeCredentials/index', [
             'youtubeCredentials' => $youtubeCredentials,
         ]);
@@ -42,7 +42,7 @@ class YoutubeCredentialController extends Controller
     public function show(YoutubeCredential $youtubeCredential)
     {
         return Inertia::render('dashboard/youtubeCredentials/show', [
-            'youtubeCredential' => $youtubeCredential,
+            'youtubeCredential' => $youtubeCredential->load('channel'),
         ]);
     }
 
@@ -52,7 +52,7 @@ class YoutubeCredentialController extends Controller
     public function edit(YoutubeCredential $youtubeCredential)
     {
         return Inertia::render('dashboard/youtubeCredentials/edit', [
-            'youtubeCredential' => $youtubeCredential,
+            'youtubeCredential' => $youtubeCredential->load('channel'),
         ]);
     }
 
