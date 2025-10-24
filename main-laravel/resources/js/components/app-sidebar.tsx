@@ -74,7 +74,7 @@ const footerNavItems: NavItem[] = [
 
 export function AppSidebar() {
     const { auth } = usePage().props as unknown as SharedData;
-    const isAdmin = auth?.user?.role?.name === 'admin';
+    const isAdmin = auth?.user?.role?.name === 'ADMIN';
 
     const filteredNavItems = mainNavItems.filter(
         (item) => !item.adminOnly || isAdmin,

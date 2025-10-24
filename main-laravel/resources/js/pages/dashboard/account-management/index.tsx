@@ -151,21 +151,40 @@ export default function AccountManagementIndex({
                                         <TableCell>{user.email}</TableCell>
                                         <TableCell>
                                             <Badge variant="outline">
-                                                {user.current_plan?.name || 'Sin plan'}
+                                                {user.current_plan?.name ||
+                                                    'Sin plan'}
                                             </Badge>
                                         </TableCell>
                                         <TableCell>
-                                            <Badge variant={user.deleted_at ? 'destructive' : 'default'}>
-                                                {user.deleted_at ? 'Eliminado' : 'Activo'}
+                                            <Badge
+                                                variant={
+                                                    user.deleted_at
+                                                        ? 'destructive'
+                                                        : 'default'
+                                                }
+                                            >
+                                                {user.deleted_at
+                                                    ? 'Eliminado'
+                                                    : 'Activo'}
                                             </Badge>
                                         </TableCell>
                                         <TableCell>
                                             {user.deleted_at ? (
-                                                <Button size="sm" onClick={() => router.patch(`/users/${user.id}/restore`)}>
+                                                <Button
+                                                    size="sm"
+                                                    onClick={() =>
+                                                        router.patch(
+                                                            `/users/${user.id}/restore`,
+                                                        )
+                                                    }
+                                                >
                                                     Restaurar
                                                 </Button>
                                             ) : (
-                                                <Button size="sm" variant="outline">
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                >
                                                     <Eye className="h-4 w-4" />
                                                 </Button>
                                             )}
@@ -204,22 +223,48 @@ export default function AccountManagementIndex({
                                     <TableRow key={channel.id}>
                                         <TableCell>{channel.id}</TableCell>
                                         <TableCell>{channel.name}</TableCell>
-                                        <TableCell>{channel.user?.name}</TableCell>
-                                        <TableCell>{channel.subscriber_count.toLocaleString()}</TableCell>
-                                        <TableCell>{channel.video_count.toLocaleString()}</TableCell>
-                                        <TableCell>{channel.view_count.toLocaleString()}</TableCell>
                                         <TableCell>
-                                            <Badge variant={channel.deleted_at ? 'destructive' : 'default'}>
-                                                {channel.deleted_at ? 'Eliminado' : 'Activo'}
+                                            {channel.user?.name}
+                                        </TableCell>
+                                        <TableCell>
+                                            {channel.subscriber_count.toLocaleString()}
+                                        </TableCell>
+                                        <TableCell>
+                                            {channel.video_count.toLocaleString()}
+                                        </TableCell>
+                                        <TableCell>
+                                            {channel.view_count.toLocaleString()}
+                                        </TableCell>
+                                        <TableCell>
+                                            <Badge
+                                                variant={
+                                                    channel.deleted_at
+                                                        ? 'destructive'
+                                                        : 'default'
+                                                }
+                                            >
+                                                {channel.deleted_at
+                                                    ? 'Eliminado'
+                                                    : 'Activo'}
                                             </Badge>
                                         </TableCell>
                                         <TableCell>
                                             {channel.deleted_at ? (
-                                                <Button size="sm" onClick={() => router.patch(`/channels/${channel.id}/restore`)}>
+                                                <Button
+                                                    size="sm"
+                                                    onClick={() =>
+                                                        router.patch(
+                                                            `/channels/${channel.id}/restore`,
+                                                        )
+                                                    }
+                                                >
                                                     Restaurar
                                                 </Button>
                                             ) : (
-                                                <Button size="sm" variant="outline">
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                >
                                                     <Eye className="h-4 w-4" />
                                                 </Button>
                                             )}
