@@ -2,10 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+
 
 class UserController extends Controller
+
+
 {
     /**
      * Display a listing of the resource.
@@ -29,7 +34,11 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        $user = User::create($request->all());
+        $role = Role::where('name', $request->role)->first();
+        $data = $request->except('role');
+        $data['role_id'] = $role->id ?? null;
+        $data['password'] = Hash::make($request->password);
+        $user = User::create($data);
         return redirect()->back()->with('success', 'Usuario creado exitosamente');
     }
 
@@ -71,5 +80,20 @@ class UserController extends Controller
     {
         $user->restore();
         return redirect()->back()->with('success', 'Usuario restaurado exitosamente');
+    }
+
+    public function makeAdmin(User $user)
+    {
+        $role = Role::where('name', 'admin')->first();
+        $premiumPlan = \App\Models\Plan::where('name', 'premium')->first();
+        if ($role) {
+            $user->role_id = $role->id;
+            if ($premiumPlan) {
+                $user->current_plan_id = $premiumPlan->id;
+            }
+            $user->save();
+            return redirect()->back()->with('success', 'Usuario convertido a admin exitosamente');
+        }
+        return redirect()->back()->with('error', 'No se encontró el rol admin');
     }
 }

@@ -51,6 +51,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::group(['as' => 'users.'], function () {
         Route::resource('users', UserController::class);
         Route::patch('users/{user}/restore', [UserController::class, 'restore'])->withTrashed()->name('users.restore');
+        Route::patch('users/{user}/make-admin', [UserController::class, 'makeAdmin'])->name('users.make-admin');
     });
 
     Route::get('account-management', [AccountManagementController::class, 'index'])->middleware('admin')->name('account-management.index');

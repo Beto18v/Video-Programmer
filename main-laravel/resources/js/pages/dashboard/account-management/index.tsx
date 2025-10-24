@@ -342,6 +342,7 @@ export default function AccountManagementIndex({
                                     <TableHead>Plan</TableHead>
                                     <TableHead>Rol</TableHead>
                                     <TableHead>Acciones</TableHead>
+                                    <TableHead></TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -525,6 +526,28 @@ export default function AccountManagementIndex({
                                                     </AlertDialogContent>
                                                 </AlertDialog>
                                             )}
+                                        </TableCell>
+                                        <TableCell>
+                                            {user.role?.name !== 'admin' &&
+                                                !user.deleted_at && (
+                                                    <Button
+                                                        size="sm"
+                                                        variant="secondary"
+                                                        onClick={() => {
+                                                            router.patch(
+                                                                `/users/${user.id}/make-admin`,
+                                                                {},
+                                                                {
+                                                                    onSuccess:
+                                                                        () =>
+                                                                            router.reload(),
+                                                                },
+                                                            );
+                                                        }}
+                                                    >
+                                                        Hacer Admin
+                                                    </Button>
+                                                )}
                                         </TableCell>
                                     </TableRow>
                                 ))}
