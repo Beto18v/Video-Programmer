@@ -19,6 +19,7 @@ import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/react';
 import { Eye, Search } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -70,6 +71,20 @@ export default function AccountManagementIndex({
     videos: Video[];
     filters?: { email?: string; plan?: string };
 }) {
+    const [emailFilter, setEmailFilter] = useState(filters?.email || '');
+
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            router.get(
+                '/account-management',
+                { email: emailFilter, plan: filters?.plan },
+                { preserveState: true },
+            );
+        }, 300);
+
+        return () => clearTimeout(timeout);
+    }, [emailFilter, filters?.plan]);
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Gestión de cuentas" />
@@ -102,16 +117,9 @@ export default function AccountManagementIndex({
                                     <input
                                         placeholder="Buscar por email..."
                                         className="w-full rounded-md border border-input bg-background px-3 py-2 pl-8 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
-                                        value={filters?.email || ''}
+                                        value={emailFilter}
                                         onChange={(e) =>
-                                            router.get(
-                                                '/account-management',
-                                                {
-                                                    ...filters,
-                                                    email: e.target.value,
-                                                },
-                                                { preserveState: true },
-                                            )
+                                            setEmailFilter(e.target.value)
                                         }
                                     />
                                 </div>
@@ -128,7 +136,8 @@ export default function AccountManagementIndex({
                                 }
                             >
                                 <option value="">Todos los planes</option>
-                                <option value="basic">Básico</option>
+                                <option value="free">Free</option>
+                                <option value="pro">Pro</option>
                                 <option value="premium">Premium</option>
                             </select>
                         </div>
