@@ -1,12 +1,24 @@
+import { Button } from '@/components/ui/button';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowLeft } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -34,11 +46,7 @@ interface Video {
     made_for_kids: boolean;
 }
 
-export default function VideosEdit({
-    video,
-}: {
-    video: Video;
-}) {
+export default function VideosEdit({ video }: { video: Video }) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Edit Video" />
@@ -53,19 +61,28 @@ export default function VideosEdit({
                     </Button>
                     <div>
                         <h1 className="text-2xl font-bold">Edit Video</h1>
-                        <p className="text-muted-foreground">Update video information</p>
+                        <p className="text-muted-foreground">
+                            Update video information
+                        </p>
                     </div>
                 </div>
 
                 <Card className="max-w-2xl">
                     <CardHeader>
                         <CardTitle>Video Information</CardTitle>
-                        <CardDescription>Update the details for your video</CardDescription>
+                        <CardDescription>
+                            Update the details for your video
+                        </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
                         <div className="grid gap-2">
                             <Label htmlFor="title">Title</Label>
-                            <Input id="title" name="title" defaultValue={video.title} required />
+                            <Input
+                                id="title"
+                                name="title"
+                                defaultValue={video.title}
+                                required
+                            />
                         </div>
 
                         <div className="grid gap-2">
@@ -75,13 +92,16 @@ export default function VideosEdit({
                                 name="description"
                                 rows={4}
                                 defaultValue={video.description}
-                                className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                             />
                         </div>
 
                         <div className="grid gap-2">
                             <Label htmlFor="channel_id">Channel</Label>
-                            <Select name="channel_id" defaultValue={video.channel_id.toString()}>
+                            <Select
+                                name="channel_id"
+                                defaultValue={video.channel_id.toString()}
+                            >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select a channel" />
                                 </SelectTrigger>
@@ -93,7 +113,12 @@ export default function VideosEdit({
 
                         <div className="grid gap-2">
                             <Label htmlFor="tags">Tags (comma separated)</Label>
-                            <Input id="tags" name="tags" defaultValue={video.tags.join(', ')} placeholder="tag1, tag2, tag3" />
+                            <Input
+                                id="tags"
+                                name="tags"
+                                defaultValue={video.tags.join(', ')}
+                                placeholder="tag1, tag2, tag3"
+                            />
                         </div>
 
                         <div className="grid gap-2">
@@ -103,15 +128,25 @@ export default function VideosEdit({
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="public">Public</SelectItem>
-                                    <SelectItem value="private">Private</SelectItem>
-                                    <SelectItem value="unlisted">Unlisted</SelectItem>
+                                    <SelectItem value="public">
+                                        Public
+                                    </SelectItem>
+                                    <SelectItem value="private">
+                                        Private
+                                    </SelectItem>
+                                    <SelectItem value="unlisted">
+                                        Unlisted
+                                    </SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
 
                         <div className="flex items-center space-x-2">
-                            <Checkbox id="made_for_kids" name="made_for_kids" defaultChecked={video.made_for_kids} />
+                            <Checkbox
+                                id="made_for_kids"
+                                name="made_for_kids"
+                                defaultChecked={video.made_for_kids}
+                            />
                             <Label htmlFor="made_for_kids">Made for kids</Label>
                         </div>
 

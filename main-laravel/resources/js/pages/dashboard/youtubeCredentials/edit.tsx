@@ -1,24 +1,35 @@
+import { Button } from '@/components/ui/button';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Dashboard',
+        title: 'Inicio',
         href: '/dashboard',
     },
     {
-        title: 'YouTube Credentials',
+        title: 'Credenciales de YouTube',
         href: '/youtube-credentials',
     },
     {
-        title: 'Edit',
+        title: 'Editar',
         href: '/youtube-credentials/edit',
     },
 ];
@@ -39,33 +50,43 @@ export default function YoutubeCredentialsEdit({
 }) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Edit YouTube Credentials" />
+            <Head title="Editar Credenciales de YouTube" />
 
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div className="flex items-center gap-4">
                     <Button asChild variant="outline" size="sm">
                         <Link href="/youtube-credentials">
                             <ArrowLeft className="mr-2 h-4 w-4" />
-                            Back to Credentials
+                            Volver a Credenciales
                         </Link>
                     </Button>
                     <div>
-                        <h1 className="text-2xl font-bold">Edit YouTube Credentials</h1>
-                        <p className="text-muted-foreground">Update YouTube API credentials</p>
+                        <h1 className="text-2xl font-bold">
+                            Editar Credenciales de YouTube
+                        </h1>
+                        <p className="text-muted-foreground">
+                            Actualizar credenciales de la API de YouTube
+                        </p>
                     </div>
                 </div>
 
                 <Card className="max-w-2xl">
                     <CardHeader>
-                        <CardTitle>Credentials Information</CardTitle>
-                        <CardDescription>Update the OAuth credentials for YouTube API access</CardDescription>
+                        <CardTitle>Información de Credenciales</CardTitle>
+                        <CardDescription>
+                            Actualizar las credenciales OAuth para el acceso a
+                            la API de YouTube
+                        </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
                         <div className="grid gap-2">
-                            <Label htmlFor="channel_id">Channel</Label>
-                            <Select name="channel_id" defaultValue={youtubeCredential.channel_id.toString()}>
+                            <Label htmlFor="channel_id">Canal</Label>
+                            <Select
+                                name="channel_id"
+                                defaultValue={youtubeCredential.channel_id.toString()}
+                            >
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select a channel" />
+                                    <SelectValue placeholder="Seleccionar un canal" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {/* Channels will be populated from props */}
@@ -74,39 +95,67 @@ export default function YoutubeCredentialsEdit({
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="access_token">Access Token</Label>
-                            <Input id="access_token" name="access_token" defaultValue={youtubeCredential.access_token} required />
-                        </div>
-
-                        <div className="grid gap-2">
-                            <Label htmlFor="refresh_token">Refresh Token</Label>
-                            <Input id="refresh_token" name="refresh_token" defaultValue={youtubeCredential.refresh_token} required />
-                        </div>
-
-                        <div className="grid gap-2">
-                            <Label htmlFor="expires_at">Expires At</Label>
+                            <Label htmlFor="access_token">
+                                Token de Acceso
+                            </Label>
                             <Input
-                                id="expires_at"
-                                name="expires_at"
-                                type="datetime-local"
-                                defaultValue={youtubeCredential.expires_at ? new Date(youtubeCredential.expires_at).toISOString().slice(0, 16) : ''}
+                                id="access_token"
+                                name="access_token"
+                                defaultValue={youtubeCredential.access_token}
+                                required
                             />
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="scopes">Scopes (comma separated)</Label>
+                            <Label htmlFor="refresh_token">
+                                Token de Actualización
+                            </Label>
+                            <Input
+                                id="refresh_token"
+                                name="refresh_token"
+                                defaultValue={youtubeCredential.refresh_token}
+                                required
+                            />
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Label htmlFor="expires_at">Expira En</Label>
+                            <Input
+                                id="expires_at"
+                                name="expires_at"
+                                type="datetime-local"
+                                defaultValue={
+                                    youtubeCredential.expires_at
+                                        ? new Date(youtubeCredential.expires_at)
+                                              .toISOString()
+                                              .slice(0, 16)
+                                        : ''
+                                }
+                            />
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Label htmlFor="scopes">
+                                Alcances (separados por coma)
+                            </Label>
                             <Input
                                 id="scopes"
                                 name="scopes"
-                                defaultValue={youtubeCredential.scopes.join(', ')}
+                                defaultValue={youtubeCredential.scopes.join(
+                                    ', ',
+                                )}
                                 placeholder="https://www.googleapis.com/auth/youtube.upload,https://www.googleapis.com/auth/youtube"
                             />
                         </div>
 
                         <div className="flex gap-4">
-                            <Button type="submit">Update Credentials</Button>
+                            <Button type="submit">
+                                Actualizar Credenciales
+                            </Button>
                             <Button asChild variant="outline">
-                                <Link href="/youtube-credentials">Cancel</Link>
+                                <Link href="/youtube-credentials">
+                                    Cancelar
+                                </Link>
                             </Button>
                         </div>
                     </CardContent>

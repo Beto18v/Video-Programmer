@@ -22,15 +22,15 @@ import {
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Dashboard',
+        title: 'Inicio',
         href: '/dashboard',
     },
     {
-        title: 'Video Schedules',
+        title: 'Programaciones de Vídeos',
         href: '/video-schedules',
     },
     {
-        title: 'Show',
+        title: 'Mostrar',
         href: '/video-schedules/show',
     },
 ];
@@ -82,7 +82,7 @@ export default function VideoSchedulesShow({
                     <Button asChild variant="outline" size="sm">
                         <Link href="/video-schedules">
                             <ArrowLeft className="mr-2 h-4 w-4" />
-                            Back to Schedules
+                            Volver a Programaciones
                         </Link>
                     </Button>
                     <Button asChild size="sm">
@@ -90,7 +90,7 @@ export default function VideoSchedulesShow({
                             href={`/video-schedules/${videoSchedule.id}/edit`}
                         >
                             <Edit className="mr-2 h-4 w-4" />
-                            Edit
+                            Editar
                         </Link>
                     </Button>
                 </div>
@@ -117,10 +117,11 @@ export default function VideoSchedulesShow({
                                     <div>
                                         <CardTitle className="text-xl">
                                             {videoSchedule.video?.title ||
-                                                'Video not found'}
+                                                'Vídeo no encontrado'}
                                         </CardTitle>
                                         <CardDescription>
-                                            Video Schedule #{videoSchedule.id}
+                                            Programación de Vídeo #
+                                            {videoSchedule.id}
                                         </CardDescription>
                                     </div>
                                 </div>
@@ -129,20 +130,20 @@ export default function VideoSchedulesShow({
                                 <div className="grid gap-4 md:grid-cols-2">
                                     <div>
                                         <h4 className="mb-2 font-medium">
-                                            Schedule Details
+                                            Detalles de la Programación
                                         </h4>
                                         <div className="space-y-2 text-sm">
                                             <div className="flex items-center gap-2">
                                                 <Calendar className="h-4 w-4" />
                                                 <span>
-                                                    Scheduled for:{' '}
+                                                    Programado para:{' '}
                                                     {new Date(
                                                         videoSchedule.scheduled_at,
                                                     ).toLocaleString()}
                                                 </span>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                                <span>Action: </span>
+                                                <span>Acción: </span>
                                                 <Badge variant="outline">
                                                     {videoSchedule.action}
                                                 </Badge>
@@ -151,7 +152,7 @@ export default function VideoSchedulesShow({
                                                 {getStatusIcon(
                                                     videoSchedule.status,
                                                 )}
-                                                <span>Status: </span>
+                                                <span>Estado: </span>
                                                 <Badge
                                                     variant={
                                                         videoSchedule.status ===
@@ -173,7 +174,7 @@ export default function VideoSchedulesShow({
                                                 <div className="flex items-center gap-2">
                                                     <Clock className="h-4 w-4" />
                                                     <span>
-                                                        Executed:{' '}
+                                                        Ejecutado:{' '}
                                                         {new Date(
                                                             videoSchedule.executed_at,
                                                         ).toLocaleString()}
@@ -185,17 +186,17 @@ export default function VideoSchedulesShow({
 
                                     <div>
                                         <h4 className="mb-2 font-medium">
-                                            Retry Information
+                                            Información de Reintentos
                                         </h4>
                                         <div className="space-y-2 text-sm">
                                             <div>
-                                                Retries:{' '}
+                                                Reintentos:{' '}
                                                 {videoSchedule.retry_count} /{' '}
                                                 {videoSchedule.max_retries}
                                             </div>
                                             {videoSchedule.next_retry_at && (
                                                 <div>
-                                                    Next retry:{' '}
+                                                    Próximo reintento:{' '}
                                                     {new Date(
                                                         videoSchedule.next_retry_at,
                                                     ).toLocaleString()}
@@ -210,7 +211,7 @@ export default function VideoSchedulesShow({
                                         .length > 0 && (
                                         <div className="mt-4">
                                             <h4 className="mb-2 font-medium">
-                                                Action Parameters
+                                                Parámetros de Acción
                                             </h4>
                                             <pre className="overflow-x-auto rounded bg-muted p-2 text-xs">
                                                 {JSON.stringify(
@@ -225,7 +226,7 @@ export default function VideoSchedulesShow({
                                 {videoSchedule.error_message && (
                                     <div className="mt-4">
                                         <h4 className="mb-2 font-medium text-red-600">
-                                            Error Message
+                                            Mensaje de Error
                                         </h4>
                                         <div className="rounded border border-red-200 bg-red-50 p-2 text-sm dark:border-red-800 dark:bg-red-950">
                                             {videoSchedule.error_message}
@@ -237,7 +238,7 @@ export default function VideoSchedulesShow({
                                     videoSchedule.execution_log.length > 0 && (
                                         <div className="mt-4">
                                             <h4 className="mb-2 font-medium">
-                                                Execution Log
+                                                Registro de Ejecución
                                             </h4>
                                             <div className="space-y-1">
                                                 {videoSchedule.execution_log.map(
@@ -265,7 +266,7 @@ export default function VideoSchedulesShow({
                     <div>
                         <Card>
                             <CardHeader>
-                                <CardTitle>Actions</CardTitle>
+                                <CardTitle>Acciones</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-2">
                                 {videoSchedule.status === 'pending' && (
@@ -273,7 +274,7 @@ export default function VideoSchedulesShow({
                                         className="w-full"
                                         variant="outline"
                                     >
-                                        Cancel Schedule
+                                        Cancelar Programación
                                     </Button>
                                 )}
                                 {videoSchedule.status === 'failed' &&
@@ -283,17 +284,17 @@ export default function VideoSchedulesShow({
                                             className="w-full"
                                             variant="outline"
                                         >
-                                            Retry Now
+                                            Reintentar Ahora
                                         </Button>
                                     )}
                                 <Button className="w-full" variant="outline">
-                                    View Video
+                                    Ver Vídeo
                                 </Button>
                                 <Button
                                     className="w-full"
                                     variant="destructive"
                                 >
-                                    Delete Schedule
+                                    Eliminar Programación
                                 </Button>
                             </CardContent>
                         </Card>

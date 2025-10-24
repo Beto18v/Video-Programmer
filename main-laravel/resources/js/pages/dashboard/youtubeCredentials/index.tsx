@@ -14,11 +14,7 @@ import { Edit, Eye, Key, Plus, Trash2 } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Dashboard',
-        href: '/dashboard',
-    },
-    {
-        title: 'YouTube Credentials',
+        title: 'Credenciales de YouTube',
         href: '/youtube-credentials',
     },
 ];
@@ -43,22 +39,23 @@ export default function YoutubeCredentialsIndex({
 }) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="YouTube Credentials" />
+            <Head title="Credenciales de YouTube" />
 
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-bold">
-                            YouTube Credentials
+                            Credenciales de YouTube
                         </h1>
                         <p className="text-muted-foreground">
-                            Manage YouTube API credentials for your channels
+                            Gestiona las credenciales de la API de YouTube para
+                            tus canales
                         </p>
                     </div>
                     <Button asChild>
                         <Link href="/youtube-credentials/create">
                             <Plus className="mr-2 h-4 w-4" />
-                            Add Credentials
+                            Agregar Credenciales
                         </Link>
                     </Button>
                 </div>
@@ -82,10 +79,10 @@ export default function YoutubeCredentialsIndex({
                                     <div>
                                         <CardTitle className="text-lg">
                                             {credential.channel?.name ||
-                                                'Channel not found'}
+                                                'Canal no encontrado'}
                                         </CardTitle>
                                         <CardDescription>
-                                            YouTube Credentials
+                                            Credenciales de YouTube
                                         </CardDescription>
                                     </div>
                                 </div>
@@ -93,7 +90,7 @@ export default function YoutubeCredentialsIndex({
                             <CardContent>
                                 <div className="mb-4 space-y-2">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-sm">Status:</span>
+                                        <span className="text-sm">Estado:</span>
                                         <Badge
                                             variant={
                                                 credential.status === 'active'
@@ -107,7 +104,7 @@ export default function YoutubeCredentialsIndex({
                                     {credential.expires_at && (
                                         <div className="flex items-center justify-between">
                                             <span className="text-sm">
-                                                Expires:
+                                                Expira:
                                             </span>
                                             <span className="text-sm">
                                                 {new Date(
@@ -119,7 +116,7 @@ export default function YoutubeCredentialsIndex({
                                     {credential.last_refreshed_at && (
                                         <div className="flex items-center justify-between">
                                             <span className="text-sm">
-                                                Last refresh:
+                                                Última actualización:
                                             </span>
                                             <span className="text-sm">
                                                 {new Date(
@@ -130,7 +127,7 @@ export default function YoutubeCredentialsIndex({
                                     )}
                                     <div className="flex items-center justify-between">
                                         <span className="text-sm">
-                                            Refresh count:
+                                            Conteo de actualizaciones:
                                         </span>
                                         <span className="text-sm">
                                             {credential.refresh_count}
@@ -140,7 +137,7 @@ export default function YoutubeCredentialsIndex({
 
                                 <div className="mb-4">
                                     <h4 className="mb-2 text-sm font-medium">
-                                        Scopes
+                                        Alcances
                                     </h4>
                                     <div className="flex flex-wrap gap-1">
                                         {credential.scopes.map(
@@ -184,11 +181,11 @@ export default function YoutubeCredentialsIndex({
                 {youtubeCredentials.length === 0 && (
                     <div className="flex flex-col items-center justify-center py-12">
                         <p className="text-muted-foreground">
-                            No credentials found
+                            No se encontraron credenciales
                         </p>
                         <Button asChild className="mt-4">
                             <Link href="/youtube-credentials/create">
-                                Add your first credentials
+                                Agrega tus primeras credenciales
                             </Link>
                         </Button>
                     </div>

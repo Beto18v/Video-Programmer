@@ -27,7 +27,7 @@ export default function Pricing({ plans = [] }: { plans?: Plan[] }) {
 
     return (
         <>
-            <Head title="Pricing">
+            <Head title="Precios">
                 <link rel="preconnect" href="https://fonts.bunny.net" />
                 <link
                     href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600"
@@ -41,11 +41,11 @@ export default function Pricing({ plans = [] }: { plans?: Plan[] }) {
                     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                         <div className="text-center">
                             <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl dark:text-white">
-                                Choose your plan
+                                Elige tu plan
                             </h1>
                             <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
-                                Select the perfect plan for your video
-                                programming needs
+                                Selecciona el plan perfecto para tus necesidades
+                                de programación de vídeos
                             </p>
                         </div>
 
@@ -54,7 +54,7 @@ export default function Pricing({ plans = [] }: { plans?: Plan[] }) {
                                 <Card key={plan.id} className="relative">
                                     {plan.name === 'pro' && (
                                         <Badge className="absolute -top-2 left-1/2 -translate-x-1/2">
-                                            Most Popular
+                                            Más popular
                                         </Badge>
                                     )}
                                     <CardHeader>
@@ -69,7 +69,7 @@ export default function Pricing({ plans = [] }: { plans?: Plan[] }) {
                                                 ${plan.price}
                                             </span>
                                             <span className="text-gray-600 dark:text-gray-300">
-                                                /month
+                                                /mes
                                             </span>
                                         </div>
                                     </CardHeader>
@@ -78,8 +78,8 @@ export default function Pricing({ plans = [] }: { plans?: Plan[] }) {
                                             <li className="flex items-center">
                                                 <span className="text-sm">
                                                     {plan.video_limit
-                                                        ? `${plan.video_limit} videos`
-                                                        : 'Unlimited videos'}
+                                                        ? `${plan.video_limit} vídeos`
+                                                        : 'Vídeos ilimitados'}
                                                 </span>
                                             </li>
                                             {plan.features.map(
@@ -106,8 +106,8 @@ export default function Pricing({ plans = [] }: { plans?: Plan[] }) {
                                             }
                                         >
                                             {auth.user
-                                                ? 'Subscribe'
-                                                : 'Get Started'}
+                                                ? 'Suscribirse'
+                                                : 'Comenzar'}
                                         </Button>
                                     </CardFooter>
                                 </Card>

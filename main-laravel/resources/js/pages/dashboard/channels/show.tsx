@@ -1,22 +1,28 @@
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Edit, Users, Video, Eye, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Edit, ExternalLink, Eye, Users, Video } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Dashboard',
+        title: 'Inicio',
         href: '/dashboard',
     },
     {
-        title: 'Channels',
+        title: 'Canales',
         href: '/channels',
     },
     {
-        title: 'Show',
+        title: 'Mostrar',
         href: '/channels/show',
     },
 ];
@@ -37,11 +43,7 @@ interface Channel {
     last_sync_at: string | null;
 }
 
-export default function ChannelsShow({
-    channel,
-}: {
-    channel: Channel;
-}) {
+export default function ChannelsShow({ channel }: { channel: Channel }) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={channel.name} />
@@ -51,13 +53,13 @@ export default function ChannelsShow({
                     <Button asChild variant="outline" size="sm">
                         <Link href="/channels">
                             <ArrowLeft className="mr-2 h-4 w-4" />
-                            Back to Channels
+                            Volver a Canales
                         </Link>
                     </Button>
                     <Button asChild size="sm">
                         <Link href={`/channels/${channel.id}/edit`}>
                             <Edit className="mr-2 h-4 w-4" />
-                            Edit
+                            Editar
                         </Link>
                     </Button>
                 </div>
@@ -74,19 +76,23 @@ export default function ChannelsShow({
                                             className="h-20 w-20 rounded-full object-cover"
                                         />
                                     ) : (
-                                        <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center">
+                                        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-muted">
                                             <Users className="h-10 w-10" />
                                         </div>
                                     )}
                                     <div className="flex-1">
-                                        <CardTitle className="text-2xl">{channel.name}</CardTitle>
-                                        <CardDescription className="mt-2">{channel.description}</CardDescription>
+                                        <CardTitle className="text-2xl">
+                                            {channel.name}
+                                        </CardTitle>
+                                        <CardDescription className="mt-2">
+                                            {channel.description}
+                                        </CardDescription>
                                         {channel.custom_url && (
                                             <a
                                                 href={`https://youtube.com/${channel.custom_url}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="inline-flex items-center gap-1 text-sm text-blue-600 hover:underline mt-2"
+                                                className="mt-2 inline-flex items-center gap-1 text-sm text-blue-600 hover:underline"
                                             >
                                                 <ExternalLink className="h-4 w-4" />
                                                 {channel.custom_url}
@@ -96,44 +102,68 @@ export default function ChannelsShow({
                                 </div>
                             </CardHeader>
                             <CardContent>
-                                <div className="grid grid-cols-3 gap-4 mb-4">
+                                <div className="mb-4 grid grid-cols-3 gap-4">
                                     <div className="text-center">
-                                        <div className="flex items-center justify-center gap-1 mb-1">
+                                        <div className="mb-1 flex items-center justify-center gap-1">
                                             <Users className="h-4 w-4 text-muted-foreground" />
-                                            <span className="text-2xl font-bold">{channel.subscriber_count.toLocaleString()}</span>
+                                            <span className="text-2xl font-bold">
+                                                {channel.subscriber_count.toLocaleString()}
+                                            </span>
                                         </div>
-                                        <p className="text-sm text-muted-foreground">Subscribers</p>
+                                        <p className="text-sm text-muted-foreground">
+                                            Suscriptores
+                                        </p>
                                     </div>
                                     <div className="text-center">
-                                        <div className="flex items-center justify-center gap-1 mb-1">
+                                        <div className="mb-1 flex items-center justify-center gap-1">
                                             <Video className="h-4 w-4 text-muted-foreground" />
-                                            <span className="text-2xl font-bold">{channel.video_count.toLocaleString()}</span>
+                                            <span className="text-2xl font-bold">
+                                                {channel.video_count.toLocaleString()}
+                                            </span>
                                         </div>
-                                        <p className="text-sm text-muted-foreground">Videos</p>
+                                        <p className="text-sm text-muted-foreground">
+                                            Vídeos
+                                        </p>
                                     </div>
                                     <div className="text-center">
-                                        <div className="flex items-center justify-center gap-1 mb-1">
+                                        <div className="mb-1 flex items-center justify-center gap-1">
                                             <Eye className="h-4 w-4 text-muted-foreground" />
-                                            <span className="text-2xl font-bold">{channel.view_count.toLocaleString()}</span>
+                                            <span className="text-2xl font-bold">
+                                                {channel.view_count.toLocaleString()}
+                                            </span>
                                         </div>
-                                        <p className="text-sm text-muted-foreground">Views</p>
+                                        <p className="text-sm text-muted-foreground">
+                                            Vistas
+                                        </p>
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-2 mb-4">
-                                    <Badge variant={channel.status === 'connected' ? 'default' : 'secondary'}>
+                                <div className="mb-4 flex items-center gap-2">
+                                    <Badge
+                                        variant={
+                                            channel.status === 'connected'
+                                                ? 'default'
+                                                : 'secondary'
+                                        }
+                                    >
                                         {channel.status}
                                     </Badge>
                                     {channel.connected_at && (
                                         <span className="text-sm text-muted-foreground">
-                                            Connected {new Date(channel.connected_at).toLocaleDateString()}
+                                            Connected{' '}
+                                            {new Date(
+                                                channel.connected_at,
+                                            ).toLocaleDateString()}
                                         </span>
                                     )}
                                 </div>
 
                                 {channel.last_sync_at && (
                                     <div className="text-sm text-muted-foreground">
-                                        Last synced: {new Date(channel.last_sync_at).toLocaleDateString()}
+                                        Última sincronización:{' '}
+                                        {new Date(
+                                            channel.last_sync_at,
+                                        ).toLocaleDateString()}
                                     </div>
                                 )}
                             </CardContent>
@@ -143,20 +173,23 @@ export default function ChannelsShow({
                     <div>
                         <Card>
                             <CardHeader>
-                                <CardTitle>Actions</CardTitle>
+                                <CardTitle>Acciones</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-2">
                                 <Button className="w-full" variant="outline">
-                                    Sync Channel Data
+                                    Sincronizar Datos del Canal
                                 </Button>
                                 <Button className="w-full" variant="outline">
-                                    View on YouTube
+                                    Ver en YouTube
                                 </Button>
                                 <Button className="w-full" variant="outline">
-                                    Manage Credentials
+                                    Gestionar Credenciales
                                 </Button>
-                                <Button className="w-full" variant="destructive">
-                                    Disconnect Channel
+                                <Button
+                                    className="w-full"
+                                    variant="destructive"
+                                >
+                                    Desconectar Canal
                                 </Button>
                             </CardContent>
                         </Card>

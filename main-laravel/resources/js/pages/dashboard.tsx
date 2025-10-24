@@ -6,7 +6,7 @@ import { Head } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Dashboard',
+        title: 'Inicio',
         href: dashboard().url,
     },
 ];
@@ -17,10 +17,10 @@ export default function Dashboard() {
             <Head title="Dashboard" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div className="mb-6">
-                    <h1 className="text-2xl font-bold">Dashboard</h1>
+                    <h1 className="text-2xl font-bold">Inicio</h1>
                     <p className="text-muted-foreground">
-                        Welcome to Video Programmer. Use the navigation above to
-                        manage your content.
+                        Bienvenido a Video Programmer. Utiliza la navegación de
+                        arriba para gestionar tu contenido.
                     </p>
                 </div>
 

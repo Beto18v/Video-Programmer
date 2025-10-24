@@ -14,15 +14,15 @@ import { ArrowLeft, Clock, Edit, Key, RefreshCw, Shield } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Dashboard',
+        title: 'Inicio',
         href: '/dashboard',
     },
     {
-        title: 'YouTube Credentials',
+        title: 'Credenciales de YouTube',
         href: '/youtube-credentials',
     },
     {
-        title: 'Show',
+        title: 'Mostrar',
         href: '/youtube-credentials/show',
     },
 ];
@@ -53,7 +53,7 @@ export default function YoutubeCredentialsShow({
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head
-                title={`Credentials for ${youtubeCredential.channel?.name || 'Unknown Channel'}`}
+                title={`Credenciales para ${youtubeCredential.channel?.name || 'Canal Desconocido'}`}
             />
 
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
@@ -61,7 +61,7 @@ export default function YoutubeCredentialsShow({
                     <Button asChild variant="outline" size="sm">
                         <Link href="/youtube-credentials">
                             <ArrowLeft className="mr-2 h-4 w-4" />
-                            Back to Credentials
+                            Volver a Credenciales
                         </Link>
                     </Button>
                     <Button asChild size="sm">
@@ -69,7 +69,7 @@ export default function YoutubeCredentialsShow({
                             href={`/youtube-credentials/${youtubeCredential.id}/edit`}
                         >
                             <Edit className="mr-2 h-4 w-4" />
-                            Edit
+                            Editar
                         </Link>
                     </Button>
                 </div>
@@ -96,10 +96,10 @@ export default function YoutubeCredentialsShow({
                                     <div>
                                         <CardTitle className="text-xl">
                                             {youtubeCredential.channel?.name ||
-                                                'Channel not found'}
+                                                'Canal no encontrado'}
                                         </CardTitle>
                                         <CardDescription>
-                                            YouTube API Credentials
+                                            Credenciales de la API de YouTube
                                         </CardDescription>
                                     </div>
                                 </div>
@@ -108,14 +108,14 @@ export default function YoutubeCredentialsShow({
                                 <div className="grid gap-4 md:grid-cols-2">
                                     <div>
                                         <h4 className="mb-2 font-medium">
-                                            Token Status
+                                            Estado del Token
                                         </h4>
                                         <div className="space-y-2 text-sm">
                                             <div className="flex items-center gap-2">
                                                 <Shield
                                                     className={`h-4 w-4 ${youtubeCredential.status === 'active' ? 'text-green-500' : 'text-red-500'}`}
                                                 />
-                                                <span>Status: </span>
+                                                <span>Estado: </span>
                                                 <Badge
                                                     variant={
                                                         youtubeCredential.status ===
@@ -133,14 +133,14 @@ export default function YoutubeCredentialsShow({
                                                         className={`h-4 w-4 ${isExpired ? 'text-red-500' : 'text-green-500'}`}
                                                     />
                                                     <span>
-                                                        Expires:{' '}
+                                                        Expira:{' '}
                                                         {new Date(
                                                             youtubeCredential.expires_at,
                                                         ).toLocaleString()}
                                                     </span>
                                                     {isExpired && (
                                                         <Badge variant="destructive">
-                                                            Expired
+                                                            Expirado
                                                         </Badge>
                                                     )}
                                                 </div>
@@ -149,7 +149,7 @@ export default function YoutubeCredentialsShow({
                                                 <div className="flex items-center gap-2">
                                                     <RefreshCw className="h-4 w-4" />
                                                     <span>
-                                                        Last refresh:{' '}
+                                                        Última actualización:{' '}
                                                         {new Date(
                                                             youtubeCredential.last_refreshed_at,
                                                         ).toLocaleString()}
@@ -157,7 +157,8 @@ export default function YoutubeCredentialsShow({
                                                 </div>
                                             )}
                                             <div>
-                                                Refresh count:{' '}
+                                                Refresh count: Conteo de
+                                                actualizaciones:{' '}
                                                 {
                                                     youtubeCredential.refresh_count
                                                 }
@@ -167,7 +168,7 @@ export default function YoutubeCredentialsShow({
 
                                     <div>
                                         <h4 className="mb-2 font-medium">
-                                            Scopes
+                                            Alcances
                                         </h4>
                                         <div className="space-y-1">
                                             {youtubeCredential.scopes.map(
@@ -191,7 +192,7 @@ export default function YoutubeCredentialsShow({
                                     ).length > 0 && (
                                         <div className="mt-4">
                                             <h4 className="mb-2 font-medium">
-                                                Token Metadata
+                                                Metadatos del Token
                                             </h4>
                                             <pre className="overflow-x-auto rounded bg-muted p-2 text-xs">
                                                 {JSON.stringify(
@@ -209,23 +210,23 @@ export default function YoutubeCredentialsShow({
                     <div>
                         <Card>
                             <CardHeader>
-                                <CardTitle>Actions</CardTitle>
+                                <CardTitle>Acciones</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-2">
                                 <Button className="w-full" variant="outline">
-                                    Refresh Token
+                                    Actualizar Token
                                 </Button>
                                 <Button className="w-full" variant="outline">
-                                    Test API Access
+                                    Probar Acceso a la API
                                 </Button>
                                 <Button className="w-full" variant="outline">
-                                    View Channel
+                                    Ver Canal
                                 </Button>
                                 <Button
                                     className="w-full"
                                     variant="destructive"
                                 >
-                                    Revoke Credentials
+                                    Revocar Credenciales
                                 </Button>
                             </CardContent>
                         </Card>

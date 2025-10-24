@@ -1,18 +1,20 @@
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Plus, Eye, Edit, Trash2, Tv } from 'lucide-react';
+import { Edit, Eye, Plus, Trash2, Tv } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Dashboard',
-        href: '/dashboard',
-    },
-    {
-        title: 'Channels',
+        title: 'Canales',
         href: '/channels',
     },
 ];
@@ -35,18 +37,20 @@ export default function ChannelsIndex({
 }) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Channels" />
+            <Head title="Canales" />
 
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold">Channels</h1>
-                        <p className="text-muted-foreground">Manage your connected YouTube channels</p>
+                        <h1 className="text-2xl font-bold">Canales</h1>
+                        <p className="text-muted-foreground">
+                            Gestiona tus canales de YouTube conectados
+                        </p>
                     </div>
                     <Button asChild>
                         <Link href="/channels/create">
                             <Plus className="mr-2 h-4 w-4" />
-                            Add Channel
+                            Agregar Canal
                         </Link>
                     </Button>
                 </div>
@@ -63,44 +67,72 @@ export default function ChannelsIndex({
                                             className="h-12 w-12 rounded-full object-cover"
                                         />
                                     ) : (
-                                        <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
+                                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
                                             <Tv className="h-6 w-6" />
                                         </div>
                                     )}
                                     <div>
-                                        <CardTitle className="text-lg">{channel.name}</CardTitle>
-                                        <CardDescription>{channel.description}</CardDescription>
+                                        <CardTitle className="text-lg">
+                                            {channel.name}
+                                        </CardTitle>
+                                        <CardDescription>
+                                            {channel.description}
+                                        </CardDescription>
                                     </div>
                                 </div>
                             </CardHeader>
                             <CardContent>
-                                <div className="space-y-2 mb-4">
+                                <div className="mb-4 space-y-2">
                                     <div className="flex justify-between text-sm">
-                                        <span>Subscribers:</span>
-                                        <span>{channel.subscriber_count.toLocaleString()}</span>
+                                        <span>Suscriptores:</span>
+                                        <span>
+                                            {channel.subscriber_count.toLocaleString()}
+                                        </span>
                                     </div>
                                     <div className="flex justify-between text-sm">
-                                        <span>Videos:</span>
-                                        <span>{channel.video_count.toLocaleString()}</span>
+                                        <span>Vídeos:</span>
+                                        <span>
+                                            {channel.video_count.toLocaleString()}
+                                        </span>
                                     </div>
                                     <div className="flex justify-between text-sm">
-                                        <span>Views:</span>
-                                        <span>{channel.view_count.toLocaleString()}</span>
+                                        <span>Vistas:</span>
+                                        <span>
+                                            {channel.view_count.toLocaleString()}
+                                        </span>
                                     </div>
                                 </div>
 
                                 <div className="flex items-center justify-between">
-                                    <Badge variant={channel.status === 'connected' ? 'default' : 'secondary'}>
+                                    <Badge
+                                        variant={
+                                            channel.status === 'connected'
+                                                ? 'default'
+                                                : 'secondary'
+                                        }
+                                    >
                                         {channel.status}
                                     </Badge>
                                     <div className="flex gap-2">
-                                        <Button asChild size="sm" variant="outline">
-                                            <Link href={`/channels/${channel.id}`}>
+                                        <Button
+                                            asChild
+                                            size="sm"
+                                            variant="outline"
+                                        >
+                                            <Link
+                                                href={`/channels/${channel.id}`}
+                                            >
                                                 <Eye className="h-4 w-4" />
                                             </Link>
                                         </Button>
-                                        <Button asChild size="sm" variant="outline">
-                                            <Link href={`/channels/${channel.id}/edit`}>
+                                        <Button
+                                            asChild
+                                            size="sm"
+                                            variant="outline"
+                                        >
+                                            <Link
+                                                href={`/channels/${channel.id}/edit`}
+                                            >
                                                 <Edit className="h-4 w-4" />
                                             </Link>
                                         </Button>
@@ -116,9 +148,13 @@ export default function ChannelsIndex({
 
                 {channels.length === 0 && (
                     <div className="flex flex-col items-center justify-center py-12">
-                        <p className="text-muted-foreground">No channels found</p>
+                        <p className="text-muted-foreground">
+                            No se encontraron canales
+                        </p>
                         <Button asChild className="mt-4">
-                            <Link href="/channels/create">Connect your first channel</Link>
+                            <Link href="/channels/create">
+                                Conecta tu primer canal
+                            </Link>
                         </Button>
                     </div>
                 )}

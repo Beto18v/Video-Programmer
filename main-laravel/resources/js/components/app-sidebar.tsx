@@ -26,6 +26,11 @@ import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
     {
+        title: 'Inicio',
+        href: dashboard(),
+        icon: LayoutGrid,
+    },
+    {
         title: 'Videos',
         href: '/videos',
         icon: Video,
@@ -44,11 +49,6 @@ const mainNavItems: NavItem[] = [
         title: 'Credentials',
         href: '/youtube-credentials',
         icon: Key,
-    },
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
     },
 ];
 

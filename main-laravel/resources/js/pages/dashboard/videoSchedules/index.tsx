@@ -14,11 +14,7 @@ import { Calendar, Clock, Edit, Eye, Plus, Trash2 } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Dashboard',
-        href: '/dashboard',
-    },
-    {
-        title: 'Video Schedules',
+        title: 'Programaciones de Vídeos',
         href: '/video-schedules',
     },
 ];
@@ -44,20 +40,22 @@ export default function VideoSchedulesIndex({
 }) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Video Schedules" />
+            <Head title="Programaciones de Vídeos" />
 
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold">Video Schedules</h1>
+                        <h1 className="text-2xl font-bold">
+                            Programaciones de Vídeos
+                        </h1>
                         <p className="text-muted-foreground">
-                            Manage scheduled video uploads and actions
+                            Gestionar subidas y acciones programadas de vídeos
                         </p>
                     </div>
                     <Button asChild>
                         <Link href="/video-schedules/create">
                             <Plus className="mr-2 h-4 w-4" />
-                            Add Schedule
+                            Agregar Programación
                         </Link>
                     </Button>
                 </div>
@@ -81,7 +79,7 @@ export default function VideoSchedulesIndex({
                                     <div className="min-w-0 flex-1">
                                         <CardTitle className="truncate text-sm">
                                             {schedule.video?.title ||
-                                                'Video not found'}
+                                                'Vídeo no encontrado'}
                                         </CardTitle>
                                         <CardDescription className="text-xs">
                                             {new Date(
@@ -94,13 +92,13 @@ export default function VideoSchedulesIndex({
                             <CardContent>
                                 <div className="mb-4 space-y-2">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-sm">Action:</span>
+                                        <span className="text-sm">Acción:</span>
                                         <Badge variant="outline">
                                             {schedule.action}
                                         </Badge>
                                     </div>
                                     <div className="flex items-center justify-between">
-                                        <span className="text-sm">Status:</span>
+                                        <span className="text-sm">Estado:</span>
                                         <Badge
                                             variant={
                                                 schedule.status === 'completed'
@@ -120,7 +118,7 @@ export default function VideoSchedulesIndex({
                                     {schedule.retry_count > 0 && (
                                         <div className="flex items-center justify-between">
                                             <span className="text-sm">
-                                                Retries:
+                                                Reintentos:
                                             </span>
                                             <span className="text-sm">
                                                 {schedule.retry_count}
@@ -130,7 +128,7 @@ export default function VideoSchedulesIndex({
                                     {schedule.executed_at && (
                                         <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                             <Clock className="h-3 w-3" />
-                                            Executed{' '}
+                                            Ejecutado{' '}
                                             {new Date(
                                                 schedule.executed_at,
                                             ).toLocaleString()}
@@ -165,11 +163,11 @@ export default function VideoSchedulesIndex({
                 {videoSchedules.length === 0 && (
                     <div className="flex flex-col items-center justify-center py-12">
                         <p className="text-muted-foreground">
-                            No schedules found
+                            No se encontraron programaciones
                         </p>
                         <Button asChild className="mt-4">
                             <Link href="/video-schedules/create">
-                                Create your first schedule
+                                Crea tu primera programación
                             </Link>
                         </Button>
                     </div>
