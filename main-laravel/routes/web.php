@@ -12,6 +12,7 @@ use App\Http\Controllers\VideoController;
 use App\Http\Controllers\VideoScheduleController;
 use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\YoutubeCredentialController;
+use App\Http\Controllers\AccountManagementController;
 use App\Models\Plan;
 
 Route::get('/', function () {
@@ -49,6 +50,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::group(['as' => 'users.'], function () {
         Route::resource('users', UserController::class);
     });
+
+    Route::get('account-management', [AccountManagementController::class, 'index'])->middleware('admin')->name('account-management.index');
 
     Route::group(['as' => 'videos.'], function () {
         Route::resource('videos', VideoController::class);
