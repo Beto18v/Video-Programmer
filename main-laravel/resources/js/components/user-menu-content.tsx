@@ -29,6 +29,16 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
             <DropdownMenuLabel className="p-0 font-normal">
                 <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                     <UserInfo user={user} showEmail={true} />
+                    {user.role?.name === 'ADMIN' && (
+                        <span className="rounded-md bg-red-100 px-2 py-1 text-xs font-medium text-red-800 dark:bg-red-900 dark:text-red-300">
+                            {user.role.name}
+                        </span>
+                    )}
+                    {user.role?.name === 'CLIENTE' && user.current_plan && (
+                        <span className="rounded-md bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+                            {user.current_plan.name}
+                        </span>
+                    )}
                 </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />

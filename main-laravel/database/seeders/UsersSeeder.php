@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Plan;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -20,6 +21,10 @@ class UsersSeeder extends Seeder
         $proPlan = Plan::where('name', 'pro')->first();
         $premiumPlan = Plan::where('name', 'premium')->first();
 
+        // Obtener roles existentes
+        $adminRole = Role::where('name', 'ADMIN')->first();
+        $clienteRole = Role::where('name', 'CLIENTE')->first();
+
         $users = [
             [
                 'name' => 'Admin User',
@@ -28,6 +33,7 @@ class UsersSeeder extends Seeder
                 'first_name' => 'Admin',
                 'last_name' => 'User',
                 'current_plan_id' => $premiumPlan?->id,
+                'role_id' => $adminRole?->id,
                 'is_active' => true,
                 'email_verified_at' => now(),
                 'timezone' => 'America/New_York',
@@ -40,6 +46,7 @@ class UsersSeeder extends Seeder
                 'first_name' => 'Pro',
                 'last_name' => 'User',
                 'current_plan_id' => $proPlan?->id,
+                'role_id' => $clienteRole?->id,
                 'is_active' => true,
                 'email_verified_at' => now(),
                 'timezone' => 'Europe/London',
@@ -52,6 +59,7 @@ class UsersSeeder extends Seeder
                 'first_name' => 'Free',
                 'last_name' => 'User',
                 'current_plan_id' => $freePlan?->id,
+                'role_id' => $clienteRole?->id,
                 'is_active' => true,
                 'email_verified_at' => now(),
                 'timezone' => 'America/Los_Angeles',
@@ -64,6 +72,7 @@ class UsersSeeder extends Seeder
                 'first_name' => 'Inactive',
                 'last_name' => 'User',
                 'current_plan_id' => $freePlan?->id,
+                'role_id' => $clienteRole?->id,
                 'is_active' => false,
                 'email_verified_at' => now(),
                 'timezone' => 'UTC',
@@ -76,6 +85,7 @@ class UsersSeeder extends Seeder
                 'first_name' => 'Usuario',
                 'last_name' => 'Español',
                 'current_plan_id' => $proPlan?->id,
+                'role_id' => $clienteRole?->id,
                 'is_active' => true,
                 'email_verified_at' => now(),
                 'timezone' => 'Europe/Madrid',

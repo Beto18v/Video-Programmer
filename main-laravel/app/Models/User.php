@@ -34,6 +34,7 @@ class User extends Authenticatable
         'is_active',
         'last_login_at',
         'preferences',
+        'role_id',
     ];
 
     /**
@@ -79,6 +80,14 @@ class User extends Authenticatable
     public function currentPlan(): BelongsTo
     {
         return $this->belongsTo(Plan::class, 'current_plan_id');
+    }
+
+    /**
+     * El rol del usuario
+     */
+    public function role(): BelongsTo
+    {
+        return $this->belongsTo(Role::class);
     }
 
     /**

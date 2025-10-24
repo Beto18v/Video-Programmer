@@ -36,30 +36,30 @@ const mainNavItems: NavItem[] = [
         icon: Video,
     },
     {
-        title: 'Channels',
+        title: 'Canales',
         href: '/channels',
         icon: Tv,
     },
     {
-        title: 'Schedules',
-        href: '/video-schedules',
-        icon: Calendar,
-    },
-    {
-        title: 'Credentials',
+        title: 'Credenciales',
         href: '/youtube-credentials',
         icon: Key,
+    },
+    {
+        title: 'Programaciones',
+        href: '/video-schedules',
+        icon: Calendar,
     },
 ];
 
 const footerNavItems: NavItem[] = [
     {
-        title: 'Repository',
+        title: 'Planes',
         href: 'https://github.com/laravel/react-starter-kit',
         icon: Folder,
     },
     {
-        title: 'Documentation',
+        title: 'Documentación',
         href: 'https://laravel.com/docs/starter-kits#react',
         icon: BookOpen,
     },
