@@ -12,7 +12,7 @@ class AccountManagementController extends Controller
 {
     public function index(Request $request)
     {
-        $usersQuery = User::withTrashed()->with('currentPlan');
+        $usersQuery = User::withTrashed()->with('currentPlan')->with('role');
 
         if ($request->filled('email')) {
             $usersQuery->where('email', 'like', '%' . $request->email . '%');
@@ -33,6 +33,7 @@ class AccountManagementController extends Controller
             'channels' => $channels,
             'videos' => $videos,
             'filters' => $request->only(['email', 'plan']),
+            'flash' => session()->only(['success']),
         ]);
     }
 }

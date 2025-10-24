@@ -1,3 +1,14 @@
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -7,6 +18,24 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import {
     Table,
     TableBody,
@@ -18,8 +47,9 @@ import {
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/react';
-import { Eye, Search } from 'lucide-react';
+import { Eye, Search, Trash2, UserPlus } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { Toaster, toast } from 'react-hot-toast';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -33,6 +63,9 @@ interface User {
     name: string;
     email: string;
     current_plan?: {
+        name: string;
+    };
+    role?: {
         name: string;
     };
     deleted_at?: string;
@@ -65,13 +98,35 @@ export default function AccountManagementIndex({
     channels,
     videos,
     filters,
+    flash,
 }: {
     users: User[];
     channels: Channel[];
     videos: Video[];
     filters?: { email?: string; plan?: string };
+    flash?: { success?: string };
 }) {
     const [emailFilter, setEmailFilter] = useState(filters?.email || '');
+
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [newUser, setNewUser] = useState({
+        name: '',
+        email: '',
+        password: '',
+        role: '',
+    });
+
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [deleteUserId, setDeleteUserId] = useState<number | null>(null);
+
+    const [isRestoreDialogOpen, setIsRestoreDialogOpen] = useState(false);
+    const [restoreUserId, setRestoreUserId] = useState<number | null>(null);
+
+    useEffect(() => {
+        if (flash?.success) {
+            toast.success(flash.success);
+        }
+    }, [flash]);
 
     useEffect(() => {
         const timeout = setTimeout(() => {
@@ -108,6 +163,143 @@ export default function AccountManagementIndex({
                         <CardDescription>
                             Lista de todos los usuarios del sistema
                         </CardDescription>
+                        <div className="flex justify-end">
+                            <Dialog
+                                open={isCreateModalOpen}
+                                onOpenChange={setIsCreateModalOpen}
+                            >
+                                <DialogTrigger asChild>
+                                    <Button>
+                                        <UserPlus className="mr-2 h-4 w-4" />
+                                        Crear Usuario
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>
+                                            Crear Nuevo Usuario
+                                        </DialogTitle>
+                                        <DialogDescription>
+                                            Ingresa los detalles del nuevo
+                                            usuario.
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <div className="grid gap-4 py-4">
+                                        <div className="grid grid-cols-4 items-center gap-4">
+                                            <Label
+                                                htmlFor="name"
+                                                className="text-right"
+                                            >
+                                                Nombre
+                                            </Label>
+                                            <Input
+                                                id="name"
+                                                value={newUser.name}
+                                                onChange={(e) =>
+                                                    setNewUser({
+                                                        ...newUser,
+                                                        name: e.target.value,
+                                                    })
+                                                }
+                                                className="col-span-3"
+                                            />
+                                        </div>
+                                        <div className="grid grid-cols-4 items-center gap-4">
+                                            <Label
+                                                htmlFor="email"
+                                                className="text-right"
+                                            >
+                                                Correo
+                                            </Label>
+                                            <Input
+                                                id="email"
+                                                type="email"
+                                                value={newUser.email}
+                                                onChange={(e) =>
+                                                    setNewUser({
+                                                        ...newUser,
+                                                        email: e.target.value,
+                                                    })
+                                                }
+                                                className="col-span-3"
+                                            />
+                                        </div>
+                                        <div className="grid grid-cols-4 items-center gap-4">
+                                            <Label
+                                                htmlFor="password"
+                                                className="text-right"
+                                            >
+                                                Contraseña
+                                            </Label>
+                                            <Input
+                                                id="password"
+                                                type="password"
+                                                value={newUser.password}
+                                                onChange={(e) =>
+                                                    setNewUser({
+                                                        ...newUser,
+                                                        password:
+                                                            e.target.value,
+                                                    })
+                                                }
+                                                className="col-span-3"
+                                                minLength={8}
+                                            />
+                                        </div>
+                                        <div className="grid grid-cols-4 items-center gap-4">
+                                            <Label
+                                                htmlFor="role"
+                                                className="text-right"
+                                            >
+                                                Rol
+                                            </Label>
+                                            <Select
+                                                value={newUser.role}
+                                                onValueChange={(value) =>
+                                                    setNewUser({
+                                                        ...newUser,
+                                                        role: value,
+                                                    })
+                                                }
+                                            >
+                                                <SelectTrigger className="col-span-3">
+                                                    <SelectValue placeholder="Selecciona un rol" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="admin">
+                                                        Admin
+                                                    </SelectItem>
+                                                    <SelectItem value="user">
+                                                        Usuario
+                                                    </SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </div>
+                                    <DialogFooter>
+                                        <Button
+                                            onClick={() => {
+                                                router.post('/users', newUser, {
+                                                    onSuccess: () => {
+                                                        setIsCreateModalOpen(
+                                                            false,
+                                                        );
+                                                        setNewUser({
+                                                            name: '',
+                                                            email: '',
+                                                            password: '',
+                                                            role: '',
+                                                        });
+                                                    },
+                                                });
+                                            }}
+                                        >
+                                            Crear
+                                        </Button>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
+                        </div>
                     </CardHeader>
                     <CardContent>
                         <div className="mb-4 flex gap-4">
@@ -148,7 +340,7 @@ export default function AccountManagementIndex({
                                     <TableHead>Nombre</TableHead>
                                     <TableHead>Email</TableHead>
                                     <TableHead>Plan</TableHead>
-                                    <TableHead>Estado</TableHead>
+                                    <TableHead>Rol</TableHead>
                                     <TableHead>Acciones</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -165,37 +357,173 @@ export default function AccountManagementIndex({
                                             </Badge>
                                         </TableCell>
                                         <TableCell>
-                                            <Badge
-                                                variant={
-                                                    user.deleted_at
-                                                        ? 'destructive'
-                                                        : 'default'
-                                                }
-                                            >
-                                                {user.deleted_at
-                                                    ? 'Eliminado'
-                                                    : 'Activo'}
+                                            <Badge variant="outline">
+                                                {user.role?.name || 'Sin rol'}
                                             </Badge>
                                         </TableCell>
                                         <TableCell>
                                             {user.deleted_at ? (
-                                                <Button
-                                                    size="sm"
-                                                    onClick={() =>
-                                                        router.patch(
-                                                            `/users/${user.id}/restore`,
-                                                        )
+                                                <AlertDialog
+                                                    open={
+                                                        isRestoreDialogOpen &&
+                                                        restoreUserId ===
+                                                            user.id
                                                     }
+                                                    onOpenChange={(open) => {
+                                                        if (!open) {
+                                                            setRestoreUserId(
+                                                                null,
+                                                            );
+                                                            setIsRestoreDialogOpen(
+                                                                false,
+                                                            );
+                                                        } else
+                                                            setIsRestoreDialogOpen(
+                                                                open,
+                                                            );
+                                                    }}
                                                 >
-                                                    Restaurar
-                                                </Button>
+                                                    <AlertDialogTrigger asChild>
+                                                        <Button
+                                                            size="sm"
+                                                            onClick={() => {
+                                                                setRestoreUserId(
+                                                                    user.id,
+                                                                );
+                                                                setIsRestoreDialogOpen(
+                                                                    true,
+                                                                );
+                                                            }}
+                                                        >
+                                                            Restaurar
+                                                        </Button>
+                                                    </AlertDialogTrigger>
+                                                    <AlertDialogContent>
+                                                        <AlertDialogHeader>
+                                                            <AlertDialogTitle>
+                                                                ¿Está seguro?
+                                                            </AlertDialogTitle>
+                                                            <AlertDialogDescription>
+                                                                Esta acción
+                                                                restaurará al
+                                                                usuario. ¿Desea
+                                                                continuar?
+                                                            </AlertDialogDescription>
+                                                        </AlertDialogHeader>
+                                                        <AlertDialogFooter>
+                                                            <AlertDialogCancel>
+                                                                Cancelar
+                                                            </AlertDialogCancel>
+                                                            <AlertDialogAction
+                                                                onClick={() => {
+                                                                    if (
+                                                                        restoreUserId
+                                                                    ) {
+                                                                        router.patch(
+                                                                            `/users/${restoreUserId}/restore`,
+                                                                            {},
+                                                                            {
+                                                                                onSuccess:
+                                                                                    () => {
+                                                                                        setIsRestoreDialogOpen(
+                                                                                            false,
+                                                                                        );
+                                                                                        setRestoreUserId(
+                                                                                            null,
+                                                                                        );
+                                                                                    },
+                                                                            },
+                                                                        );
+                                                                    }
+                                                                }}
+                                                            >
+                                                                Sí, restaurar
+                                                            </AlertDialogAction>
+                                                        </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                </AlertDialog>
                                             ) : (
-                                                <Button
-                                                    size="sm"
-                                                    variant="outline"
+                                                <AlertDialog
+                                                    open={
+                                                        isDeleteDialogOpen &&
+                                                        deleteUserId === user.id
+                                                    }
+                                                    onOpenChange={(open) => {
+                                                        if (!open) {
+                                                            setDeleteUserId(
+                                                                null,
+                                                            );
+                                                            setIsDeleteDialogOpen(
+                                                                false,
+                                                            );
+                                                        } else
+                                                            setIsDeleteDialogOpen(
+                                                                open,
+                                                            );
+                                                    }}
                                                 >
-                                                    <Eye className="h-4 w-4" />
-                                                </Button>
+                                                    <AlertDialogTrigger asChild>
+                                                        <Button
+                                                            size="sm"
+                                                            variant="destructive"
+                                                            onClick={() => {
+                                                                setDeleteUserId(
+                                                                    user.id,
+                                                                );
+                                                                setIsDeleteDialogOpen(
+                                                                    true,
+                                                                );
+                                                            }}
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </Button>
+                                                    </AlertDialogTrigger>
+                                                    <AlertDialogContent>
+                                                        <AlertDialogHeader>
+                                                            <AlertDialogTitle>
+                                                                ¿Está seguro?
+                                                            </AlertDialogTitle>
+                                                            <AlertDialogDescription>
+                                                                Esta acción
+                                                                eliminará
+                                                                permanentemente
+                                                                al usuario.
+                                                                ¿Desea
+                                                                continuar?
+                                                            </AlertDialogDescription>
+                                                        </AlertDialogHeader>
+                                                        <AlertDialogFooter>
+                                                            <AlertDialogCancel>
+                                                                Cancelar
+                                                            </AlertDialogCancel>
+                                                            <AlertDialogAction
+                                                                onClick={() => {
+                                                                    if (
+                                                                        deleteUserId
+                                                                    ) {
+                                                                        router.delete(
+                                                                            `/users/${deleteUserId}`,
+                                                                            {
+                                                                                onSuccess:
+                                                                                    () => {
+                                                                                        setIsDeleteDialogOpen(
+                                                                                            false,
+                                                                                        );
+                                                                                        setDeleteUserId(
+                                                                                            null,
+                                                                                        );
+                                                                                    },
+                                                                            },
+                                                                        );
+                                                                    }
+                                                                }}
+                                                                className="bg-red-600 hover:bg-red-700"
+                                                            >
+                                                                Sí, eliminar
+                                                            </AlertDialogAction>
+                                                        </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                </AlertDialog>
                                             )}
                                         </TableCell>
                                     </TableRow>
@@ -327,6 +655,7 @@ export default function AccountManagementIndex({
                     </CardContent>
                 </Card>
             </div>
+            <Toaster />
         </AppLayout>
     );
 }

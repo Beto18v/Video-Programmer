@@ -30,7 +30,7 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $user = User::create($request->all());
-        return response()->json($user, 201);
+        return redirect()->back()->with('success', 'Usuario creado exitosamente');
     }
 
     /**
@@ -64,12 +64,12 @@ class UserController extends Controller
     public function destroy(User $user)
     {
         $user->delete();
-        return response()->json(null, 204);
+        return redirect()->back()->with('success', 'Usuario eliminado exitosamente');
     }
 
     public function restore(User $user)
     {
         $user->restore();
-        return response()->json(['message' => 'Usuario restaurado'], 200);
+        return redirect()->back()->with('success', 'Usuario restaurado exitosamente');
     }
 }
