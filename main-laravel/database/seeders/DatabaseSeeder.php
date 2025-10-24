@@ -15,8 +15,9 @@ class DatabaseSeeder extends Seeder
     {
         // Ejecutar seeders en orden correcto para mantener las relaciones de foreign keys
         $this->call([
-            PlansSeeder::class,           // Primero los planes
-            UsersSeeder::class,           // Luego los usuarios (referencian planes)
+            RolesSeeder::class,           // Primero los roles
+            PlansSeeder::class,           // Luego los planes
+            UsersSeeder::class,           // Luego los usuarios (referencian roles y planes)
             ChannelsSeeder::class,        // Canales (referencian usuarios)
             YoutubeCredentialsSeeder::class, // Credenciales (referencian canales)
             VideosSeeder::class,          // Videos (referencian usuarios y canales)

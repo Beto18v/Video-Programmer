@@ -31,24 +31,24 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
-        title: 'Videos',
-        href: '/videos',
-        icon: Video,
-    },
-    {
         title: 'Canales',
         href: '/channels',
         icon: Tv,
     },
     {
+        title: 'Videos',
+        href: '/videos',
+        icon: Video,
+    },
+    {
+        title: 'Programados',
+        href: '/video-schedules',
+        icon: Calendar,
+    },
+    {
         title: 'Credenciales',
         href: '/youtube-credentials',
         icon: Key,
-    },
-    {
-        title: 'Programaciones',
-        href: '/video-schedules',
-        icon: Calendar,
     },
 ];
 

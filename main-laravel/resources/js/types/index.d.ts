@@ -47,6 +47,7 @@ export interface User {
     current_plan?: {
         id: number;
         name: string;
+        display_name: string;
     };
     [key: string]: unknown; // This allows for additional properties...
 }

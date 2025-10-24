@@ -48,7 +48,7 @@ export default function ChannelsIndex({
                         </p>
                     </div>
                     <Button asChild>
-                        <Link href="/channels/create">
+                        <Link href="/auth/google">
                             <Plus className="mr-2 h-4 w-4" />
                             Agregar Canal
                         </Link>
@@ -152,7 +152,7 @@ export default function ChannelsIndex({
                             No se encontraron canales
                         </p>
                         <Button asChild className="mt-4">
-                            <Link href="/channels/create">
+                            <Link href="/auth/google">
                                 Conecta tu primer canal
                             </Link>
                         </Button>

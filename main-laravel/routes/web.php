@@ -10,6 +10,7 @@ use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VideoController;
 use App\Http\Controllers\VideoScheduleController;
+use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\YoutubeCredentialController;
 use App\Models\Plan;
 
@@ -29,6 +30,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
+
+    Route::get('auth/google', [GoogleAuthController::class, 'redirect'])->name('auth.google');
+    Route::get('auth/google/callback', [GoogleAuthController::class, 'callback'])->name('auth.google.callback');
 
     Route::group(['as' => 'channels.'], function () {
         Route::resource('channels', ChannelController::class);

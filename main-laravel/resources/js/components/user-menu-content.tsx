@@ -36,7 +36,7 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
                     )}
                     {user.role?.name === 'CLIENTE' && user.current_plan && (
                         <span className="rounded-md bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-300">
-                            {user.current_plan.name}
+                            {user.current_plan.display_name}
                         </span>
                     )}
                 </div>

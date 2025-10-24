@@ -2,6 +2,8 @@
 
 namespace App\Actions\Fortify;
 
+use App\Models\Plan;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -30,10 +32,17 @@ class CreateNewUser implements CreatesNewUsers
             'password' => $this->passwordRules(),
         ])->validate();
 
+        // Obtener rol CLIENTE por defecto
+        $clienteRole = Role::where('name', 'CLIENTE')->first();
+        // Obtener plan gratuito por defecto
+        $freePlan = Plan::where('name', 'free')->first();
+
         return User::create([
             'name' => $input['name'],
             'email' => $input['email'],
             'password' => $input['password'],
+            'role_id' => $clienteRole?->id,
+            'current_plan_id' => $freePlan?->id,
         ]);
     }
 }

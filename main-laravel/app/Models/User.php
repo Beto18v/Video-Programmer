@@ -155,6 +155,11 @@ class User extends Authenticatable
      */
     public function canUseVideos(int $quantity = 1): bool
     {
+        // Los administradores no tienen límites
+        if ($this->isAdmin()) {
+            return true;
+        }
+
         $plan = $this->currentPlan;
 
         if (!$plan) {
@@ -190,6 +195,11 @@ class User extends Authenticatable
      */
     public function getRemainingVideosAttribute(): ?int
     {
+        // Los administradores no tienen límites
+        if ($this->isAdmin()) {
+            return null; // Ilimitado
+        }
+
         $plan = $this->currentPlan;
 
         if (!$plan) {
@@ -243,6 +253,14 @@ class User extends Authenticatable
     public function isPremiumPlan(): bool
     {
         return $this->currentPlan && $this->currentPlan->name === 'premium';
+    }
+
+    /**
+     * Verificar si el usuario es administrador
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role && $this->role->name === 'ADMIN';
     }
 
     /**

@@ -56,9 +56,6 @@ export default function VideosIndex({ videos = [] }: { videos?: Video[] }) {
                     </div>
                     <div className="flex gap-2">
                         <Button asChild>
-                            <Link href="/sheets">Conectar con Sheets</Link>
-                        </Button>
-                        <Button asChild>
                             <Link href="/videos/create">
                                 <Plus className="mr-2 h-4 w-4" />
                                 Agregar Vídeo
@@ -133,11 +130,6 @@ export default function VideosIndex({ videos = [] }: { videos?: Video[] }) {
                             No se encontraron vídeos
                         </p>
                         <div className="mt-4 flex gap-2">
-                            <Button asChild>
-                                <Link href="/channels">
-                                    Conectar una cuenta
-                                </Link>
-                            </Button>
                             <Button asChild>
                                 <Link href="/videos/create">
                                     Crea tu primer vídeo
