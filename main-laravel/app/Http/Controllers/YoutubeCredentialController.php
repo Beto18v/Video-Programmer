@@ -13,7 +13,11 @@ class YoutubeCredentialController extends Controller
      */
     public function index()
     {
-        $youtubeCredentials = YoutubeCredential::with('channel')->get();
+        $youtubeCredentials = YoutubeCredential::with('channel')
+            ->whereHas('channel', function ($query) {
+                $query->where('user_id', auth()->id());
+            })
+            ->get();
         return Inertia::render('dashboard/youtubeCredentials/index', [
             'youtubeCredentials' => $youtubeCredentials,
         ]);

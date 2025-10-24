@@ -32,8 +32,10 @@ interface Channel {
 
 export default function ChannelsIndex({
     channels = [],
+    flash,
 }: {
     channels?: Channel[];
+    flash?: { success?: string; error?: string };
 }) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -48,12 +50,24 @@ export default function ChannelsIndex({
                         </p>
                     </div>
                     <Button asChild>
-                        <Link href="/auth/google">
+                        <a href="/auth/google">
                             <Plus className="mr-2 h-4 w-4" />
                             Agregar Canal
-                        </Link>
+                        </a>
                     </Button>
                 </div>
+
+                {flash?.success && (
+                    <div className="mb-4 rounded border border-green-400 bg-green-100 px-4 py-3 text-green-700">
+                        {flash.success}
+                    </div>
+                )}
+
+                {flash?.error && (
+                    <div className="mb-4 rounded border border-red-400 bg-red-100 px-4 py-3 text-red-700">
+                        {flash.error}
+                    </div>
+                )}
 
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {channels.map((channel) => (
@@ -106,7 +120,7 @@ export default function ChannelsIndex({
                                 <div className="flex items-center justify-between">
                                     <Badge
                                         variant={
-                                            channel.status === 'connected'
+                                            channel.status === 'active'
                                                 ? 'default'
                                                 : 'secondary'
                                         }
@@ -152,9 +166,7 @@ export default function ChannelsIndex({
                             No se encontraron canales
                         </p>
                         <Button asChild className="mt-4">
-                            <Link href="/auth/google">
-                                Conecta tu primer canal
-                            </Link>
+                            <a href="/auth/google">Conecta tu primer canal</a>
                         </Button>
                     </div>
                 )}

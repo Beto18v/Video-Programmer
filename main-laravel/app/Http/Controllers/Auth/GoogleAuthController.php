@@ -17,6 +17,7 @@ class GoogleAuthController extends Controller
     {
         return Socialite::driver('google')
             ->scopes(['https://www.googleapis.com/auth/youtube.readonly', 'https://www.googleapis.com/auth/youtube'])
+            ->with(['access_type' => 'offline', 'prompt' => 'consent'])
             ->redirect();
     }
 
@@ -60,7 +61,7 @@ class GoogleAuthController extends Controller
                 'subscriber_count' => $youtubeChannel->statistics->subscriberCount ?? 0,
                 'video_count' => $youtubeChannel->statistics->videoCount ?? 0,
                 'view_count' => $youtubeChannel->statistics->viewCount ?? 0,
-                'status' => 'connected',
+                'status' => 'active',
                 'connected_at' => now(),
                 'channel_metadata' => [
                     'country' => $youtubeChannel->snippet->country ?? null,

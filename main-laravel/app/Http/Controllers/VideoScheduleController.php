@@ -13,7 +13,11 @@ class VideoScheduleController extends Controller
      */
     public function index()
     {
-        $videoSchedules = VideoSchedule::with('video')->get();
+        $videoSchedules = VideoSchedule::with('video')
+            ->whereHas('video', function ($query) {
+                $query->where('user_id', auth()->id());
+            })
+            ->get();
         return Inertia::render('dashboard/videoSchedules/index', [
             'videoSchedules' => $videoSchedules,
         ]);

@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -37,6 +37,17 @@ interface Channel {
 }
 
 export default function ChannelsEdit({ channel }: { channel: Channel }) {
+    const form = useForm({
+        youtube_channel_id: channel.youtube_channel_id,
+        name: channel.name,
+        description: channel.description,
+        custom_url: channel.custom_url,
+    });
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        form.patch(`/channels/${channel.id}`);
+    };
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Editar Canal" />
@@ -45,6 +56,8 @@ export default function ChannelsEdit({ channel }: { channel: Channel }) {
                 <div className="flex items-center gap-4">
                     <Button asChild variant="outline" size="sm">
                         <Link href="/channels">
+                            select * from users;select * from users;select *
+                            from users;
                             <ArrowLeft className="mr-2 h-4 w-4" />
                             Volver a Canales
                         </Link>
@@ -65,57 +78,85 @@ export default function ChannelsEdit({ channel }: { channel: Channel }) {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
-                        <div className="grid gap-2">
-                            <Label htmlFor="youtube_channel_id">
-                                ID del Canal de YouTube
-                            </Label>
-                            <Input
-                                id="youtube_channel_id"
-                                name="youtube_channel_id"
-                                defaultValue={channel.youtube_channel_id}
-                                required
-                            />
-                        </div>
+                        <form onSubmit={handleSubmit}>
+                            <div className="grid gap-2">
+                                <Label htmlFor="youtube_channel_id">
+                                    ID del Canal de YouTube
+                                </Label>
+                                <Input
+                                    id="youtube_channel_id"
+                                    name="youtube_channel_id"
+                                    value={form.data.youtube_channel_id}
+                                    onChange={(e) =>
+                                        form.setData(
+                                            'youtube_channel_id',
+                                            e.target.value,
+                                        )
+                                    }
+                                    required
+                                />
+                            </div>
 
-                        <div className="grid gap-2">
-                            <Label htmlFor="name">Nombre del Canal</Label>
-                            <Input
-                                id="name"
-                                name="name"
-                                defaultValue={channel.name}
-                                required
-                            />
-                        </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="name">Nombre del Canal</Label>
+                                <Input
+                                    id="name"
+                                    name="name"
+                                    value={form.data.name}
+                                    onChange={(e) =>
+                                        form.setData('name', e.target.value)
+                                    }
+                                    required
+                                />
+                            </div>
 
-                        <div className="grid gap-2">
-                            <Label htmlFor="description">Descripción</Label>
-                            <textarea
-                                id="description"
-                                name="description"
-                                rows={3}
-                                defaultValue={channel.description}
-                                className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                            />
-                        </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="description">Descripción</Label>
+                                <textarea
+                                    id="description"
+                                    name="description"
+                                    rows={3}
+                                    value={form.data.description}
+                                    onChange={(e) =>
+                                        form.setData(
+                                            'description',
+                                            e.target.value,
+                                        )
+                                    }
+                                    className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                                />
+                            </div>
 
-                        <div className="grid gap-2">
-                            <Label htmlFor="custom_url">
-                                URL Personalizada
-                            </Label>
-                            <Input
-                                id="custom_url"
-                                name="custom_url"
-                                defaultValue={channel.custom_url}
-                                placeholder="youtube.com/c/TuCanal"
-                            />
-                        </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="custom_url">
+                                    URL Personalizada
+                                </Label>
+                                <Input
+                                    id="custom_url"
+                                    name="custom_url"
+                                    value={form.data.custom_url}
+                                    onChange={(e) =>
+                                        form.setData(
+                                            'custom_url',
+                                            e.target.value,
+                                        )
+                                    }
+                                    placeholder="youtube.com/c/TuCanal"
+                                />
+                            </div>
 
-                        <div className="flex gap-4">
-                            <Button type="submit">Actualizar Canal</Button>
-                            <Button asChild variant="outline">
-                                <Link href="/channels">Cancelar</Link>
-                            </Button>
-                        </div>
+                            <div className="flex gap-4">
+                                <Button
+                                    type="submit"
+                                    disabled={form.processing}
+                                >
+                                    Actualizar Canal
+                                </Button>
+                                <Button asChild variant="outline">
+                                    <Link href="/channels">Cancelar</Link>
+                                </Button>
+                            </div>
+                        </form>
                     </CardContent>
                 </Card>
             </div>

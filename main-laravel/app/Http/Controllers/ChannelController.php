@@ -13,9 +13,13 @@ class ChannelController extends Controller
      */
     public function index()
     {
-        $channels = Channel::all();
+        $channels = Channel::where('user_id', auth()->id())->get();
         return Inertia::render('dashboard/channels/index', [
             'channels' => $channels,
+            'flash' => [
+                'success' => session('success'),
+                'error' => session('error'),
+            ],
         ]);
     }
 
