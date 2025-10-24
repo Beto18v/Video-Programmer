@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Channel;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class ChannelController extends Controller
 {
@@ -13,7 +14,9 @@ class ChannelController extends Controller
     public function index()
     {
         $channels = Channel::all();
-        return response()->json($channels);
+        return Inertia::render('dashboard/channels/index', [
+            'channels' => $channels,
+        ]);
     }
 
     /**
@@ -21,7 +24,7 @@ class ChannelController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render('dashboard/channels/create');
     }
 
     /**
@@ -30,7 +33,7 @@ class ChannelController extends Controller
     public function store(Request $request)
     {
         $channel = Channel::create($request->all());
-        return response()->json($channel, 201);
+        return redirect()->route('channels.index');
     }
 
     /**
@@ -38,7 +41,9 @@ class ChannelController extends Controller
      */
     public function show(Channel $channel)
     {
-        return response()->json($channel);
+        return Inertia::render('dashboard/channels/show', [
+            'channel' => $channel,
+        ]);
     }
 
     /**
@@ -46,7 +51,9 @@ class ChannelController extends Controller
      */
     public function edit(Channel $channel)
     {
-        //
+        return Inertia::render('dashboard/channels/edit', [
+            'channel' => $channel,
+        ]);
     }
 
     /**
@@ -55,7 +62,7 @@ class ChannelController extends Controller
     public function update(Request $request, Channel $channel)
     {
         $channel->update($request->all());
-        return response()->json($channel);
+        return redirect()->route('channels.show', $channel);
     }
 
     /**
@@ -64,6 +71,6 @@ class ChannelController extends Controller
     public function destroy(Channel $channel)
     {
         $channel->delete();
-        return response()->json(null, 204);
+        return redirect()->route('channels.index');
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\VideoSchedule;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class VideoScheduleController extends Controller
 {
@@ -13,7 +14,9 @@ class VideoScheduleController extends Controller
     public function index()
     {
         $videoSchedules = VideoSchedule::all();
-        return response()->json($videoSchedules);
+        return Inertia::render('dashboard/videoSchedules/index', [
+            'videoSchedules' => $videoSchedules,
+        ]);
     }
 
     /**
@@ -21,7 +24,7 @@ class VideoScheduleController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render('dashboard/videoSchedules/create');
     }
 
     /**
@@ -30,7 +33,7 @@ class VideoScheduleController extends Controller
     public function store(Request $request)
     {
         $videoSchedule = VideoSchedule::create($request->all());
-        return response()->json($videoSchedule, 201);
+        return redirect()->route('video-schedules.index');
     }
 
     /**
@@ -38,7 +41,9 @@ class VideoScheduleController extends Controller
      */
     public function show(VideoSchedule $videoSchedule)
     {
-        return response()->json($videoSchedule);
+        return Inertia::render('dashboard/videoSchedules/show', [
+            'videoSchedule' => $videoSchedule,
+        ]);
     }
 
     /**
@@ -46,7 +51,9 @@ class VideoScheduleController extends Controller
      */
     public function edit(VideoSchedule $videoSchedule)
     {
-        //
+        return Inertia::render('dashboard/videoSchedules/edit', [
+            'videoSchedule' => $videoSchedule,
+        ]);
     }
 
     /**
@@ -55,7 +62,7 @@ class VideoScheduleController extends Controller
     public function update(Request $request, VideoSchedule $videoSchedule)
     {
         $videoSchedule->update($request->all());
-        return response()->json($videoSchedule);
+        return redirect()->route('video-schedules.show', $videoSchedule);
     }
 
     /**
@@ -64,6 +71,6 @@ class VideoScheduleController extends Controller
     public function destroy(VideoSchedule $videoSchedule)
     {
         $videoSchedule->delete();
-        return response()->json(null, 204);
+        return redirect()->route('video-schedules.index');
     }
 }

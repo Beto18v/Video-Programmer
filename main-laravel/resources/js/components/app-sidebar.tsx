@@ -13,10 +13,38 @@ import {
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
+import {
+    BookOpen,
+    Calendar,
+    Folder,
+    Key,
+    LayoutGrid,
+    Tv,
+    Video,
+} from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
+    {
+        title: 'Videos',
+        href: '/videos',
+        icon: Video,
+    },
+    {
+        title: 'Channels',
+        href: '/channels',
+        icon: Tv,
+    },
+    {
+        title: 'Schedules',
+        href: '/video-schedules',
+        icon: Calendar,
+    },
+    {
+        title: 'Credentials',
+        href: '/youtube-credentials',
+        icon: Key,
+    },
     {
         title: 'Dashboard',
         href: dashboard(),

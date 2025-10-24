@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Video;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class VideoController extends Controller
 {
@@ -13,7 +14,9 @@ class VideoController extends Controller
     public function index()
     {
         $videos = Video::all();
-        return response()->json($videos);
+        return Inertia::render('dashboard/videos/index', [
+            'videos' => $videos,
+        ]);
     }
 
     /**
@@ -21,7 +24,7 @@ class VideoController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render('dashboard/videos/create');
     }
 
     /**
@@ -30,7 +33,7 @@ class VideoController extends Controller
     public function store(Request $request)
     {
         $video = Video::create($request->all());
-        return response()->json($video, 201);
+        return redirect()->route('videos.index');
     }
 
     /**
@@ -38,7 +41,9 @@ class VideoController extends Controller
      */
     public function show(Video $video)
     {
-        return response()->json($video);
+        return Inertia::render('dashboard/videos/show', [
+            'video' => $video,
+        ]);
     }
 
     /**
@@ -46,7 +51,9 @@ class VideoController extends Controller
      */
     public function edit(Video $video)
     {
-        //
+        return Inertia::render('dashboard/videos/edit', [
+            'video' => $video,
+        ]);
     }
 
     /**
@@ -55,7 +62,7 @@ class VideoController extends Controller
     public function update(Request $request, Video $video)
     {
         $video->update($request->all());
-        return response()->json($video);
+        return redirect()->route('videos.show', $video);
     }
 
     /**
@@ -64,6 +71,6 @@ class VideoController extends Controller
     public function destroy(Video $video)
     {
         $video->delete();
-        return response()->json(null, 204);
+        return redirect()->route('videos.index');
     }
 }

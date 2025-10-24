@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\YoutubeCredential;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class YoutubeCredentialController extends Controller
 {
@@ -13,7 +14,9 @@ class YoutubeCredentialController extends Controller
     public function index()
     {
         $youtubeCredentials = YoutubeCredential::all();
-        return response()->json($youtubeCredentials);
+        return Inertia::render('dashboard/youtubeCredentials/index', [
+            'youtubeCredentials' => $youtubeCredentials,
+        ]);
     }
 
     /**
@@ -21,7 +24,7 @@ class YoutubeCredentialController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render('dashboard/youtubeCredentials/create');
     }
 
     /**
@@ -30,7 +33,7 @@ class YoutubeCredentialController extends Controller
     public function store(Request $request)
     {
         $youtubeCredential = YoutubeCredential::create($request->all());
-        return response()->json($youtubeCredential, 201);
+        return redirect()->route('youtube-credentials.index');
     }
 
     /**
@@ -38,7 +41,9 @@ class YoutubeCredentialController extends Controller
      */
     public function show(YoutubeCredential $youtubeCredential)
     {
-        return response()->json($youtubeCredential);
+        return Inertia::render('dashboard/youtubeCredentials/show', [
+            'youtubeCredential' => $youtubeCredential,
+        ]);
     }
 
     /**
@@ -46,7 +51,9 @@ class YoutubeCredentialController extends Controller
      */
     public function edit(YoutubeCredential $youtubeCredential)
     {
-        //
+        return Inertia::render('dashboard/youtubeCredentials/edit', [
+            'youtubeCredential' => $youtubeCredential,
+        ]);
     }
 
     /**
@@ -55,7 +62,7 @@ class YoutubeCredentialController extends Controller
     public function update(Request $request, YoutubeCredential $youtubeCredential)
     {
         $youtubeCredential->update($request->all());
-        return response()->json($youtubeCredential);
+        return redirect()->route('youtube-credentials.show', $youtubeCredential);
     }
 
     /**
@@ -64,6 +71,6 @@ class YoutubeCredentialController extends Controller
     public function destroy(YoutubeCredential $youtubeCredential)
     {
         $youtubeCredential->delete();
-        return response()->json(null, 204);
+        return redirect()->route('youtube-credentials.index');
     }
 }
