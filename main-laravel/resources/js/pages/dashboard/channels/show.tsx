@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { ArrowLeft, Edit, ExternalLink, Eye, Users, Video } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -141,7 +141,7 @@ export default function ChannelsShow({ channel }: { channel: Channel }) {
                                 <div className="mb-4 flex items-center gap-2">
                                     <Badge
                                         variant={
-                                            channel.status === 'connected'
+                                            channel.status === 'active'
                                                 ? 'default'
                                                 : 'secondary'
                                         }
@@ -176,18 +176,15 @@ export default function ChannelsShow({ channel }: { channel: Channel }) {
                                 <CardTitle>Acciones</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-2">
-                                <Button className="w-full" variant="outline">
-                                    Sincronizar Datos del Canal
-                                </Button>
-                                <Button className="w-full" variant="outline">
-                                    Ver en YouTube
-                                </Button>
-                                <Button className="w-full" variant="outline">
-                                    Gestionar Credenciales
-                                </Button>
                                 <Button
                                     className="w-full"
                                     variant="destructive"
+                                    onClick={() =>
+                                        confirm(
+                                            '¿Estás seguro de que quieres desconectar este canal?',
+                                        ) &&
+                                        router.delete(`/channels/${channel.id}`)
+                                    }
                                 >
                                     Desconectar Canal
                                 </Button>

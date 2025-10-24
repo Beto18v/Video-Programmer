@@ -75,6 +75,6 @@ class ChannelController extends Controller
     public function destroy(Channel $channel)
     {
         $channel->delete();
-        return redirect()->route('channels.index');
+        return redirect()->route('channels.index')->with('success', 'Canal desconectado exitosamente.');
     }
 }
