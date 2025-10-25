@@ -7,14 +7,22 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { Edit, Eye, Plus, Trash2 } from 'lucide-react';
+import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Vídeos',
+        title: 'Videos',
         href: '/videos',
     },
 ];
@@ -26,6 +34,12 @@ interface Video {
     status: string;
     published_at: string | null;
     thumbnail_url: string | null;
+    view_count: number;
+    like_count: number;
+    comment_count: number;
+    channel: {
+        name: string;
+    };
 }
 
 function translateStatus(status: string): string {
@@ -41,7 +55,24 @@ function translateStatus(status: string): string {
     }
 }
 
+function formatDate(dateString: string | null): string {
+    if (!dateString) return 'No publicado';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    });
+}
+
 export default function VideosIndex({ videos = [] }: { videos?: Video[] }) {
+    const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const openModal = (video: Video) => {
+        setSelectedVideo(video);
+        setIsModalOpen(true);
+    };
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Vídeos" />
@@ -83,46 +114,184 @@ export default function VideosIndex({ videos = [] }: { videos?: Video[] }) {
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <div className="flex items-center justify-between">
-                                    <Badge
-                                        variant={
-                                            video.status === 'published'
-                                                ? 'default'
-                                                : 'secondary'
-                                        }
-                                    >
-                                        {translateStatus(video.status)}
-                                    </Badge>
-                                    <div className="flex gap-2">
-                                        <Button
-                                            asChild
-                                            size="sm"
-                                            variant="outline"
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                        <span>📺</span>
+                                        <span>{video.channel.name}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                        <span>🎬</span>
+                                        <span className="font-medium">
+                                            {video.title}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                        <span>📅</span>
+                                        <span>
+                                            {formatDate(video.published_at)}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-4 text-sm">
+                                        <div className="flex items-center gap-1">
+                                            <span>👁️</span>
+                                            <span>
+                                                {video.view_count.toLocaleString()}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <span>👍</span>
+                                            <span>
+                                                {video.like_count.toLocaleString()}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <span>💬</span>
+                                            <span>
+                                                {video.comment_count.toLocaleString()}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center justify-between pt-2">
+                                        <Badge
+                                            variant={
+                                                video.status === 'published'
+                                                    ? 'default'
+                                                    : 'secondary'
+                                            }
                                         >
-                                            <Link href={`/videos/${video.id}`}>
-                                                <Eye className="h-4 w-4" />
-                                            </Link>
-                                        </Button>
-                                        <Button
-                                            asChild
-                                            size="sm"
-                                            variant="outline"
-                                        >
-                                            <Link
-                                                href={`/videos/${video.id}/edit`}
+                                            {translateStatus(video.status)}
+                                        </Badge>
+                                        <div className="flex gap-2">
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() => openModal(video)}
                                             >
-                                                <Edit className="h-4 w-4" />
-                                            </Link>
-                                        </Button>
-                                        <Button size="sm" variant="outline">
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
+                                                <Eye className="h-4 w-4" />
+                                            </Button>
+                                            <Button
+                                                asChild
+                                                size="sm"
+                                                variant="outline"
+                                            >
+                                                <Link
+                                                    href={`/videos/${video.id}/edit`}
+                                                >
+                                                    <Edit className="h-4 w-4" />
+                                                </Link>
+                                            </Button>
+                                            <Button size="sm" variant="outline">
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </div>
                                     </div>
                                 </div>
                             </CardContent>
                         </Card>
                     ))}
                 </div>
+
+                {/* Video Detail Modal */}
+                <Dialog
+                    open={isModalOpen}
+                    onOpenChange={(open) => {
+                        setIsModalOpen(open);
+                        if (!open) setSelectedVideo(null);
+                    }}
+                >
+                    <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
+                        <DialogHeader>
+                            <DialogTitle>Detalle del Video</DialogTitle>
+                            <DialogDescription>
+                                Información completa del video seleccionado
+                            </DialogDescription>
+                        </DialogHeader>
+                        {selectedVideo && (
+                            <div className="space-y-6">
+                                {selectedVideo.thumbnail_url && (
+                                    <img
+                                        src={selectedVideo.thumbnail_url}
+                                        alt={selectedVideo.title}
+                                        className="h-64 w-full rounded-md object-cover"
+                                    />
+                                )}
+                                <div className="space-y-4">
+                                    <div>
+                                        <h3 className="text-xl font-semibold">
+                                            {selectedVideo.title}
+                                        </h3>
+                                        <p className="mt-2 text-muted-foreground">
+                                            {selectedVideo.description}
+                                        </p>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="flex items-center gap-2">
+                                            <span>📺</span>
+                                            <span className="font-medium">
+                                                Canal:
+                                            </span>
+                                            <span>
+                                                {selectedVideo.channel.name}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <span>📅</span>
+                                            <span className="font-medium">
+                                                Publicado:
+                                            </span>
+                                            <span>
+                                                {formatDate(
+                                                    selectedVideo.published_at,
+                                                )}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <span>👁️</span>
+                                            <span className="font-medium">
+                                                Vistas:
+                                            </span>
+                                            <span>
+                                                {selectedVideo.view_count.toLocaleString()}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <span>👍</span>
+                                            <span className="font-medium">
+                                                Likes:
+                                            </span>
+                                            <span>
+                                                {selectedVideo.like_count.toLocaleString()}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <span>💬</span>
+                                            <span className="font-medium">
+                                                Comentarios:
+                                            </span>
+                                            <span>
+                                                {selectedVideo.comment_count.toLocaleString()}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <Badge
+                                                variant={
+                                                    selectedVideo.status ===
+                                                    'published'
+                                                        ? 'default'
+                                                        : 'secondary'
+                                                }
+                                            >
+                                                {translateStatus(
+                                                    selectedVideo.status,
+                                                )}
+                                            </Badge>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </DialogContent>
+                </Dialog>
 
                 {videos.length === 0 && (
                     <div className="flex flex-col items-center justify-center py-12">
