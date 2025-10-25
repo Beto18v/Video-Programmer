@@ -18,8 +18,15 @@ class VideoScheduleController extends Controller
                 $query->where('user_id', auth()->id());
             })
             ->get();
+
+        $channels = auth()->user()->channels()->get()->map(function ($channel) {
+            $channel->platform = 'youtube';
+            return $channel;
+        });
+
         return Inertia::render('dashboard/videoSchedules/index', [
             'videoSchedules' => $videoSchedules,
+            'channels' => $channels,
         ]);
     }
 
