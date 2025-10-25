@@ -37,6 +37,12 @@ class YoutubeCredentialController extends Controller
     public function store(Request $request)
     {
         $youtubeCredential = YoutubeCredential::create($request->all());
+
+        // Import videos automatically when connecting a channel
+        if ($youtubeCredential->channel_id) {
+            \App\Jobs\ImportChannelVideos::dispatchSync($youtubeCredential->channel_id);
+        }
+
         return redirect()->route('youtube-credentials.index');
     }
 

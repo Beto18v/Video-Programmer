@@ -14,9 +14,16 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { Edit, Eye, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -65,7 +72,20 @@ function formatDate(dateString: string | null): string {
     });
 }
 
-export default function VideosIndex({ videos = [] }: { videos?: Video[] }) {
+interface Channel {
+    id: number;
+    name: string;
+}
+
+export default function VideosIndex({
+    videos = [],
+    channels = [],
+    filters = {},
+}: {
+    videos?: Video[];
+    channels?: Channel[];
+    filters?: { channel_id?: string };
+}) {
     const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -86,6 +106,38 @@ export default function VideosIndex({ videos = [] }: { videos?: Video[] }) {
                         </p>
                     </div>
                     <div className="flex gap-2">
+                        <Select
+                            value={
+                                filters.channel_id
+                                    ? filters.channel_id.toString()
+                                    : 'all'
+                            }
+                            onValueChange={(value) => {
+                                router.get(
+                                    '/videos',
+                                    value === 'all'
+                                        ? {}
+                                        : { channel_id: value },
+                                );
+                            }}
+                        >
+                            <SelectTrigger className="w-48">
+                                <SelectValue placeholder="Todos los canales" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">
+                                    Todos los canales
+                                </SelectItem>
+                                {channels.map((channel) => (
+                                    <SelectItem
+                                        key={channel.id}
+                                        value={channel.id.toString()}
+                                    >
+                                        {channel.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                         <Button asChild>
                             <Link href="/videos/create">
                                 <Plus className="mr-2 h-4 w-4" />

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Channel;
 use App\Models\Video;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -11,16 +12,27 @@ class VideoController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $videos = Video::with('channel')
+        $query = Video::with('channel')
             ->whereHas('channel', function ($query) {
                 $query->where('user_id', auth()->id());
-            })
-            ->orderBy('published_at', 'desc')
-            ->get();
+            });
+
+        // Filter by channel if provided
+        if ($request->has('channel_id') && $request->channel_id) {
+            $query->where('channel_id', $request->channel_id);
+        }
+
+        $videos = $query->orderBy('published_at', 'desc')->get();
+
+        // Get user's channels for filter
+        $channels = Channel::where('user_id', auth()->id())->get();
+
         return Inertia::render('dashboard/videos/index', [
             'videos' => $videos,
+            'channels' => $channels,
+            'filters' => $request->only(['channel_id']),
         ]);
     }
 
