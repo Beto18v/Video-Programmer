@@ -56,7 +56,7 @@ class GoogleSheetsAuthController extends Controller
         $credential->save();
 
         return redirect()
-            ->route('sheets.select')
+            ->route('video-schedules.index')
             ->with('success', 'Cuenta de Google Sheets conectada correctamente.');
     }
 
@@ -120,8 +120,14 @@ class GoogleSheetsAuthController extends Controller
     public function listTabs(Request $request)
     {
         $validated = $request->validate([
-            'spreadsheet_id' => 'required|string',
+            'url' => 'required|url',
         ]);
+
+        // Extract spreadsheet ID from Google Sheets URL
+        $spreadsheetId = $this->extractSpreadsheetId($validated['url']);
+        if (!$spreadsheetId) {
+            return response()->json(['error' => 'URL de Google Sheets inválida.'], 400);
+        }
 
         $user = Auth::user();
         if (!$user) {
@@ -139,7 +145,7 @@ class GoogleSheetsAuthController extends Controller
         try {
             $client = $this->buildAuthorizedClient($credential);
             $sheetsService = new Sheets($client);
-            $spreadsheet = $sheetsService->spreadsheets->get($validated['spreadsheet_id'], [
+            $spreadsheet = $sheetsService->spreadsheets->get($spreadsheetId, [
                 'fields' => 'sheets(properties(sheetId,title,index,gridProperties(rowCount,columnCount)))',
             ]);
 
@@ -148,17 +154,12 @@ class GoogleSheetsAuthController extends Controller
                 $grid = $properties->getGridProperties();
 
                 return [
-                    'sheet_id' => $properties->getSheetId(),
-                    'title' => $properties->getTitle(),
+                    'name' => $properties->getTitle(),
                     'index' => $properties->getIndex(),
-                    'row_count' => $grid ? $grid->getRowCount() : null,
-                    'column_count' => $grid ? $grid->getColumnCount() : null,
                 ];
             });
 
-            return response()->json([
-                'tabs' => $tabs,
-            ]);
+            return response()->json($tabs->toArray());
         } catch (\Throwable $th) {
             Log::error('Error listing Google Sheets tabs', ['error' => $th->getMessage()]);
 
@@ -253,5 +254,23 @@ class GoogleSheetsAuthController extends Controller
     private function escapeSheetName(string $sheetName): string
     {
         return str_replace("'", "''", $sheetName);
+    }
+
+    private function extractSpreadsheetId(string $url): ?string
+    {
+        // Match Google Sheets URL patterns
+        $patterns = [
+            '/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/',
+            '/\/d\/([a-zA-Z0-9-_]+)\/edit/',
+            '/\/d\/([a-zA-Z0-9-_]+)$/',
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $url, $matches)) {
+                return $matches[1];
+            }
+        }
+
+        return null;
     }
 }

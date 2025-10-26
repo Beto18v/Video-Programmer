@@ -75,14 +75,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('auth/google/sheets', [GoogleSheetsAuthController::class, 'redirect'])->name('auth.google.sheets');
 
     Route::prefix('sheets')->name('sheets.')->group(function () {
-        Route::get('auth/redirect', [GoogleSheetsAuthController::class, 'redirect'])->name('auth.redirect');
+        Route::get('auth/redirect', [GoogleAuthController::class, 'redirectForSheets'])->name('auth.redirect');
         Route::get('auth/callback', [GoogleSheetsAuthController::class, 'callback'])->name('auth.callback');
         Route::get('list', [GoogleSheetsAuthController::class, 'listSheets'])->name('list');
-        Route::get('tabs', [GoogleSheetsAuthController::class, 'listTabs'])->name('tabs');
         Route::get('preview', [GoogleSheetsAuthController::class, 'previewTab'])->name('preview');
         Route::get('select', [SheetController::class, 'select'])->name('select');
-        Route::get('check-credentials', [SheetController::class, 'checkCredentials'])->name('check-credentials');
-        Route::post('data', [SheetController::class, 'getSheetData'])->name('data');
     });
 });
 

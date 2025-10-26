@@ -3,8 +3,8 @@ import { Separator } from '@/components/ui/separator';
 import { Calendar, Settings, Tv, Upload } from 'lucide-react';
 import { useState } from 'react';
 import { useVideoScheduling } from '../hooks';
-import { Channel, SheetMapping } from '../types';
-import { SheetMappingModal } from './sheet-mapping';
+import { Channel, SheetColumn, SheetMapping } from '../types';
+import { SheetMappingView } from './sheet-mapping-view';
 import { UploadActions } from './upload-actions';
 import { VideoTable } from './video-table';
 
@@ -15,7 +15,11 @@ interface VideoSchedulingWorkflowProps {
 export default function VideoSchedulingWorkflow({
     channels,
 }: VideoSchedulingWorkflowProps) {
-    const [showSheetModal, setShowSheetModal] = useState(false);
+    const [sheetMappingState, setSheetMappingState] = useState<{
+        url: string;
+        data: SheetColumn[];
+        mapping: SheetMapping;
+    } | null>(null);
 
     const {
         selectedChannel,
@@ -24,9 +28,6 @@ export default function VideoSchedulingWorkflow({
         isUploading,
         isPaused,
         setSelectedChannel,
-        addVideo,
-        updateVideo,
-        removeVideo,
         setVideos,
         startUpload,
         pauseUpload,
@@ -44,7 +45,11 @@ export default function VideoSchedulingWorkflow({
     };
 
     const handleConnectSheet = () => {
-        setShowSheetModal(true);
+        setSheetMappingState({
+            url: '',
+            data: [],
+            mapping: {},
+        });
     };
 
     const handleSheetImport = (
@@ -52,7 +57,11 @@ export default function VideoSchedulingWorkflow({
         data: Record<string, unknown>[],
     ) => {
         importFromSheet(mapping, data);
-        setShowSheetModal(false);
+        setSheetMappingState(null);
+    };
+
+    const handleCancelSheetMapping = () => {
+        setSheetMappingState(null);
     };
 
     const handleStartUpload = async (
@@ -168,12 +177,21 @@ export default function VideoSchedulingWorkflow({
                             </h2>
                         </div>
 
-                        <VideoTable
-                            videos={videos}
-                            onVideosChange={handleVideosChange}
-                            onConnectSheet={handleConnectSheet}
-                            isLoading={isUploading}
-                        />
+                        {sheetMappingState ? (
+                            <SheetMappingView
+                                sheetState={sheetMappingState}
+                                onStateChange={setSheetMappingState}
+                                onConfirm={handleSheetImport}
+                                onCancel={handleCancelSheetMapping}
+                            />
+                        ) : (
+                            <VideoTable
+                                videos={videos}
+                                onVideosChange={handleVideosChange}
+                                onConnectSheet={handleConnectSheet}
+                                isLoading={isUploading}
+                            />
+                        )}
                     </div>
 
                     <Separator />
@@ -203,13 +221,7 @@ export default function VideoSchedulingWorkflow({
                 </>
             )}
 
-            {/* Sheet Mapping Modal */}
-            <SheetMappingModal
-                isOpen={showSheetModal}
-                onClose={() => setShowSheetModal(false)}
-                onConfirm={handleSheetImport}
-                isLoading={false}
-            />
+            {/* Sheet Mapping Modal - REMOVED: Now using integrated view */}
         </div>
     );
 }

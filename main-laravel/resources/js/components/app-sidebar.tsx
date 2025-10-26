@@ -42,11 +42,6 @@ const mainNavItems: NavItem[] = [
         icon: Tv,
     },
     {
-        title: 'Credenciales',
-        href: '/youtube-credentials',
-        icon: Key,
-    },
-    {
         title: 'Programaciones',
         href: '/video-schedules',
         icon: Calendar,
@@ -64,6 +59,11 @@ const footerNavItems: NavItem[] = [
         title: 'Planes',
         href: '/pricing',
         icon: Folder,
+    },
+    {
+        title: 'Credenciales',
+        href: '/youtube-credentials',
+        icon: Key,
     },
     {
         title: 'Documentación',

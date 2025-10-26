@@ -233,7 +233,7 @@ export function useVideoScheduling(): UseVideoSchedulingReturn {
                 // Map data based on the mapping
                 Object.entries(mapping).forEach(([fieldKey, columnId]) => {
                     if (columnId && fieldKey in video) {
-                        const value = row[columnId];
+                        const value = row[fieldKey];
                         if (value !== undefined && value !== null) {
                             // Type casting for different field types
                             if (

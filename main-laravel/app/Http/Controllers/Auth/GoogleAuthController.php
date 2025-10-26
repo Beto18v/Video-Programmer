@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\Channel;
 use App\Models\YoutubeCredential;
+use App\Models\SheetCredential;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
 use Google\Client;
 use Google\Service\YouTube;
@@ -23,60 +25,56 @@ class GoogleAuthController extends Controller
 
     public function redirectForSheets()
     {
+        // Marcar en sesión que estamos autenticando sheets
+        session(['auth_type' => 'sheets']);
+
         return Socialite::driver('google')
             ->scopes([
                 'https://www.googleapis.com/auth/youtube.readonly',
                 'https://www.googleapis.com/auth/youtube',
                 'https://www.googleapis.com/auth/spreadsheets.readonly'
             ])
-            ->with(['access_type' => 'offline', 'prompt' => 'consent', 'state' => 'sheets'])
+            ->with(['access_type' => 'offline', 'prompt' => 'consent'])
             ->redirect();
     }
 
     public function callback(Request $request)
     {
-        $isSheetsAuth = $request->input('state') === 'sheets';
+        $isSheetsAuth = session('auth_type') === 'sheets';
+
+        // Limpiar la sesión
+        session()->forget('auth_type');
+
+        Log::info('Google Auth Callback', [
+            'session_auth_type' => session('auth_type'),
+            'isSheetsAuth' => $isSheetsAuth,
+            'all_params' => $request->all()
+        ]);
 
         try {
             $googleUser = Socialite::driver('google')->user();
 
             if ($isSheetsAuth) {
-                // Para autenticación de sheets, buscar canal existente y actualizar credenciales
-                $existingChannel = Auth::user()->channels()->first();
-
-                if (!$existingChannel) {
-                    return redirect('/channels')->with('error', 'Necesitas tener al menos un canal de YouTube conectado antes de acceder a Google Sheets.');
+                // Para autenticación de sheets, guardar en SheetCredential
+                $sheetCredential = SheetCredential::firstOrNew(['user_id' => Auth::id()]);
+                $sheetCredential->access_token = $googleUser->token;
+                if ($googleUser->refreshToken) {
+                    $sheetCredential->refresh_token = $googleUser->refreshToken;
                 }
+                $sheetCredential->expires_at = now()->addSeconds($googleUser->expiresIn ?? 3600);
+                $sheetCredential->token_metadata = array_merge($sheetCredential->token_metadata ?? [], [
+                    'token_type' => $googleUser->tokenType,
+                    'id_token' => $googleUser->idToken,
+                    'fetched_at' => now()->toIso8601String(),
+                    'scopes' => ['https://www.googleapis.com/auth/spreadsheets.readonly', 'https://www.googleapis.com/auth/drive.metadata.readonly'],
+                ]);
+                $sheetCredential->save();
 
-                // Actualizar credenciales existentes con scope de sheets
-                if ($existingChannel->youtubeCredentials) {
-                    $existingScopes = $existingChannel->youtubeCredentials->scopes ?? [];
-                    if (!in_array('https://www.googleapis.com/auth/spreadsheets.readonly', $existingScopes)) {
-                        $existingScopes[] = 'https://www.googleapis.com/auth/spreadsheets.readonly';
-                        $existingChannel->youtubeCredentials->update([
-                            'access_token' => $googleUser->token,
-                            'refresh_token' => $googleUser->refreshToken,
-                            'expires_at' => now()->addSeconds($googleUser->expiresIn),
-                            'scopes' => $existingScopes,
-                            'last_refreshed_at' => now(),
-                        ]);
-                    }
-                } else {
-                    // Crear credenciales si no existen
-                    YoutubeCredential::create([
-                        'channel_id' => $existingChannel->id,
-                        'access_token' => $googleUser->token,
-                        'refresh_token' => $googleUser->refreshToken,
-                        'expires_at' => now()->addSeconds($googleUser->expiresIn),
-                        'scopes' => ['https://www.googleapis.com/auth/spreadsheets.readonly'],
-                        'status' => 'active',
-                        'token_metadata' => [
-                            'token_type' => $googleUser->tokenType,
-                        ],
-                    ]);
-                }
-
-                return redirect('/video-schedules')->with('success', 'Acceso a Google Sheets concedido exitosamente.');
+                // Para autenticación desde popup, devolver HTML que cierre el popup
+                return response()->view('auth.google-sheets-callback', [
+                    'message' => 'Cuenta de Google Sheets conectada correctamente.',
+                    'redirectUrl' => route('video-schedules.index')
+                ]);
             }
 
             // Lógica normal para autenticación de YouTube

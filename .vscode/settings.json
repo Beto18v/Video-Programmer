@@ -14,6 +14,17 @@
       "username": "root",
       "name": "Programador de videos",
       "password": ""
+    },
+    {
+      "ssh": "Disabled",
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 5432,
+      "askForPassword": true,
+      "driver": "PostgreSQL",
+      "name": "Video programmer",
+      "username": "postgres",
+      "database": "video_programmer"
     }
   ]
 }
