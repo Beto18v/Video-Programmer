@@ -21,11 +21,65 @@ class GoogleAuthController extends Controller
             ->redirect();
     }
 
+    public function redirectForSheets()
+    {
+        return Socialite::driver('google')
+            ->scopes([
+                'https://www.googleapis.com/auth/youtube.readonly',
+                'https://www.googleapis.com/auth/youtube',
+                'https://www.googleapis.com/auth/spreadsheets.readonly'
+            ])
+            ->with(['access_type' => 'offline', 'prompt' => 'consent', 'state' => 'sheets'])
+            ->redirect();
+    }
+
     public function callback(Request $request)
     {
+        $isSheetsAuth = $request->input('state') === 'sheets';
+
         try {
             $googleUser = Socialite::driver('google')->user();
 
+            if ($isSheetsAuth) {
+                // Para autenticación de sheets, buscar canal existente y actualizar credenciales
+                $existingChannel = Auth::user()->channels()->first();
+
+                if (!$existingChannel) {
+                    return redirect('/channels')->with('error', 'Necesitas tener al menos un canal de YouTube conectado antes de acceder a Google Sheets.');
+                }
+
+                // Actualizar credenciales existentes con scope de sheets
+                if ($existingChannel->youtubeCredentials) {
+                    $existingScopes = $existingChannel->youtubeCredentials->scopes ?? [];
+                    if (!in_array('https://www.googleapis.com/auth/spreadsheets.readonly', $existingScopes)) {
+                        $existingScopes[] = 'https://www.googleapis.com/auth/spreadsheets.readonly';
+                        $existingChannel->youtubeCredentials->update([
+                            'access_token' => $googleUser->token,
+                            'refresh_token' => $googleUser->refreshToken,
+                            'expires_at' => now()->addSeconds($googleUser->expiresIn),
+                            'scopes' => $existingScopes,
+                            'last_refreshed_at' => now(),
+                        ]);
+                    }
+                } else {
+                    // Crear credenciales si no existen
+                    YoutubeCredential::create([
+                        'channel_id' => $existingChannel->id,
+                        'access_token' => $googleUser->token,
+                        'refresh_token' => $googleUser->refreshToken,
+                        'expires_at' => now()->addSeconds($googleUser->expiresIn),
+                        'scopes' => ['https://www.googleapis.com/auth/spreadsheets.readonly'],
+                        'status' => 'active',
+                        'token_metadata' => [
+                            'token_type' => $googleUser->tokenType,
+                        ],
+                    ]);
+                }
+
+                return redirect('/video-schedules')->with('success', 'Acceso a Google Sheets concedido exitosamente.');
+            }
+
+            // Lógica normal para autenticación de YouTube
             // Crear cliente de Google API
             $client = new Client();
             $client->setAccessToken($googleUser->token);
@@ -70,12 +124,16 @@ class GoogleAuthController extends Controller
 
                     // Verificar si ya tiene credenciales, si no, crear
                     if (!$existingChannel->youtubeCredentials) {
+                        $scopes = ['https://www.googleapis.com/auth/youtube.readonly', 'https://www.googleapis.com/auth/youtube'];
+                        if ($isSheetsAuth) {
+                            $scopes[] = 'https://www.googleapis.com/auth/spreadsheets.readonly';
+                        }
                         YoutubeCredential::create([
                             'channel_id' => $existingChannel->id,
                             'access_token' => $googleUser->token,
                             'refresh_token' => $googleUser->refreshToken,
                             'expires_at' => now()->addSeconds($googleUser->expiresIn),
-                            'scopes' => ['https://www.googleapis.com/auth/youtube.readonly', 'https://www.googleapis.com/auth/youtube'],
+                            'scopes' => $scopes,
                             'status' => 'active',
                             'token_metadata' => [
                                 'token_type' => $googleUser->tokenType,
@@ -83,6 +141,10 @@ class GoogleAuthController extends Controller
                         ]);
                     } else {
                         // Actualizar credenciales
+                        $existingScopes = $existingChannel->youtubeCredentials->scopes ?? [];
+                        if ($isSheetsAuth && !in_array('https://www.googleapis.com/auth/spreadsheets.readonly', $existingScopes)) {
+                            $existingScopes[] = 'https://www.googleapis.com/auth/spreadsheets.readonly';
+                        }
                         $existingChannel->youtubeCredentials->update([
                             'access_token' => $googleUser->token,
                             'refresh_token' => $googleUser->refreshToken,
@@ -118,12 +180,16 @@ class GoogleAuthController extends Controller
             ]);
 
             // Crear las credenciales
+            $scopes = ['https://www.googleapis.com/auth/youtube.readonly', 'https://www.googleapis.com/auth/youtube'];
+            if ($isSheetsAuth) {
+                $scopes[] = 'https://www.googleapis.com/auth/spreadsheets.readonly';
+            }
             YoutubeCredential::create([
                 'channel_id' => $channel->id,
                 'access_token' => $googleUser->token,
                 'refresh_token' => $googleUser->refreshToken,
                 'expires_at' => now()->addSeconds($googleUser->expiresIn),
-                'scopes' => ['https://www.googleapis.com/auth/youtube.readonly', 'https://www.googleapis.com/auth/youtube'],
+                'scopes' => $scopes,
                 'status' => 'active',
                 'token_metadata' => [
                     'token_type' => $googleUser->tokenType,

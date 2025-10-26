@@ -75,6 +75,11 @@ class User extends Authenticatable
         return $this->hasMany(Channel::class);
     }
 
+    public function sheetCredential(): HasOne
+    {
+        return $this->hasOne(SheetCredential::class);
+    }
+
     /**
      * El plan actual del usuario
      */

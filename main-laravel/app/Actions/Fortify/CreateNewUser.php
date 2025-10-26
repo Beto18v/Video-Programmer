@@ -32,8 +32,8 @@ class CreateNewUser implements CreatesNewUsers
             'password' => $this->passwordRules(),
         ])->validate();
 
-        // Obtener rol CLIENTE por defecto
-        $clienteRole = Role::where('name', 'CLIENTE')->first();
+        // Obtener rol USER por defecto
+        $clienteRole = Role::where('name', 'USER')->first();
         // Obtener plan gratuito por defecto
         $freePlan = Plan::where('name', 'free')->first();
 

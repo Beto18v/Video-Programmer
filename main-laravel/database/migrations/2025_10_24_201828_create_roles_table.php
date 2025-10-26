@@ -21,7 +21,7 @@ return new class extends Migration
 
         // Insertar roles por defecto
         DB::table('roles')->insert([
-            ['name' => 'CLIENTE', 'description' => 'Rol de cliente'],
+            ['name' => 'USER', 'description' => 'Rol de usuario'],
             ['name' => 'ADMIN', 'description' => 'Rol de administrador'],
         ]);
     }

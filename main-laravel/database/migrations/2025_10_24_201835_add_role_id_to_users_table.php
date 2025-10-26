@@ -13,7 +13,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $clienteId = DB::table('roles')->where('name', 'CLIENTE')->value('id');
+            $clienteId = DB::table('roles')->where('name', 'USER')->value('id');
             $table->foreignId('role_id')->default($clienteId)->constrained('roles')->onDelete('cascade');
         });
     }

@@ -70,72 +70,91 @@ export default function SheetMappingModal({
         setError(null);
 
         try {
-            // Simulate API call
-            await new Promise((resolve) => setTimeout(resolve, 2000));
+            // First check if user has valid credentials
+            console.log('Checking credentials...');
+            const credentialsResponse = await fetch(
+                '/sheets/check-credentials',
+                {
+                    method: 'GET',
+                    headers: {
+                        'X-CSRF-TOKEN':
+                            document
+                                .querySelector('meta[name="csrf-token"]')
+                                ?.getAttribute('content') || '',
+                    },
+                },
+            );
 
-            // Mock data - in real implementation, this would come from Google Sheets API
-            const mockData: SheetColumn[] = [
-                {
-                    id: 'A',
-                    name: 'Título del Video',
-                    data: [
-                        'Mi primer video',
-                        'Tutorial de React',
-                        'Cómo usar TypeScript',
-                        'Introducción a Node.js',
-                    ],
-                },
-                {
-                    id: 'B',
-                    name: 'Descripción',
-                    data: [
-                        'Este es mi primer video en YouTube',
-                        'Aprende React desde cero',
-                        'Guía completa de TypeScript',
-                        'Tutorial básico de Node.js',
-                    ],
-                },
-                {
-                    id: 'C',
-                    name: 'Tags',
-                    data: [
-                        '#youtube #principiante',
-                        '#react #tutorial',
-                        '#typescript #programación',
-                        '#nodejs #backend',
-                    ],
-                },
-                {
-                    id: 'D',
-                    name: 'Fecha Publicación',
-                    data: [
-                        '2024-01-15 10:00',
-                        '2024-01-16 14:30',
-                        '2024-01-17 09:15',
-                        '2024-01-18 16:45',
-                    ],
-                },
-                {
-                    id: 'E',
-                    name: 'URL Miniatura',
-                    data: [
-                        'https://example.com/thumb1.jpg',
-                        'https://example.com/thumb2.jpg',
-                        'https://example.com/thumb3.jpg',
-                        'https://example.com/thumb4.jpg',
-                    ],
-                },
-            ];
+            console.log(
+                'Credentials response status:',
+                credentialsResponse.status,
+            );
 
-            setSheetData(mockData);
-        } catch {
+            let errorData;
+            try {
+                errorData = await credentialsResponse.json();
+                console.log('Credentials response data:', errorData);
+            } catch (parseError) {
+                console.error('Failed to parse response JSON:', parseError);
+                throw new Error(
+                    `Server error (${credentialsResponse.status}): ${credentialsResponse.statusText}`,
+                );
+            }
+
+            if (!credentialsResponse.ok) {
+                throw new Error(
+                    errorData.message ||
+                        errorData.error ||
+                        'Error al verificar credenciales',
+                );
+            }
+
+            const credentialsData = errorData;
+
+            if (!credentialsData.hasCredentials) {
+                if (credentialsData.redirectUrl) {
+                    // Redirect to authentication
+                    console.log('Redirecting to:', credentialsData.redirectUrl);
+                    window.location.href = credentialsData.redirectUrl;
+                    return;
+                }
+                throw new Error(credentialsData.message);
+            }
+
+            console.log('Credentials valid, loading sheet data...');
+            // If credentials are valid, proceed to load sheet data
+            const response = await fetch('/sheets/data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN':
+                        document
+                            .querySelector('meta[name="csrf-token"]')
+                            ?.getAttribute('content') || '',
+                },
+                body: JSON.stringify({ url: sheetUrl }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(
+                    errorData.error || 'Error al cargar los datos del Sheet',
+                );
+            }
+
+            const data = await response.json();
+            setSheetData(data);
+        } catch (err) {
+            console.error('Load sheet data error:', err);
             setError(
-                'Error al cargar los datos del Sheet. Verifica la URL y los permisos.',
+                err instanceof Error
+                    ? err.message
+                    : 'Error al cargar los datos del Sheet. Verifica la URL y los permisos.',
             );
         } finally {
             setLoadingSheet(false);
         }
-    }, []);
+    }, [sheetUrl]);
 
     const handleColumnSelect = useCallback(
         (columnId: string) => {
@@ -279,7 +298,7 @@ export default function SheetMappingModal({
                     </div>
 
                     {sheetData.length > 0 && (
-                        <div className="grid h-[500px] grid-cols-3 gap-6">
+                        <div className="flex flex-col gap-6">
                             {/* Fields to Map */}
                             <Card>
                                 <CardHeader>
@@ -288,93 +307,91 @@ export default function SheetMappingModal({
                                     </CardTitle>
                                     <CardDescription className="text-xs">
                                         Selecciona un campo y luego una columna
+                                        del sheet
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <ScrollArea className="h-[400px]">
-                                        <div className="space-y-2">
-                                            {VIDEO_FIELDS.filter(
-                                                (field) => field.key !== 'file',
-                                            ).map((field) => {
-                                                const mappedColumn =
-                                                    getMappedColumn(field.key);
-                                                const isSelected =
-                                                    selectedField === field.key;
+                                    <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                                        {VIDEO_FIELDS.filter(
+                                            (field) => field.key !== 'file',
+                                        ).map((field) => {
+                                            const mappedColumn =
+                                                getMappedColumn(field.key);
+                                            const isSelected =
+                                                selectedField === field.key;
 
-                                                return (
-                                                    <div
-                                                        key={field.key}
-                                                        className={`cursor-pointer rounded-lg border p-3 transition-colors ${
-                                                            isSelected
-                                                                ? 'border-primary bg-primary/10'
-                                                                : mappedColumn
-                                                                  ? 'border-green-500 bg-green-50'
-                                                                  : 'border-border hover:border-primary/50'
-                                                        } `}
-                                                        onClick={() =>
-                                                            handleFieldSelect(
-                                                                field.key,
-                                                            )
-                                                        }
-                                                    >
-                                                        <div className="flex items-center justify-between">
-                                                            <div>
-                                                                <div className="text-sm font-medium">
+                                            return (
+                                                <div
+                                                    key={field.key}
+                                                    className={`cursor-pointer rounded-lg border p-3 transition-colors ${
+                                                        isSelected
+                                                            ? 'border-primary bg-primary/10'
+                                                            : mappedColumn
+                                                              ? 'border-green-500 bg-green-50'
+                                                              : 'border-border hover:border-primary/50'
+                                                    } `}
+                                                    onClick={() =>
+                                                        handleFieldSelect(
+                                                            field.key,
+                                                        )
+                                                    }
+                                                >
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="min-w-0 flex-1">
+                                                            <div className="truncate text-sm font-medium">
+                                                                {field.label}
+                                                                {field.required && (
+                                                                    <span className="ml-1 text-destructive">
+                                                                        *
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                            {mappedColumn && (
+                                                                <div className="truncate text-xs text-muted-foreground">
+                                                                    →{' '}
                                                                     {
-                                                                        field.label
+                                                                        mappedColumn.name
                                                                     }
-                                                                    {field.required && (
-                                                                        <span className="ml-1 text-destructive">
-                                                                            *
-                                                                        </span>
-                                                                    )}
                                                                 </div>
-                                                                {mappedColumn && (
-                                                                    <div className="text-xs text-muted-foreground">
-                                                                        →{' '}
-                                                                        {
-                                                                            mappedColumn.name
-                                                                        }
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                            <div className="flex items-center gap-1">
-                                                                {mappedColumn && (
-                                                                    <>
-                                                                        <Check className="h-4 w-4 text-green-500" />
-                                                                        <Button
-                                                                            variant="ghost"
-                                                                            size="sm"
-                                                                            onClick={(
-                                                                                e,
-                                                                            ) => {
-                                                                                e.stopPropagation();
-                                                                                handleRemoveMapping(
-                                                                                    field.key,
-                                                                                );
-                                                                            }}
-                                                                        >
-                                                                            <X className="h-3 w-3" />
-                                                                        </Button>
-                                                                    </>
-                                                                )}
-                                                            </div>
+                                                            )}
+                                                        </div>
+                                                        <div className="ml-2 flex items-center gap-1">
+                                                            {mappedColumn && (
+                                                                <>
+                                                                    <Check className="h-4 w-4 flex-shrink-0 text-green-500" />
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="sm"
+                                                                        onClick={(
+                                                                            e,
+                                                                        ) => {
+                                                                            e.stopPropagation();
+                                                                            handleRemoveMapping(
+                                                                                field.key,
+                                                                            );
+                                                                        }}
+                                                                    >
+                                                                        <X className="h-3 w-3" />
+                                                                    </Button>
+                                                                </>
+                                                            )}
                                                         </div>
                                                     </div>
-                                                );
-                                            })}
-                                        </div>
-                                    </ScrollArea>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
                                 </CardContent>
                             </Card>
 
                             {/* Sheet Preview */}
-                            <Card className="col-span-2">
+                            <Card>
                                 <CardHeader>
                                     <CardTitle className="text-sm">
-                                        Vista Previa del Sheet
+                                        Vista Previa de tu Google Sheet
                                     </CardTitle>
                                     <CardDescription className="text-xs">
+                                        Verifica que los datos sean correctos.
                                         Haz clic en una columna para mapear
                                         {selectedField && (
                                             <Badge
@@ -394,7 +411,7 @@ export default function SheetMappingModal({
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <ScrollArea className="h-[400px]">
+                                    <ScrollArea className="h-[600px] w-full">
                                         <Table>
                                             <TableHeader>
                                                 <TableRow>
@@ -456,14 +473,10 @@ export default function SheetMappingModal({
                                             </TableHeader>
                                             <TableBody>
                                                 {Array.from({
-                                                    length: Math.min(
-                                                        5,
-                                                        Math.max(
-                                                            ...sheetData.map(
-                                                                (col) =>
-                                                                    col.data
-                                                                        .length,
-                                                            ),
+                                                    length: Math.max(
+                                                        ...sheetData.map(
+                                                            (col) =>
+                                                                col.data.length,
                                                         ),
                                                     ),
                                                 }).map((_, rowIndex) => (

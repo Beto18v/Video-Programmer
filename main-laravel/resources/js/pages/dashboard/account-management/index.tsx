@@ -266,10 +266,10 @@ export default function AccountManagementIndex({
                                                     <SelectValue placeholder="Selecciona un rol" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="admin">
+                                                    <SelectItem value="ADMIN">
                                                         Admin
                                                     </SelectItem>
-                                                    <SelectItem value="user">
+                                                    <SelectItem value="USER">
                                                         Usuario
                                                     </SelectItem>
                                                 </SelectContent>
@@ -528,14 +528,14 @@ export default function AccountManagementIndex({
                                             )}
                                         </TableCell>
                                         <TableCell>
-                                            {user.role?.name !== 'admin' &&
+                                            {user.role?.name !== 'ADMIN' &&
                                                 !user.deleted_at && (
                                                     <Button
                                                         size="sm"
                                                         variant="secondary"
                                                         onClick={() => {
                                                             router.patch(
-                                                                `/users/${user.id}/make-admin`,
+                                                                `/users/${user.id}/make-ADMIN`,
                                                                 {},
                                                                 {
                                                                     onSuccess:

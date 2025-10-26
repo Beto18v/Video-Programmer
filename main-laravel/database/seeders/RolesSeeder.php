@@ -19,8 +19,8 @@ class RolesSeeder extends Seeder
                 'description' => 'Administrador del sistema con acceso completo',
             ],
             [
-                'name' => 'CLIENTE',
-                'description' => 'Usuario cliente con acceso limitado según su plan',
+                'name' => 'USER',
+                'description' => 'Usuario con acceso limitado según su plan',
             ],
         ];
 

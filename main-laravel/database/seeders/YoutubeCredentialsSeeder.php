@@ -29,7 +29,8 @@ class YoutubeCredentialsSeeder extends Seeder
                     'scopes' => [
                         'https://www.googleapis.com/auth/youtube',
                         'https://www.googleapis.com/auth/youtube.upload',
-                        'https://www.googleapis.com/auth/youtube.readonly'
+                        'https://www.googleapis.com/auth/youtube.readonly',
+                        'https://www.googleapis.com/auth/spreadsheets.readonly'
                     ],
                     'status' => 'active',
                     'last_refreshed_at' => now()->subMinutes(rand(10, 60)),

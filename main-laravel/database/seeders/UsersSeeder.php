@@ -23,7 +23,7 @@ class UsersSeeder extends Seeder
 
         // Obtener roles existentes
         $adminRole = Role::where('name', 'ADMIN')->first();
-        $clienteRole = Role::where('name', 'CLIENTE')->first();
+        $clienteRole = Role::where('name', 'USER')->first();
 
         $users = [
             [
