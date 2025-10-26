@@ -25,7 +25,8 @@ import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import { Edit, Eye, Plus, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -75,6 +76,8 @@ function formatDate(dateString: string | null): string {
 interface Channel {
     id: number;
     name: string;
+    importing: boolean;
+    video_count: number;
 }
 
 export default function VideosIndex({
@@ -88,6 +91,27 @@ export default function VideosIndex({
 }) {
     const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    // Polling para actualizar si hay importaciones en progreso
+    useEffect(() => {
+        if (channels.some((channel) => channel.importing)) {
+            toast.loading('Cargando videos del canal, por favor espera...');
+            const interval = setInterval(() => {
+                router.reload({ only: ['channels', 'videos'] });
+            }, 5000); // Cada 5 segundos
+
+            return () => clearInterval(interval);
+        } else {
+            toast.dismiss();
+            if (
+                channels.some(
+                    (channel) => !channel.importing && channel.video_count > 0,
+                )
+            ) {
+                toast.success('Videos subidos correctamente.');
+            }
+        }
+    }, [channels]);
 
     const openModal = (video: Video) => {
         setSelectedVideo(video);

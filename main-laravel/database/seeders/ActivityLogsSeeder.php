@@ -31,7 +31,7 @@ class ActivityLogsSeeder extends Seeder
         $activityLogs = [];
 
         // Logs de conexión de canales
-        if ($adminChannel) {
+        if ($adminChannel && $adminUser) {
             $activityLogs[] = [
                 'user_id' => $adminUser->id,
                 'action' => 'channel_connected',
@@ -49,7 +49,7 @@ class ActivityLogsSeeder extends Seeder
             ];
         }
 
-        if ($proChannel) {
+        if ($proChannel && $proUser) {
             $activityLogs[] = [
                 'user_id' => $proUser->id,
                 'action' => 'channel_connected',
@@ -95,7 +95,7 @@ class ActivityLogsSeeder extends Seeder
         }
 
         // Logs de cambio de plan/suscripción
-        if ($adminSubscription) {
+        if ($adminSubscription && $adminUser) {
             $activityLogs[] = [
                 'user_id' => $adminUser->id,
                 'action' => 'plan_changed',
@@ -119,35 +119,39 @@ class ActivityLogsSeeder extends Seeder
         }
 
         // Logs de login
-        $activityLogs[] = [
-            'user_id' => $adminUser->id,
-            'action' => 'user_login',
-            'entity_type' => null,
-            'entity_id' => null,
-            'description' => 'User logged in',
-            'metadata' => [
-                'login_method' => 'email'
-            ],
-            'ip_address' => '192.168.1.100',
-            'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-            'level' => 'info',
-            'performed_at' => now()->subHours(2),
-        ];
+        if ($adminUser) {
+            $activityLogs[] = [
+                'user_id' => $adminUser->id,
+                'action' => 'user_login',
+                'entity_type' => null,
+                'entity_id' => null,
+                'description' => 'User logged in',
+                'metadata' => [
+                    'login_method' => 'email'
+                ],
+                'ip_address' => '192.168.1.100',
+                'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'level' => 'info',
+                'performed_at' => now()->subHours(2),
+            ];
+        }
 
-        $activityLogs[] = [
-            'user_id' => $proUser->id,
-            'action' => 'user_login',
-            'entity_type' => null,
-            'entity_id' => null,
-            'description' => 'User logged in',
-            'metadata' => [
-                'login_method' => 'email'
-            ],
-            'ip_address' => '10.0.0.50',
-            'user_agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-            'level' => 'info',
-            'performed_at' => now()->subHours(1),
-        ];
+        if ($proUser) {
+            $activityLogs[] = [
+                'user_id' => $proUser->id,
+                'action' => 'user_login',
+                'entity_type' => null,
+                'entity_id' => null,
+                'description' => 'User logged in',
+                'metadata' => [
+                    'login_method' => 'email'
+                ],
+                'ip_address' => '10.0.0.50',
+                'user_agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+                'level' => 'info',
+                'performed_at' => now()->subHours(1),
+            ];
+        }
 
         // Log de error de subida
         $failedVideo = Video::where('status', 'failed')->first();
@@ -170,24 +174,26 @@ class ActivityLogsSeeder extends Seeder
         }
 
         // Log de actualización de perfil
-        $activityLogs[] = [
-            'user_id' => $freeUser->id,
-            'action' => 'profile_updated',
-            'entity_type' => 'User',
-            'entity_id' => $freeUser->id,
-            'description' => 'Updated user profile',
-            'metadata' => [
-                'fields_updated' => ['first_name', 'last_name', 'timezone']
-            ],
-            'changes' => [
-                'before' => ['timezone' => 'UTC'],
-                'after' => ['timezone' => 'America/Los_Angeles']
-            ],
-            'ip_address' => '172.16.0.25',
-            'user_agent' => 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36',
-            'level' => 'info',
-            'performed_at' => now()->subDays(3),
-        ];
+        if ($freeUser) {
+            $activityLogs[] = [
+                'user_id' => $freeUser->id,
+                'action' => 'profile_updated',
+                'entity_type' => 'User',
+                'entity_id' => $freeUser->id,
+                'description' => 'Updated user profile',
+                'metadata' => [
+                    'fields_updated' => ['first_name', 'last_name', 'timezone']
+                ],
+                'changes' => [
+                    'before' => ['timezone' => 'UTC'],
+                    'after' => ['timezone' => 'America/Los_Angeles']
+                ],
+                'ip_address' => '172.16.0.25',
+                'user_agent' => 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36',
+                'level' => 'info',
+                'performed_at' => now()->subDays(3),
+            ];
+        }
 
         // Log de intento de acceso fallido (sin user_id)
         $activityLogs[] = [

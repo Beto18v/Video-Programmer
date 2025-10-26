@@ -30,11 +30,15 @@ class ImportChannelVideos implements ShouldQueue
      */
     public function handle(): void
     {
+        Log::info("Starting import for channel {$this->channelId}");
+
         $channel = Channel::find($this->channelId);
         if (!$channel) {
             Log::error("Channel {$this->channelId} not found");
             return;
         }
+
+        Log::info("Channel found: {$channel->name}");
 
         $credential = YoutubeCredential::where('channel_id', $this->channelId)->first();
         if (!$credential) {
@@ -42,11 +46,15 @@ class ImportChannelVideos implements ShouldQueue
             return;
         }
 
+        Log::info("Credentials found for channel {$this->channelId}");
+
         $this->importVideos($channel, $credential);
     }
 
     private function importVideos(Channel $channel, YoutubeCredential $credential)
     {
+        Log::info("Initializing YouTube client for channel {$channel->id}");
+
         $client = new Client();
         $client->setClientId(config('services.google.client_id'));
         $client->setClientSecret(config('services.google.client_secret'));
@@ -54,6 +62,7 @@ class ImportChannelVideos implements ShouldQueue
 
         // Refresh token if needed
         if ($client->isAccessTokenExpired() || $credential->needsRefresh()) {
+            Log::info("Refreshing token for channel {$channel->id}");
             try {
                 $client->refreshToken($credential->refresh_token);
                 $newToken = $client->getAccessToken();
@@ -72,6 +81,8 @@ class ImportChannelVideos implements ShouldQueue
 
         $youtube = new YouTube($client);
 
+        Log::info("Fetching channel details for {$channel->youtube_channel_id}");
+
         // Get channel details to find uploads playlist
         $channelResponse = $youtube->channels->listChannels('contentDetails', [
             'id' => $channel->youtube_channel_id,
@@ -83,10 +94,14 @@ class ImportChannelVideos implements ShouldQueue
         }
 
         $uploadsPlaylistId = $channelResponse->items[0]->contentDetails->relatedPlaylists->uploads;
+        Log::info("Uploads playlist ID: {$uploadsPlaylistId}");
 
         // Get playlist items
         $nextPageToken = null;
+        $videoCount = 0;
         do {
+            Log::info("Fetching playlist items page for channel {$channel->id}");
+
             $playlistResponse = $youtube->playlistItems->listPlaylistItems('snippet,contentDetails,status', [
                 'playlistId' => $uploadsPlaylistId,
                 'maxResults' => 50,
@@ -128,6 +143,7 @@ class ImportChannelVideos implements ShouldQueue
                         ]
                     );
 
+                    $videoCount++;
                     Log::info("Imported/Updated video: {$videoSnippet->title}");
                 }
             }
@@ -135,7 +151,9 @@ class ImportChannelVideos implements ShouldQueue
             $nextPageToken = $playlistResponse->nextPageToken;
         } while ($nextPageToken);
 
+        Log::info("Import completed for channel {$channel->id}. Total videos: {$videoCount}");
+
         // Update channel last_sync_at
-        $channel->update(['last_sync_at' => now()]);
+        $channel->update(['last_sync_at' => now(), 'importing' => false]);
     }
 }

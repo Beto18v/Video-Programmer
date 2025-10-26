@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\ImportChannelVideos;
 use App\Models\Channel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class ChannelController extends Controller
@@ -37,6 +39,12 @@ class ChannelController extends Controller
     public function store(Request $request)
     {
         $channel = Channel::create($request->all());
+        $channel->importing = true;
+        $channel->save();
+
+        // Despachar el job para importar videos automáticamente
+        ImportChannelVideos::dispatchSync($channel->id);
+
         return redirect()->route('channels.index');
     }
 
@@ -74,6 +82,8 @@ class ChannelController extends Controller
      */
     public function destroy(Channel $channel)
     {
+        $channel->importing = false;
+        $channel->save();
         $channel->delete();
         return redirect()->route('channels.index')->with('success', 'Canal desconectado exitosamente.');
     }

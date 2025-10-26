@@ -11,6 +11,8 @@ import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { Edit, Eye, Plus, Trash2, Tv } from 'lucide-react';
+import { useEffect } from 'react';
+import toast from 'react-hot-toast';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -37,6 +39,15 @@ export default function ChannelsIndex({
     channels?: Channel[];
     flash?: { success?: string; error?: string };
 }) {
+    useEffect(() => {
+        if (flash?.success) {
+            toast.success(flash.success);
+        }
+        if (flash?.error) {
+            toast.error(flash.error);
+        }
+    }, [flash]);
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Canales" />
@@ -56,18 +67,6 @@ export default function ChannelsIndex({
                         </a>
                     </Button>
                 </div>
-
-                {flash?.success && (
-                    <div className="mb-4 rounded border border-green-400 bg-green-100 px-4 py-3 text-green-700">
-                        {flash.success}
-                    </div>
-                )}
-
-                {flash?.error && (
-                    <div className="mb-4 rounded border border-red-400 bg-red-100 px-4 py-3 text-red-700">
-                        {flash.error}
-                    </div>
-                )}
 
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {channels.map((channel) => (

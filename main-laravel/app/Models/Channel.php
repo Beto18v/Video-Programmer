@@ -27,6 +27,7 @@ class Channel extends Model
         'connected_at',
         'last_sync_at',
         'channel_metadata',
+        'importing',
     ];
 
     protected $casts = [
@@ -36,6 +37,7 @@ class Channel extends Model
         'connected_at' => 'datetime',
         'last_sync_at' => 'datetime',
         'channel_metadata' => 'array',
+        'importing' => 'boolean',
     ];
 
     /**
