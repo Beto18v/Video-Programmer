@@ -83,7 +83,7 @@ export function SheetMappingView({
             // First check if user has valid credentials
             console.log('Checking credentials...');
             const credentialsResponse = await fetch(
-                '/api/sheets/check-credentials',
+                '/sheets/check-credentials',
                 {
                     method: 'GET',
                     headers: {
@@ -162,7 +162,7 @@ export function SheetMappingView({
 
             console.log('Credentials valid, loading sheet metadata...');
             // If credentials are valid, load sheet metadata (tabs)
-            const metadataResponse = await fetch('/api/sheets/tabs', {
+            const metadataResponse = await fetch('/sheets/tabs', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -186,7 +186,7 @@ export function SheetMappingView({
             // Load data for the selected sheet (or first sheet if none selected)
             const selectedSheet = sheetState.selectedSheet || metadata[0]?.name;
 
-            const dataResponse = await fetch('/api/sheets/data', {
+            const dataResponse = await fetch('/sheets/data', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -233,7 +233,7 @@ export function SheetMappingView({
             setError(null);
 
             try {
-                const response = await fetch('/api/sheets/data', {
+                const response = await fetch('/sheets/data', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

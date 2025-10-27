@@ -80,6 +80,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('list', [GoogleSheetsAuthController::class, 'listSheets'])->name('list');
         Route::get('preview', [GoogleSheetsAuthController::class, 'previewTab'])->name('preview');
         Route::get('select', [SheetController::class, 'select'])->name('select');
+        Route::post('tabs', [GoogleSheetsAuthController::class, 'listTabs'])->name('tabs');
+        Route::post('data', [SheetController::class, 'getSheetData'])->name('data');
+        Route::get('check-credentials', [SheetController::class, 'checkCredentials'])->name('check-credentials');
     });
 });
 
