@@ -15,6 +15,7 @@ interface FileUploadProps {
     placeholder?: string;
     maxSize?: number; // in MB
     className?: string;
+    compact?: boolean; // New prop for compact mode
 }
 
 export default function FileUpload({
@@ -27,6 +28,7 @@ export default function FileUpload({
     placeholder,
     maxSize = 500, // 500MB default for videos
     className = '',
+    compact = false,
 }: FileUploadProps) {
     const [isDragActive, setIsDragActive] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -131,47 +133,89 @@ export default function FileUpload({
 
     return (
         <div className={`space-y-2 ${className}`}>
-            <Label className="text-sm font-medium">{label}</Label>
+            {label && <Label className="text-sm font-medium">{label}</Label>}
 
             {displayFileName ? (
-                <Card className="relative">
-                    <CardContent className="p-3">
-                        <div className="flex items-center gap-3">
-                            <div className="flex-shrink-0">
-                                {isVideo ? (
-                                    <FileVideo className="h-8 w-8 text-blue-500" />
-                                ) : isImage ? (
-                                    <Image className="h-8 w-8 text-green-500" />
-                                ) : (
-                                    <Upload className="h-8 w-8 text-gray-500" />
-                                )}
-                            </div>
-                            <div className="min-w-0 flex-1">
-                                <p className="truncate text-sm font-medium">
-                                    {displayFileName}
-                                </p>
-                                {currentFile && (
-                                    <p className="text-xs text-muted-foreground">
-                                        {(
-                                            currentFile.size /
-                                            (1024 * 1024)
-                                        ).toFixed(2)}{' '}
-                                        MB
-                                    </p>
-                                )}
-                            </div>
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={handleClearFile}
-                                className="flex-shrink-0"
-                            >
-                                <X className="h-4 w-4" />
-                            </Button>
+                compact ? (
+                    <div className="flex items-center gap-2 rounded-md border bg-muted/20 p-2">
+                        <div className="flex-shrink-0">
+                            {isVideo ? (
+                                <FileVideo className="h-4 w-4 text-blue-500" />
+                            ) : isImage ? (
+                                <Image className="h-4 w-4 text-green-500" />
+                            ) : (
+                                <Upload className="h-4 w-4 text-gray-500" />
+                            )}
                         </div>
-                    </CardContent>
-                </Card>
+                        <div className="min-w-0 flex-1">
+                            <p className="truncate text-xs font-medium">
+                                {displayFileName}
+                            </p>
+                        </div>
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleClearFile}
+                            className="h-6 w-6 flex-shrink-0 p-0"
+                        >
+                            <X className="h-3 w-3" />
+                        </Button>
+                    </div>
+                ) : (
+                    <Card className="relative">
+                        <CardContent className="p-3">
+                            <div className="flex items-center gap-3">
+                                <div className="flex-shrink-0">
+                                    {isVideo ? (
+                                        <FileVideo className="h-8 w-8 text-blue-500" />
+                                    ) : isImage ? (
+                                        <Image className="h-8 w-8 text-green-500" />
+                                    ) : (
+                                        <Upload className="h-8 w-8 text-gray-500" />
+                                    )}
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                    <p className="truncate text-sm font-medium">
+                                        {displayFileName}
+                                    </p>
+                                    {currentFile && (
+                                        <p className="text-xs text-muted-foreground">
+                                            {(
+                                                currentFile.size /
+                                                (1024 * 1024)
+                                            ).toFixed(2)}{' '}
+                                            MB
+                                        </p>
+                                    )}
+                                </div>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={handleClearFile}
+                                    className="flex-shrink-0"
+                                >
+                                    <X className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )
+            ) : compact ? (
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleClick}
+                    className="h-8 w-full text-xs"
+                    onDrop={handleDrop}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                >
+                    <Upload className="mr-1 h-3 w-3" />
+                    {placeholder || 'Seleccionar'}
+                </Button>
             ) : (
                 <div
                     className={`cursor-pointer rounded-lg border-2 border-dashed p-6 text-center transition-colors duration-200 ${

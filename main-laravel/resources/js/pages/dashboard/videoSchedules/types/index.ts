@@ -23,6 +23,8 @@ export interface VideoUpload {
     status: 'pending' | 'uploading' | 'scheduled' | 'completed' | 'failed';
     progress?: number; // Upload progress percentage
     error?: string;
+    forKids?: boolean; // Whether the video is for kids
+    ageRestricted?: boolean; // Whether the video has age restrictions
 }
 
 export interface SheetColumn {

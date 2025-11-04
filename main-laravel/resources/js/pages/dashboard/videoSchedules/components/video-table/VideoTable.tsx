@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import {
     Table,
@@ -14,6 +15,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Calendar, Clock, Plus, Sheet, Trash2, Upload } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { VIDEO_FIELDS, VideoUpload } from '../../types';
+import BulkUploadModal from './BulkUploadModal';
 import FileUpload from './FileUpload';
 
 interface VideoTableProps {
@@ -32,19 +34,26 @@ export default function VideoTable({
         videoId: string;
         field: string;
     } | null>(null);
+    const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
 
     const generateVideoId = useCallback(() => {
         return Date.now().toString() + Math.random().toString(36).substr(2, 9);
     }, []);
 
     const addVideo = useCallback(() => {
+        const now = new Date();
+        const defaultTime = new Date(now);
+        defaultTime.setHours(3, 33, 0, 0); // 3:33 AM
+
         const newVideo: VideoUpload = {
             id: generateVideoId(),
             title: '',
             description: '',
             hashtags: '',
-            scheduledAt: new Date().toISOString().slice(0, 16), // Format for datetime-local input
+            scheduledAt: defaultTime.toISOString().slice(0, 16), // Format for datetime-local input
             status: 'pending',
+            forKids: false,
+            ageRestricted: false,
         };
         onVideosChange([...videos, newVideo]);
     }, [videos, onVideosChange, generateVideoId]);
@@ -60,7 +69,7 @@ export default function VideoTable({
         (
             videoId: string,
             field: keyof VideoUpload,
-            value: string | File | number,
+            value: string | File | number | boolean,
         ) => {
             onVideosChange(
                 videos.map((video) =>
@@ -106,9 +115,10 @@ export default function VideoTable({
                                 }}
                                 currentFile={video.file}
                                 currentFileName={video.fileName}
-                                placeholder="MP4, MOV, AVI..."
+                                placeholder="Seleccionar video"
                                 maxSize={2000} // 2GB for videos
                                 className="min-w-0"
+                                compact={true}
                             />
                         </div>
                     );
@@ -134,9 +144,10 @@ export default function VideoTable({
                                     }
                                 }}
                                 currentFile={video.thumbnail}
-                                placeholder="JPG, PNG..."
+                                placeholder="Imagen"
                                 maxSize={10} // 10MB for images
                                 className="min-w-0"
+                                compact={true}
                             />
                         </div>
                     );
@@ -285,6 +296,27 @@ export default function VideoTable({
         );
     }, []);
 
+    const handleBulkUpload = useCallback(
+        async (fileMappings: { videoId: string; file: File }[]) => {
+            const updatedVideos = videos.map((video) => {
+                const mapping = fileMappings.find(
+                    (m) => m.videoId === video.id,
+                );
+                if (mapping) {
+                    return {
+                        ...video,
+                        file: mapping.file,
+                        fileName: mapping.file.name,
+                    };
+                }
+                return video;
+            });
+
+            onVideosChange(updatedVideos);
+        },
+        [videos, onVideosChange],
+    );
+
     if (videos.length === 0) {
         return (
             <Card>
@@ -345,6 +377,14 @@ export default function VideoTable({
                             Conectar con Sheet
                         </Button>
                         <Button
+                            onClick={() => setIsBulkUploadOpen(true)}
+                            variant="outline"
+                            className="flex items-center gap-2"
+                        >
+                            <Upload className="h-4 w-4" />
+                            Subida Masiva
+                        </Button>
+                        <Button
                             onClick={addVideo}
                             className="flex items-center gap-2"
                         >
@@ -355,7 +395,7 @@ export default function VideoTable({
                 </div>
             </CardHeader>
             <CardContent>
-                <div className="overflow-x-auto">
+                <div className="max-h-[600px] overflow-auto">
                     <Table>
                         <TableHeader>
                             <TableRow>
@@ -373,7 +413,15 @@ export default function VideoTable({
                                     </TableHead>
                                 ))}
                                 <TableHead>Estado</TableHead>
-                                <TableHead className="w-20">Acciones</TableHead>
+                                <TableHead className="w-32 text-center">
+                                    Para niños
+                                </TableHead>
+                                <TableHead className="w-40 text-center">
+                                    Restricción de edad
+                                </TableHead>
+                                <TableHead className="w-20 text-center">
+                                    Acciones
+                                </TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -388,7 +436,7 @@ export default function VideoTable({
                                         </TableCell>
                                     ))}
                                     <TableCell className="p-1">
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex items-center justify-center gap-2">
                                             {getStatusBadge(video.status)}
                                             {video.progress && (
                                                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -398,13 +446,40 @@ export default function VideoTable({
                                             )}
                                         </div>
                                     </TableCell>
-                                    <TableCell className="p-1">
+                                    <TableCell className="p-1 text-center">
+                                        <Checkbox
+                                            checked={video.forKids || false}
+                                            onCheckedChange={(checked) =>
+                                                updateVideo(
+                                                    video.id,
+                                                    'forKids',
+                                                    checked as boolean,
+                                                )
+                                            }
+                                        />
+                                    </TableCell>
+                                    <TableCell className="p-1 text-center">
+                                        <Checkbox
+                                            checked={
+                                                video.ageRestricted || false
+                                            }
+                                            onCheckedChange={(checked) =>
+                                                updateVideo(
+                                                    video.id,
+                                                    'ageRestricted',
+                                                    checked as boolean,
+                                                )
+                                            }
+                                        />
+                                    </TableCell>
+                                    <TableCell className="p-1 text-center">
                                         <Button
                                             variant="ghost"
                                             size="sm"
-                                            onClick={() =>
-                                                removeVideo(video.id)
-                                            }
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                removeVideo(video.id);
+                                            }}
                                             className="text-destructive hover:text-destructive"
                                         >
                                             <Trash2 className="h-4 w-4" />
@@ -416,6 +491,13 @@ export default function VideoTable({
                     </Table>
                 </div>
             </CardContent>
+
+            <BulkUploadModal
+                isOpen={isBulkUploadOpen}
+                onClose={() => setIsBulkUploadOpen(false)}
+                videos={videos}
+                onBulkUpload={handleBulkUpload}
+            />
         </Card>
     );
 }
