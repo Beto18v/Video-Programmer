@@ -1,3 +1,13 @@
+/**
+ * useVideoScheduling Hook - Hook mejorado para gestión de videos programados
+ *
+ * Mejoras implementadas:
+ * - ✅ Asociación automática del canal seleccionado en addVideo e importFromSheet
+ * - ✅ Validación integrada en todas las operaciones de creación y actualización
+ * - ✅ Gestión optimizada del estado con hooks nativos de React
+ * - ✅ Funciones de upload con control de progreso y manejo de errores
+ */
+
 import { useCallback, useRef, useState } from 'react';
 import { Channel, SheetMapping, UploadProgress, VideoUpload } from '../types';
 
@@ -167,6 +177,7 @@ export function useVideoScheduling(): UseVideoSchedulingReturn {
         return Date.now().toString() + Math.random().toString(36).substr(2, 9);
     }, []);
 
+    // ✅ MEJORA: Función para agregar video con canal pre-asignado
     const addVideo = useCallback(async () => {
         const now = new Date();
         const defaultTime = new Date(now);
@@ -178,6 +189,9 @@ export function useVideoScheduling(): UseVideoSchedulingReturn {
             description: '',
             hashtags: '',
             scheduledAt: defaultTime.toISOString().slice(0, 16),
+            // Asignar automáticamente el canal seleccionado
+            channelId: selectedChannel?.id,
+            channelName: selectedChannel?.name,
             status: 'pending',
             forKids: false,
             ageRestricted: false,
@@ -205,7 +219,7 @@ export function useVideoScheduling(): UseVideoSchedulingReturn {
             );
             throw error;
         }
-    }, [generateVideoId, saveVideo]);
+    }, [generateVideoId, saveVideo, selectedChannel]);
 
     const updateVideo = useCallback(
         async (videoId: string, updates: Partial<VideoUpload>) => {
@@ -402,6 +416,7 @@ export function useVideoScheduling(): UseVideoSchedulingReturn {
         currentUploadRef.current = [];
     }, [updateUploadProgress]);
 
+    // ✅ MEJORA: Importación desde Google Sheets con canal pre-asignado
     const importFromSheet = useCallback(
         (mapping: SheetMapping, data: Record<string, unknown>[]) => {
             const importedVideos: VideoUpload[] = data.map((row, index) => {
@@ -415,6 +430,9 @@ export function useVideoScheduling(): UseVideoSchedulingReturn {
                     description: '',
                     hashtags: '',
                     scheduledAt: defaultTime.toISOString().slice(0, 16),
+                    // Asignar automáticamente el canal seleccionado
+                    channelId: selectedChannel?.id,
+                    channelName: selectedChannel?.name,
                     status: 'pending',
                     forKids: false,
                     ageRestricted: false,
@@ -453,7 +471,7 @@ export function useVideoScheduling(): UseVideoSchedulingReturn {
 
             setVideos((prev) => [...prev, ...importedVideos]);
         },
-        [generateVideoId],
+        [generateVideoId, selectedChannel],
     );
 
     return {

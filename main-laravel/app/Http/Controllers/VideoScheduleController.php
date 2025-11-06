@@ -13,10 +13,11 @@ class VideoScheduleController extends Controller
      */
     public function index(Request $request)
     {
-        $videoSchedules = VideoSchedule::with('video')
+        $videoSchedules = VideoSchedule::with(['video.channel'])
             ->whereHas('video', function ($query) {
                 $query->where('user_id', auth()->id());
             })
+            ->orderBy('created_at', 'desc')
             ->get();
 
         // Check if this is an API request
@@ -50,11 +51,22 @@ class VideoScheduleController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate([
+            'title' => 'required|string|max:100|min:3',
+            'description' => 'nullable|string',
+            'tags' => 'nullable|array',
+            'scheduled_for' => 'required|date|after:now',
+            'made_for_kids' => 'boolean',
+            'privacy' => 'string|in:public,private,unlisted',
+            'channel_id' => 'nullable|exists:channels,id',
+        ]);
+
         // Create the video first
         $video = \App\Models\Video::create([
             'user_id' => auth()->id(),
+            'channel_id' => $request->channel_id,
             'title' => $request->title,
-            'description' => $request->description,
+            'description' => $request->description ?? '',
             'tags' => $request->tags ?? [],
             'made_for_kids' => $request->made_for_kids ?? false,
             'privacy' => ($request->privacy ?? 'public'),
@@ -105,11 +117,22 @@ class VideoScheduleController extends Controller
      */
     public function update(Request $request, VideoSchedule $videoSchedule)
     {
+        $request->validate([
+            'title' => 'required|string|max:100|min:3',
+            'description' => 'nullable|string',
+            'tags' => 'nullable|array',
+            'scheduled_for' => 'required|date|after:now',
+            'made_for_kids' => 'boolean',
+            'privacy' => 'string|in:public,private,unlisted',
+            'channel_id' => 'nullable|exists:channels,id',
+        ]);
+
         // Update the associated video
         if ($videoSchedule->video) {
             $videoSchedule->video->update([
+                'channel_id' => $request->channel_id,
                 'title' => $request->title,
-                'description' => $request->description,
+                'description' => $request->description ?? '',
                 'tags' => $request->tags ?? [],
                 'made_for_kids' => $request->made_for_kids ?? false,
                 'privacy' => ($request->privacy ?? 'public'),
@@ -150,5 +173,50 @@ class VideoScheduleController extends Controller
         }
 
         return redirect()->route('video-schedules.index');
+    }
+
+    /**
+     * Upload video file for a specific video schedule
+     */
+    public function uploadFile(Request $request, VideoSchedule $videoSchedule)
+    {
+        $request->validate([
+            'video_file' => 'required|file|mimes:mp4,avi,mov,wmv,flv,webm,mkv|max:10240000', // 10GB max
+            'thumbnail' => 'nullable|file|mimes:jpg,jpeg,png,gif|max:10240', // 10MB max
+        ]);
+
+        $uploadPath = 'videos/' . auth()->id();
+
+        if ($request->hasFile('video_file')) {
+            $videoPath = $request->file('video_file')->store($uploadPath, 'public');
+
+            if ($videoSchedule->video) {
+                $videoSchedule->video->update([
+                    'file_path' => $videoPath,
+                    'file_size' => $request->file('video_file')->getSize(),
+                    'duration' => null, // This could be extracted using FFmpeg
+                ]);
+            }
+        }
+
+        if ($request->hasFile('thumbnail')) {
+            $thumbnailPath = $request->file('thumbnail')->store($uploadPath . '/thumbnails', 'public');
+
+            if ($videoSchedule->video) {
+                $videoSchedule->video->update([
+                    'thumbnail_path' => $thumbnailPath,
+                ]);
+            }
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Files uploaded successfully',
+                'videoSchedule' => $videoSchedule->load('video')
+            ]);
+        }
+
+        return redirect()->route('video-schedules.show', $videoSchedule)
+            ->with('success', 'Archivos subidos correctamente');
     }
 }

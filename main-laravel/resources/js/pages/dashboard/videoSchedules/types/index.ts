@@ -20,11 +20,20 @@ export interface VideoUpload {
     thumbnail?: File;
     thumbnailUrl?: string;
     scheduledAt: string; // ISO date string
+    channelId?: number; // ID of the selected channel
+    channelName?: string; // Name of the selected channel for display
     status: 'pending' | 'uploading' | 'scheduled' | 'completed' | 'failed';
     progress?: number; // Upload progress percentage
     error?: string;
     forKids?: boolean; // Whether the video is for kids
     ageRestricted?: boolean; // Whether the video has age restrictions
+    // Validation errors for each field
+    validationErrors?: {
+        file?: string;
+        title?: string;
+        channel?: string;
+        scheduledAt?: string;
+    };
 }
 
 export interface SheetColumn {
@@ -55,6 +64,7 @@ export interface UploadProgress {
 export const VIDEO_FIELDS = [
     { key: 'file', label: 'Video', required: true },
     { key: 'title', label: 'Título', required: true },
+    { key: 'channel', label: 'Canal', required: true },
     { key: 'description', label: 'Descripción', required: false },
     { key: 'hashtags', label: 'Hashtags', required: false },
     { key: 'thumbnail', label: 'Miniatura', required: false },

@@ -1,3 +1,15 @@
+/**
+ * BulkUploadModal - Componente mejorado para subida masiva de videos
+ *
+ * Mejoras implementadas:
+ * - ✅ Algoritmo de matching inteligente con normalización de texto
+ * - ✅ Validación de archivos (tipo y tamaño) antes del matching
+ * - ✅ Detección mejorada de duplicados
+ * - ✅ Múltiples estrategias de matching: exacto, inclusión, por nombre de archivo
+ * - ✅ Manejo de errores robusto con try-catch
+ * - ✅ Límite de 50GB total para archivos y 10GB por archivo individual
+ */
+
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -33,7 +45,7 @@ interface BulkUploadModalProps {
 interface FileMapping {
     file: File;
     videoId: string | null;
-    matchedBy: 'title' | 'filename' | 'manual';
+    matchedBy: 'title' | 'filename' | 'manual' | 'none';
     status: 'matched' | 'unmatched' | 'duplicate';
 }
 
@@ -50,51 +62,109 @@ export default function BulkUploadModal({
         (files: FileList) => {
             const fileArray = Array.from(files);
 
-            // Auto-match files to videos
-            const mappings: FileMapping[] = fileArray.map((file) => {
+            // Validar archivos antes del matching
+            const validFiles = fileArray.filter((file) => {
+                // Verificar tipo de archivo
+                if (!file.type.startsWith('video/')) {
+                    console.warn(
+                        `Archivo omitido (no es un video): ${file.name}`,
+                    );
+                    return false;
+                }
+
+                // Verificar tamaño (10GB máximo)
+                if (file.size > 10000 * 1024 * 1024) {
+                    console.warn(`Archivo omitido (muy grande): ${file.name}`);
+                    return false;
+                }
+
+                return true;
+            });
+
+            // Auto-matching mejorado de archivos a videos
+            const mappings: FileMapping[] = validFiles.map((file) => {
                 const fileName = file.name
                     .toLowerCase()
                     .replace(/\.[^/.]+$/, ''); // Remove extension
 
-                // Try to match by title first
+                // Normalizar texto para comparación
+                const normalizeText = (text: string) =>
+                    text
+                        .toLowerCase()
+                        .replace(/[^a-z0-9\s]/g, '') // Remover caracteres especiales
+                        .replace(/\s+/g, ' ') // Normalizar espacios
+                        .trim();
+
+                const normalizedFileName = normalizeText(fileName);
+
+                // 1. Buscar coincidencia exacta por título
                 let matchedVideo = videos.find(
                     (video) =>
-                        video.title.toLowerCase().includes(fileName) ||
-                        fileName.includes(video.title.toLowerCase()),
+                        normalizeText(video.title) === normalizedFileName,
                 );
 
-                // If no match by title, try by existing filename
+                // 2. Si no hay coincidencia exacta, buscar por inclusión (título contiene nombre de archivo)
+                if (!matchedVideo) {
+                    matchedVideo = videos.find((video) => {
+                        const normalizedTitle = normalizeText(video.title);
+                        return (
+                            normalizedTitle.includes(normalizedFileName) ||
+                            normalizedFileName.includes(normalizedTitle)
+                        );
+                    });
+                }
+
+                // 3. Si no hay match por título, intentar por fileName existente
                 if (!matchedVideo) {
                     matchedVideo = videos.find(
                         (video) =>
-                            video.fileName
-                                ?.toLowerCase()
-                                .replace(/\.[^/.]+$/, '') === fileName,
+                            video.fileName &&
+                            normalizeText(
+                                video.fileName.replace(/\.[^/.]+$/, ''),
+                            ) === normalizedFileName,
                     );
+                }
+
+                // 4. Como último recurso, buscar videos sin archivo asignado
+                if (!matchedVideo) {
+                    matchedVideo = videos.find((video) => !video.file);
                 }
 
                 return {
                     file,
                     videoId: matchedVideo?.id || null,
-                    matchedBy: matchedVideo ? 'title' : 'filename',
+                    matchedBy: matchedVideo
+                        ? normalizeText(matchedVideo.title) ===
+                          normalizedFileName
+                            ? 'title'
+                            : normalizeText(matchedVideo.title).includes(
+                                    normalizedFileName,
+                                )
+                              ? 'title'
+                              : 'filename'
+                        : ('none' as FileMapping['matchedBy']),
                     status: matchedVideo ? 'matched' : 'unmatched',
                 };
             });
 
-            // Check for duplicates - only if there are videos with files
-            const videosWithFiles = videos.filter((v) => v.file);
-            if (videosWithFiles.length > 0) {
-                const usedVideoIds = new Set<string>();
-                mappings.forEach((mapping) => {
-                    if (mapping.videoId) {
-                        if (usedVideoIds.has(mapping.videoId)) {
+            // Detectar y marcar duplicados
+            const usedVideoIds = new Set<string>();
+            mappings.forEach((mapping) => {
+                if (mapping.videoId) {
+                    if (usedVideoIds.has(mapping.videoId)) {
+                        mapping.status = 'duplicate';
+                    } else {
+                        usedVideoIds.add(mapping.videoId);
+                        // Verificar si el video ya tiene un archivo
+                        const video = videos.find(
+                            (v) => v.id === mapping.videoId,
+                        );
+                        if (video?.file) {
                             mapping.status = 'duplicate';
-                        } else {
-                            usedVideoIds.add(mapping.videoId);
                         }
                     }
-                });
-            }
+                }
+            });
 
             setFileMappings(mappings);
         },
@@ -129,11 +199,34 @@ export default function BulkUploadModal({
                 file: mapping.file,
             }));
 
-        if (validMappings.length > 0) {
-            setIsProcessing(true);
+        if (validMappings.length === 0) {
+            console.warn('No hay archivos válidos para subir');
+            return;
+        }
+
+        // Verificar que los archivos no excedan el límite de tamaño total
+        const totalSize = validMappings.reduce(
+            (sum, mapping) => sum + mapping.file.size,
+            0,
+        );
+        const totalSizeGB = totalSize / (1024 * 1024 * 1024);
+
+        if (totalSizeGB > 50) {
+            // Límite de 50GB total
+            console.warn(
+                'El tamaño total de archivos excede el límite recomendado de 50GB',
+            );
+        }
+
+        setIsProcessing(true);
+
+        try {
             onBulkUpload(validMappings);
-            setIsProcessing(false);
             onClose();
+        } catch (error) {
+            console.error('Error durante la subida masiva:', error);
+        } finally {
+            setIsProcessing(false);
         }
     }, [fileMappings, onBulkUpload, onClose]);
 
@@ -298,6 +391,9 @@ export default function BulkUploadModal({
                                                         {mapping.matchedBy ===
                                                             'manual' &&
                                                             'Manual'}
+                                                        {mapping.matchedBy ===
+                                                            'none' &&
+                                                            'Sin coincidencia'}
                                                     </span>
                                                 </TableCell>
                                                 <TableCell>

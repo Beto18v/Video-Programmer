@@ -1,3 +1,15 @@
+/**
+ * VideoTable - Componente mejorado para la gestión de videos programados
+ *
+ * Mejoras implementadas:
+ * - ✅ Añadida columna Canal que muestra automáticamente el canal seleccionado
+ * - ✅ Validación completa de campos con mensajes de error visibles
+ * - ✅ Botón de subida masiva integrado en la cabecera de la columna Video
+ * - ✅ Asociación automática del canal seleccionado a nuevos videos
+ * - ✅ Soporte para archivos de video de hasta 10GB
+ * - ✅ Optimización de performance con useMemo y useCallback
+ */
+
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,9 +24,17 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
-import { Calendar, Clock, Plus, Sheet, Trash2, Upload } from 'lucide-react';
-import { useCallback, useState } from 'react';
-import { VIDEO_FIELDS, VideoUpload } from '../../types';
+import {
+    AlertCircle,
+    Calendar,
+    Clock,
+    Plus,
+    Sheet,
+    Trash2,
+    Upload,
+} from 'lucide-react';
+import { useCallback, useMemo, useState } from 'react';
+import { Channel, VIDEO_FIELDS, VideoUpload } from '../../types';
 import BulkUploadModal from './BulkUploadModal';
 import FileUpload from './FileUpload';
 
@@ -22,6 +42,7 @@ interface VideoTableProps {
     videos: VideoUpload[];
     onVideosChange: (videos: VideoUpload[]) => void;
     onConnectSheet: () => void;
+    selectedChannel?: Channel | null; // Canal seleccionado del contexto
     isLoading?: boolean;
 }
 
@@ -29,6 +50,7 @@ export default function VideoTable({
     videos,
     onVideosChange,
     onConnectSheet,
+    selectedChannel,
 }: VideoTableProps) {
     const [editingCell, setEditingCell] = useState<{
         videoId: string;
@@ -40,6 +62,51 @@ export default function VideoTable({
         return Date.now().toString() + Math.random().toString(36).substr(2, 9);
     }, []);
 
+    // Función para validar un video individual
+    const validateVideo = useCallback(
+        (video: VideoUpload): VideoUpload => {
+            const errors: VideoUpload['validationErrors'] = {};
+
+            // Validar archivo de video (requerido)
+            if (!video.file) {
+                errors.file = 'El archivo de video es obligatorio';
+            }
+
+            // Validar título (requerido, mínimo 3 caracteres, máximo 100)
+            if (!video.title || video.title.trim().length === 0) {
+                errors.title = 'El título es obligatorio';
+            } else if (video.title.trim().length < 3) {
+                errors.title = 'El título debe tener al menos 3 caracteres';
+            } else if (video.title.length > 100) {
+                errors.title = 'El título no debe exceder 100 caracteres';
+            }
+
+            // Validar canal (requerido)
+            if (!selectedChannel) {
+                errors.channel = 'Debe seleccionar un canal';
+            }
+
+            // Validar fecha de programación (requerida, no puede ser en el pasado)
+            if (!video.scheduledAt) {
+                errors.scheduledAt = 'La fecha de programación es obligatoria';
+            } else {
+                const scheduledDate = new Date(video.scheduledAt);
+                const now = new Date();
+                if (scheduledDate <= now) {
+                    errors.scheduledAt = 'La fecha debe ser futura';
+                }
+            }
+
+            return {
+                ...video,
+                validationErrors:
+                    Object.keys(errors).length > 0 ? errors : undefined,
+            };
+        },
+        [selectedChannel],
+    );
+
+    // Función para agregar un nuevo video con canal pre-asignado
     const addVideo = useCallback(() => {
         const now = new Date();
         const defaultTime = new Date(now);
@@ -51,12 +118,15 @@ export default function VideoTable({
             description: '',
             hashtags: '',
             scheduledAt: defaultTime.toISOString().slice(0, 16), // Format for datetime-local input
+            // ✅ MEJORA: Asociar automáticamente el canal seleccionado
+            channelId: selectedChannel?.id,
+            channelName: selectedChannel?.name,
             status: 'pending',
             forKids: false,
             ageRestricted: false,
         };
         onVideosChange([...videos, newVideo]);
-    }, [videos, onVideosChange, generateVideoId]);
+    }, [videos, onVideosChange, generateVideoId, selectedChannel]);
 
     const removeVideo = useCallback(
         (videoId: string) => {
@@ -65,6 +135,7 @@ export default function VideoTable({
         [videos, onVideosChange],
     );
 
+    // ✅ MEJORA: Actualización de video con validación automática
     const updateVideo = useCallback(
         (
             videoId: string,
@@ -72,16 +143,22 @@ export default function VideoTable({
             value: string | File | number | boolean,
         ) => {
             onVideosChange(
-                videos.map((video) =>
-                    video.id === videoId ? { ...video, [field]: value } : video,
-                ),
+                videos.map((video) => {
+                    if (video.id === videoId) {
+                        const updatedVideo = { ...video, [field]: value };
+                        // Validar el video después de actualizarlo
+                        return validateVideo(updatedVideo);
+                    }
+                    return video;
+                }),
             );
         },
-        [videos, onVideosChange],
+        [videos, onVideosChange, validateVideo],
     );
 
     const handleCellClick = useCallback((videoId: string, field: string) => {
-        if (!['file', 'thumbnail'].includes(field)) {
+        // Solo permitir edición para campos que no sean archivos
+        if (!['file', 'thumbnail', 'channel'].includes(field)) {
             setEditingCell({ videoId, field });
         }
     }, []);
@@ -99,7 +176,7 @@ export default function VideoTable({
             switch (field.key) {
                 case 'file':
                     return (
-                        <div className="w-48">
+                        <div className="w-48 space-y-1">
                             <FileUpload
                                 label=""
                                 accept="video/*"
@@ -116,10 +193,20 @@ export default function VideoTable({
                                 currentFile={video.file}
                                 currentFileName={video.fileName}
                                 placeholder="Seleccionar video"
-                                maxSize={2000} // 2GB for videos
-                                className="min-w-0"
+                                maxSize={10000} // 10GB for videos
+                                className={`min-w-0 ${
+                                    video.validationErrors?.file
+                                        ? 'border-destructive'
+                                        : ''
+                                }`}
                                 compact={true}
                             />
+                            {video.validationErrors?.file && (
+                                <div className="flex items-center gap-1 text-xs text-destructive">
+                                    <AlertCircle className="h-3 w-3" />
+                                    {video.validationErrors.file}
+                                </div>
+                            )}
                         </div>
                     );
 
@@ -153,31 +240,58 @@ export default function VideoTable({
                     );
 
                 case 'title':
-                    return isEditing ? (
-                        <Input
-                            value={video.title}
-                            onChange={(e) =>
-                                updateVideo(video.id, 'title', e.target.value)
-                            }
-                            onBlur={handleCellBlur}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter' || e.key === 'Escape') {
-                                    handleCellBlur();
-                                }
-                            }}
-                            autoFocus
-                            className="w-full min-w-[200px]"
-                            placeholder="Título del video"
-                        />
-                    ) : (
-                        <div
-                            className="min-h-[40px] min-w-[200px] cursor-text rounded p-2 hover:bg-muted/50"
-                            onClick={() => handleCellClick(video.id, field.key)}
-                        >
-                            {video.title || (
-                                <span className="text-muted-foreground italic">
-                                    Haz clic para agregar título
-                                </span>
+                    return (
+                        <div className="space-y-1">
+                            {isEditing ? (
+                                <Input
+                                    value={video.title}
+                                    onChange={(e) =>
+                                        updateVideo(
+                                            video.id,
+                                            'title',
+                                            e.target.value,
+                                        )
+                                    }
+                                    onBlur={handleCellBlur}
+                                    onKeyDown={(e) => {
+                                        if (
+                                            e.key === 'Enter' ||
+                                            e.key === 'Escape'
+                                        ) {
+                                            handleCellBlur();
+                                        }
+                                    }}
+                                    autoFocus
+                                    className={`w-full min-w-[200px] ${
+                                        video.validationErrors?.title
+                                            ? 'border-destructive'
+                                            : ''
+                                    }`}
+                                    placeholder="Título del video"
+                                />
+                            ) : (
+                                <div
+                                    className={`min-h-[40px] min-w-[200px] cursor-text rounded p-2 hover:bg-muted/50 ${
+                                        video.validationErrors?.title
+                                            ? 'border border-destructive'
+                                            : ''
+                                    }`}
+                                    onClick={() =>
+                                        handleCellClick(video.id, field.key)
+                                    }
+                                >
+                                    {video.title || (
+                                        <span className="text-muted-foreground italic">
+                                            Haz clic para agregar título
+                                        </span>
+                                    )}
+                                </div>
+                            )}
+                            {video.validationErrors?.title && (
+                                <div className="flex items-center gap-1 text-xs text-destructive">
+                                    <AlertCircle className="h-3 w-3" />
+                                    {video.validationErrors.title}
+                                </div>
                             )}
                         </div>
                     );
@@ -257,9 +371,44 @@ export default function VideoTable({
                         </div>
                     );
 
+                case 'channel':
+                    return (
+                        <div className="min-w-[150px] space-y-1">
+                            <div
+                                className={`rounded-md bg-muted/20 p-2 ${
+                                    video.validationErrors?.channel
+                                        ? 'border border-destructive'
+                                        : ''
+                                }`}
+                            >
+                                <div className="flex items-center gap-2">
+                                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10">
+                                        <span className="text-xs font-medium text-primary">
+                                            {selectedChannel?.name?.charAt(0) ||
+                                                'C'}
+                                        </span>
+                                    </div>
+                                    <span className="text-sm font-medium">
+                                        {selectedChannel?.name || 'Sin canal'}
+                                    </span>
+                                </div>
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                    {selectedChannel?.platform?.toUpperCase() ||
+                                        'N/A'}
+                                </p>
+                            </div>
+                            {video.validationErrors?.channel && (
+                                <div className="flex items-center gap-1 text-xs text-destructive">
+                                    <AlertCircle className="h-3 w-3" />
+                                    {video.validationErrors.channel}
+                                </div>
+                            )}
+                        </div>
+                    );
+
                 case 'scheduledAt':
                     return (
-                        <div className="min-w-[180px]">
+                        <div className="min-w-[180px] space-y-1">
                             <Input
                                 type="datetime-local"
                                 value={video.scheduledAt}
@@ -270,8 +419,18 @@ export default function VideoTable({
                                         e.target.value,
                                     )
                                 }
-                                className="w-full"
+                                className={`w-full ${
+                                    video.validationErrors?.scheduledAt
+                                        ? 'border-destructive'
+                                        : ''
+                                }`}
                             />
+                            {video.validationErrors?.scheduledAt && (
+                                <div className="flex items-center gap-1 text-xs text-destructive">
+                                    <AlertCircle className="h-3 w-3" />
+                                    {video.validationErrors.scheduledAt}
+                                </div>
+                            )}
                         </div>
                     );
 
@@ -279,23 +438,37 @@ export default function VideoTable({
                     return null;
             }
         },
-        [editingCell, updateVideo, handleCellClick, handleCellBlur],
+        [
+            editingCell,
+            updateVideo,
+            handleCellClick,
+            handleCellBlur,
+            selectedChannel,
+        ],
     );
 
-    const getStatusBadge = useCallback((status: VideoUpload['status']) => {
-        const variants = {
-            pending: 'secondary',
-            uploading: 'default',
-            scheduled: 'outline',
-            completed: 'default',
-            failed: 'destructive',
-        } as const;
+    // Configuración de badges optimizada con useMemo
+    const statusBadgeConfig = useMemo(
+        () => ({
+            pending: { variant: 'secondary' as const, label: 'Pendiente' },
+            uploading: { variant: 'default' as const, label: 'Subiendo' },
+            scheduled: { variant: 'outline' as const, label: 'Programado' },
+            completed: { variant: 'default' as const, label: 'Completado' },
+            failed: { variant: 'destructive' as const, label: 'Fallido' },
+        }),
+        [],
+    );
 
-        return (
-            <Badge variant={variants[status] || 'secondary'}>{status}</Badge>
-        );
-    }, []);
+    const getStatusBadge = useCallback(
+        (status: VideoUpload['status']) => {
+            const config =
+                statusBadgeConfig[status] || statusBadgeConfig.pending;
+            return <Badge variant={config.variant}>{config.label}</Badge>;
+        },
+        [statusBadgeConfig],
+    );
 
+    // ✅ MEJORA: Función de subida masiva con asociación automática de canal
     const handleBulkUpload = useCallback(
         async (fileMappings: { videoId: string; file: File }[]) => {
             const updatedVideos = videos.map((video) => {
@@ -307,6 +480,9 @@ export default function VideoTable({
                         ...video,
                         file: mapping.file,
                         fileName: mapping.file.name,
+                        // Asegurar que el canal esté asociado
+                        channelId: selectedChannel?.id || video.channelId,
+                        channelName: selectedChannel?.name || video.channelName,
                     };
                 }
                 return video;
@@ -314,7 +490,7 @@ export default function VideoTable({
 
             onVideosChange(updatedVideos);
         },
-        [videos, onVideosChange],
+        [videos, onVideosChange, selectedChannel],
     );
 
     if (videos.length === 0) {
@@ -404,12 +580,35 @@ export default function VideoTable({
                                         key={field.key}
                                         className="whitespace-nowrap"
                                     >
-                                        {field.label}
-                                        {field.required && (
-                                            <span className="ml-1 text-destructive">
-                                                *
+                                        <div className="flex items-center justify-between">
+                                            <span>
+                                                {field.label}
+                                                {field.required && (
+                                                    <span className="ml-1 text-destructive">
+                                                        *
+                                                    </span>
+                                                )}
                                             </span>
-                                        )}
+                                            {/* Botón de subida masiva para la columna Video */}
+                                            {field.key === 'file' && (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() =>
+                                                        setIsBulkUploadOpen(
+                                                            true,
+                                                        )
+                                                    }
+                                                    className="ml-2 h-6 px-2 text-xs"
+                                                    title="Subida masiva de videos"
+                                                >
+                                                    <Upload className="h-3 w-3" />
+                                                    <span className="ml-1 hidden sm:inline">
+                                                        Masiva
+                                                    </span>
+                                                </Button>
+                                            )}
+                                        </div>
                                     </TableHead>
                                 ))}
                                 <TableHead>Estado</TableHead>

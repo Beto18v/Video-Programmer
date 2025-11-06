@@ -62,6 +62,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::group(['as' => 'video-schedules.'], function () {
         Route::resource('video-schedules', VideoScheduleController::class);
+        Route::post('video-schedules/{videoSchedule}/upload', [VideoScheduleController::class, 'uploadFile'])->name('upload-file');
     });
 
     Route::group(['as' => 'youtube-credentials.'], function () {

@@ -26,7 +26,7 @@ export default function FileUpload({
     currentFile,
     currentFileName,
     placeholder,
-    maxSize = 500, // 500MB default for videos
+    maxSize = 500, // Default size in MB (videos: 10000MB/10GB, images: 10MB)
     className = '',
     compact = false,
 }: FileUploadProps) {

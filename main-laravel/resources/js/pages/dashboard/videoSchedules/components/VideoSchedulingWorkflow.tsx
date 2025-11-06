@@ -189,6 +189,7 @@ export default function VideoSchedulingWorkflow({
                                 videos={videos}
                                 onVideosChange={handleVideosChange}
                                 onConnectSheet={handleConnectSheet}
+                                selectedChannel={selectedChannel}
                                 isLoading={isUploading}
                             />
                         )}
