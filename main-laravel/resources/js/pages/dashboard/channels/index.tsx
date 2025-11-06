@@ -41,7 +41,9 @@ export default function ChannelsIndex({
     flash?: { success?: string; error?: string };
 }) {
     const [channelData, setChannelData] = useState<Channel[]>(channels);
-    const [syncingChannels, setSyncingChannels] = useState<Set<number>>(new Set());
+    const [syncingChannels, setSyncingChannels] = useState<Set<number>>(
+        new Set(),
+    );
     const [syncingAll, setSyncingAll] = useState(false);
 
     useEffect(() => {
@@ -54,14 +56,17 @@ export default function ChannelsIndex({
     }, [flash]);
 
     const syncChannel = async (channelId: number) => {
-        setSyncingChannels(prev => new Set(prev).add(channelId));
-        
+        setSyncingChannels((prev) => new Set(prev).add(channelId));
+
         try {
             const response = await fetch(`/channels/${channelId}/sync`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    'X-CSRF-TOKEN':
+                        document
+                            .querySelector('meta[name="csrf-token"]')
+                            ?.getAttribute('content') || '',
                 },
             });
 
@@ -69,10 +74,12 @@ export default function ChannelsIndex({
 
             if (data.success) {
                 // Update the channel in the local state
-                setChannelData(prev => 
-                    prev.map(channel => 
-                        channel.id === channelId ? { ...channel, ...data.channel } : channel
-                    )
+                setChannelData((prev) =>
+                    prev.map((channel) =>
+                        channel.id === channelId
+                            ? { ...channel, ...data.channel }
+                            : channel,
+                    ),
                 );
                 toast.success(data.message);
             } else {
@@ -81,7 +88,7 @@ export default function ChannelsIndex({
         } catch {
             toast.error('Error al sincronizar el canal');
         } finally {
-            setSyncingChannels(prev => {
+            setSyncingChannels((prev) => {
                 const newSet = new Set(prev);
                 newSet.delete(channelId);
                 return newSet;
@@ -91,13 +98,16 @@ export default function ChannelsIndex({
 
     const syncAllChannels = async () => {
         setSyncingAll(true);
-        
+
         try {
             const response = await fetch('/channels/sync-all', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    'X-CSRF-TOKEN':
+                        document
+                            .querySelector('meta[name="csrf-token"]')
+                            ?.getAttribute('content') || '',
                 },
             });
 
@@ -132,13 +142,17 @@ export default function ChannelsIndex({
                         </p>
                     </div>
                     <div className="flex gap-2">
-                        <Button 
+                        <Button
                             onClick={syncAllChannels}
                             disabled={syncingAll}
                             variant="outline"
                         >
-                            <RefreshCw className={`mr-2 h-4 w-4 ${syncingAll ? 'animate-spin' : ''}`} />
-                            {syncingAll ? 'Sincronizando...' : 'Sincronizar Todo'}
+                            <RefreshCw
+                                className={`mr-2 h-4 w-4 ${syncingAll ? 'animate-spin' : ''}`}
+                            />
+                            {syncingAll
+                                ? 'Sincronizando...'
+                                : 'Sincronizar Todo'}
                         </Button>
                         <Button asChild>
                             <a href="/auth/google">
@@ -175,12 +189,16 @@ export default function ChannelsIndex({
                                     </div>
                                     <Button
                                         onClick={() => syncChannel(channel.id)}
-                                        disabled={syncingChannels.has(channel.id)}
+                                        disabled={syncingChannels.has(
+                                            channel.id,
+                                        )}
                                         size="sm"
                                         variant="ghost"
                                         className="shrink-0"
                                     >
-                                        <RefreshCw className={`h-4 w-4 ${syncingChannels.has(channel.id) ? 'animate-spin' : ''}`} />
+                                        <RefreshCw
+                                            className={`h-4 w-4 ${syncingChannels.has(channel.id) ? 'animate-spin' : ''}`}
+                                        />
                                     </Button>
                                 </div>
                             </CardHeader>
@@ -208,12 +226,14 @@ export default function ChannelsIndex({
                                         <div className="flex justify-between text-sm text-muted-foreground">
                                             <span>Última sincronización:</span>
                                             <span>
-                                                {new Date(channel.last_sync_at).toLocaleDateString('es-ES', {
+                                                {new Date(
+                                                    channel.last_sync_at,
+                                                ).toLocaleDateString('es-ES', {
                                                     day: '2-digit',
                                                     month: '2-digit',
                                                     year: 'numeric',
                                                     hour: '2-digit',
-                                                    minute: '2-digit'
+                                                    minute: '2-digit',
                                                 })}
                                             </span>
                                         </div>

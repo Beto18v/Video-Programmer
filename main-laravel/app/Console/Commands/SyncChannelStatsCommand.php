@@ -43,12 +43,12 @@ class SyncChannelStatsCommand extends Command
             // Sync all active channels
             $channels = Channel::where('status', 'active')->get();
             $this->info("Syncing stats for {$channels->count()} active channels...");
-            
+
             foreach ($channels as $channel) {
                 $this->line("Syncing channel: {$channel->name}");
                 SyncChannelStats::dispatch($channel->id);
             }
-            
+
             $this->info('All channel stats sync jobs dispatched.');
         }
 

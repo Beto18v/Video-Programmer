@@ -103,10 +103,10 @@ class ChannelController extends Controller
         try {
             // Dispatch the sync job synchronously to get immediate results
             SyncChannelStats::dispatchSync($channel->id);
-            
+
             // Reload the channel to get updated data
             $channel->refresh();
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Estadísticas del canal actualizadas exitosamente',
@@ -114,7 +114,7 @@ class ChannelController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error("Error syncing channel {$channel->id}: " . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Error al actualizar las estadísticas del canal'
@@ -131,11 +131,11 @@ class ChannelController extends Controller
             $channels = Channel::where('user_id', auth()->id())
                 ->where('status', 'active')
                 ->get();
-            
+
             foreach ($channels as $channel) {
                 SyncChannelStats::dispatch($channel->id);
             }
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Sincronización iniciada para todos los canales',
@@ -143,7 +143,7 @@ class ChannelController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error("Error syncing all channels: " . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Error al sincronizar los canales'
