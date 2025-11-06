@@ -132,7 +132,24 @@ export function useVideoUpload({
             formData.append('title', video.title);
             formData.append('description', video.description || '');
             formData.append('hashtags', video.hashtags || '');
-            formData.append('scheduled_at', video.scheduledAt);
+
+            // Convert datetime-local to proper ISO string with timezone
+            // datetime-local gives us YYYY-MM-DDTHH:mm format (user's local time)
+            // We need to convert it to ISO string that Laravel can properly parse
+            const localDateTime = new Date(video.scheduledAt);
+            const isoDateTime = localDateTime.toISOString(); // This converts to UTC
+
+            // Debug info for timezone handling
+            console.log('Timezone conversion debug:', {
+                input: video.scheduledAt,
+                localDateTime: localDateTime.toString(),
+                isoDateTime: isoDateTime,
+                userTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                localTimezoneOffset: localDateTime.getTimezoneOffset(),
+            });
+
+            formData.append('scheduled_at', isoDateTime);
+
             formData.append('for_kids', video.forKids ? '1' : '0');
             formData.append('age_restricted', video.ageRestricted ? '1' : '0');
             formData.append('video_file', video.file);

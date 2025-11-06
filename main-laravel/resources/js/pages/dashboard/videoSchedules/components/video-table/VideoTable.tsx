@@ -62,6 +62,16 @@ export default function VideoTable({
         return Date.now().toString() + Math.random().toString(36).substr(2, 9);
     }, []);
 
+    // Obtener zona horaria del usuario una sola vez
+    const userTimezone = useMemo(() => {
+        return Intl.DateTimeFormat().resolvedOptions().timeZone;
+    }, []);
+
+    const timezoneDisplayName = useMemo(() => {
+        const parts = userTimezone.split('/');
+        return parts[parts.length - 1]; // Última parte (ej: "Mexico_City" de "America/Mexico_City")
+    }, [userTimezone]);
+
     // Función para validar un video individual
     const validateVideo = useCallback(
         (video: VideoUpload): VideoUpload => {
@@ -501,7 +511,7 @@ export default function VideoTable({
                         </div>
                     );
 
-                case 'scheduledAt':
+                case 'scheduledAt': {
                     return (
                         <div className="min-w-[180px] space-y-1">
                             <Input
@@ -519,7 +529,11 @@ export default function VideoTable({
                                         ? 'border-destructive'
                                         : ''
                                 }`}
+                                title={`Hora en tu zona horaria: ${userTimezone}`}
                             />
+                            <div className="text-xs text-muted-foreground">
+                                Formato 24h - Zona: {timezoneDisplayName}
+                            </div>
                             {video.validationErrors?.scheduledAt && (
                                 <div className="flex items-center gap-1 text-xs text-destructive">
                                     <AlertCircle className="h-3 w-3" />
@@ -528,6 +542,7 @@ export default function VideoTable({
                             )}
                         </div>
                     );
+                }
 
                 default:
                     return null;
@@ -542,6 +557,8 @@ export default function VideoTable({
             onVideosChange,
             validateVideo,
             videos,
+            userTimezone,
+            timezoneDisplayName,
         ],
     );
 

@@ -62,11 +62,22 @@ class YoutubeUploadService
             // If video has a scheduled_for date, set it as private initially and schedule for later
             if ($video->scheduled_for && $video->scheduled_for > now()) {
                 $status->setPrivacyStatus('private');
-                $status->setPublishAt($video->scheduled_for->format('Y-m-d\TH:i:s.000\Z'));
+
+                // Convert to UTC for YouTube API (YouTube expects UTC in ISO 8601 format)
+                $utcScheduledTime = $video->scheduled_for->utc();
+                $publishAtFormat = $utcScheduledTime->format('Y-m-d\TH:i:s.000\Z');
+
+                $status->setPublishAt($publishAtFormat);
+
                 Log::info('Video scheduled for YouTube publication', [
                     'video_id' => $video->id,
-                    'scheduled_for' => $video->scheduled_for->format('Y-m-d H:i:s'),
-                    'publish_at' => $video->scheduled_for->format('Y-m-d\TH:i:s.000\Z')
+                    'original_scheduled_for' => $video->scheduled_for->format('Y-m-d H:i:s T'),
+                    'utc_scheduled_for' => $utcScheduledTime->format('Y-m-d H:i:s T'),
+                    'youtube_publish_at' => $publishAtFormat,
+                    'timezone_info' => [
+                        'app_timezone' => config('app.timezone'),
+                        'php_timezone' => date_default_timezone_get(),
+                    ]
                 ]);
             } else {
                 $status->setPrivacyStatus($video->privacy ?? 'public');
