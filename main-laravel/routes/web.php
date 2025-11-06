@@ -13,6 +13,7 @@ use App\Http\Controllers\VideoScheduleController;
 use App\Http\Controllers\VideoUploadController;
 use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\YoutubeCredentialController;
+use App\Http\Controllers\YoutubeStatusController;
 use App\Http\Controllers\AccountManagementController;
 use App\Http\Controllers\SheetController;
 use App\Http\Controllers\GoogleSheetsAuthController;
@@ -84,6 +85,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard/youtube-setup', function () {
         return Inertia::render('dashboard/youtube-setup');
     })->name('youtube-setup');
+
+    // YouTube status page
+    Route::get('dashboard/youtube-status', [YoutubeStatusController::class, 'status'])->name('youtube-status');
 
     Route::group(['as' => 'activity-logs.'], function () {
         Route::resource('activity-logs', ActivityLogController::class);

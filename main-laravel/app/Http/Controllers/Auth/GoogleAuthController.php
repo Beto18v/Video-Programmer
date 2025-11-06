@@ -128,8 +128,8 @@ class GoogleAuthController extends Controller
                         }
                         YoutubeCredential::create([
                             'channel_id' => $existingChannel->id,
-                            'access_token' => $googleUser->token,
-                            'refresh_token' => $googleUser->refreshToken,
+                            'access_token' => encrypt($googleUser->token),
+                            'refresh_token' => encrypt($googleUser->refreshToken),
                             'expires_at' => now()->addSeconds($googleUser->expiresIn),
                             'scopes' => $scopes,
                             'status' => 'active',
@@ -144,10 +144,13 @@ class GoogleAuthController extends Controller
                             $existingScopes[] = 'https://www.googleapis.com/auth/spreadsheets.readonly';
                         }
                         $existingChannel->youtubeCredentials->update([
-                            'access_token' => $googleUser->token,
-                            'refresh_token' => $googleUser->refreshToken,
+                            'access_token' => encrypt($googleUser->token),
+                            'refresh_token' => encrypt($googleUser->refreshToken),
                             'expires_at' => now()->addSeconds($googleUser->expiresIn),
+                            'scopes' => $existingScopes,
                             'status' => 'active',
+                            'last_refreshed_at' => now(),
+                            'refresh_count' => $existingChannel->youtubeCredentials->refresh_count + 1,
                         ]);
                     }
 
@@ -184,8 +187,8 @@ class GoogleAuthController extends Controller
             }
             YoutubeCredential::create([
                 'channel_id' => $channel->id,
-                'access_token' => $googleUser->token,
-                'refresh_token' => $googleUser->refreshToken,
+                'access_token' => encrypt($googleUser->token),
+                'refresh_token' => encrypt($googleUser->refreshToken),
                 'expires_at' => now()->addSeconds($googleUser->expiresIn),
                 'scopes' => $scopes,
                 'status' => 'active',

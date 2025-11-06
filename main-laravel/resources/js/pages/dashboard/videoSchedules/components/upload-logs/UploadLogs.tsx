@@ -202,27 +202,86 @@ export default function UploadLogs({
                     </div>
                 )}
 
-                {/* YouTube Setup Alert */}
-                {stats.completed > 0 && (
-                    <Alert className="border-yellow-200 bg-yellow-50">
-                        <Youtube className="h-4 w-4 text-yellow-600" />
+                {/* YouTube Issues Alert - Only show when there are actual failures */}
+                {stats.failed > 0 && (
+                    <Alert className="border-red-200 bg-red-50">
+                        <AlertCircle className="h-4 w-4 text-red-600" />
+                        <AlertDescription>
+                            <div className="space-y-3">
+                                <div>
+                                    <p className="text-sm font-medium text-red-800">
+                                        ⚠️ {stats.failed} video
+                                        {stats.failed > 1 ? 's' : ''} no se{' '}
+                                        {stats.failed > 1
+                                            ? 'subieron'
+                                            : 'subió'}{' '}
+                                        a YouTube
+                                    </p>
+                                    <p className="text-sm text-red-700">
+                                        {stats.failed > 1
+                                            ? 'Algunos videos se guardaron'
+                                            : 'El video se guardó'}{' '}
+                                        localmente pero no se{' '}
+                                        {stats.failed > 1
+                                            ? 'publicaron'
+                                            : 'publicó'}{' '}
+                                        en YouTube. Esto indica que tus
+                                        credenciales de YouTube han expirado o
+                                        hay un problema de configuración.
+                                    </p>
+                                </div>
+
+                                <div className="flex flex-wrap gap-2">
+                                    <Link
+                                        href="/dashboard/youtube-status"
+                                        className="inline-flex items-center gap-1 rounded-md bg-red-100 px-3 py-1 text-sm font-medium text-red-800 hover:bg-red-200"
+                                    >
+                                        Verificar Estado de YouTube
+                                        <ExternalLink className="h-3 w-3" />
+                                    </Link>
+                                    <Link
+                                        href="/auth/google"
+                                        className="inline-flex items-center gap-1 rounded-md bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800 hover:bg-blue-200"
+                                    >
+                                        <Youtube className="h-3 w-3" />
+                                        Volver a Conectar YouTube
+                                    </Link>
+                                </div>
+
+                                <div className="border-t border-red-200 pt-2 text-xs text-red-600">
+                                    <strong>Causa común:</strong> Los tokens de
+                                    YouTube expiran automáticamente por
+                                    seguridad. Solo necesitas volver a autorizar
+                                    tu cuenta para solucionarlo.
+                                </div>
+                            </div>
+                        </AlertDescription>
+                    </Alert>
+                )}
+
+                {/* Success Alert - When videos are uploaded successfully */}
+                {stats.completed > 0 && stats.failed === 0 && (
+                    <Alert className="border-green-200 bg-green-50">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
                         <AlertDescription>
                             <div className="space-y-2">
-                                <p className="text-sm font-medium text-yellow-800">
-                                    Videos subidos localmente pero no en YouTube
+                                <p className="text-sm font-medium text-green-800">
+                                    ✅ {stats.completed} video
+                                    {stats.completed > 1 ? 's' : ''}{' '}
+                                    {stats.completed > 1 ? 'subidos' : 'subido'}{' '}
+                                    exitosamente
                                 </p>
-                                <p className="text-sm text-yellow-700">
-                                    Para que los videos aparezcan en tu canal de
-                                    YouTube, necesitas configurar las
-                                    credenciales de YouTube API.
+                                <p className="text-sm text-green-700">
+                                    {stats.completed > 1
+                                        ? 'Los videos se han subido'
+                                        : 'El video se ha subido'}{' '}
+                                    correctamente a YouTube y{' '}
+                                    {stats.completed > 1 ? 'están' : 'está'}{' '}
+                                    {stats.completed > 1
+                                        ? 'disponibles'
+                                        : 'disponible'}{' '}
+                                    según tu configuración de privacidad.
                                 </p>
-                                <Link
-                                    href="/dashboard/youtube-setup"
-                                    className="inline-flex items-center gap-1 text-sm font-medium text-yellow-800 underline hover:text-yellow-900"
-                                >
-                                    Configurar YouTube API
-                                    <ExternalLink className="h-3 w-3" />
-                                </Link>
                             </div>
                         </AlertDescription>
                     </Alert>

@@ -17,6 +17,7 @@ import {
     ExternalLink,
     Key,
     Settings,
+    Shield,
     Youtube,
 } from 'lucide-react';
 
@@ -57,6 +58,14 @@ export default function YoutubeSetup({
                         Conecta tu canal de YouTube para subir videos
                         automáticamente
                     </p>
+                    <div className="mt-4">
+                        <Button asChild variant="outline">
+                            <Link href="/dashboard/youtube-status">
+                                <Shield className="mr-2 h-4 w-4" />
+                                Verificar Estado de Credenciales
+                            </Link>
+                        </Button>
+                    </div>
                 </div>
 
                 {/* Status Alert */}

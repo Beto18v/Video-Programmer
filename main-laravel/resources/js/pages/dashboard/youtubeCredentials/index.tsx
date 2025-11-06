@@ -52,12 +52,20 @@ export default function YoutubeCredentialsIndex({
                             tus canales
                         </p>
                     </div>
-                    <Button asChild>
-                        <Link href="/youtube-credentials/create">
-                            <Plus className="mr-2 h-4 w-4" />
-                            Agregar Credenciales
-                        </Link>
-                    </Button>
+                    <div className="flex gap-2">
+                        <Button asChild variant="outline">
+                            <Link href="/dashboard/youtube-status">
+                                <Eye className="mr-2 h-4 w-4" />
+                                Ver Estado
+                            </Link>
+                        </Button>
+                        <Button asChild>
+                            <Link href="/youtube-credentials/create">
+                                <Plus className="mr-2 h-4 w-4" />
+                                Agregar Credenciales
+                            </Link>
+                        </Button>
+                    </div>
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

@@ -57,6 +57,14 @@ class Channel extends Model
     }
 
     /**
+     * Alias singular para youtubeCredentials (para compatibilidad)
+     */
+    public function youtubeCredential(): HasOne
+    {
+        return $this->youtubeCredentials();
+    }
+
+    /**
      * Los videos de este canal
      */
     public function videos(): HasMany

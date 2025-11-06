@@ -79,8 +79,12 @@ export default function VideoTable({
 
             const errors: VideoUpload['validationErrors'] = {};
 
-            // Validar archivo de video (requerido solo para videos pendientes)
-            if (!video.file && video.status === 'pending') {
+            // Verificar si tiene archivo (tanto File object como fileName para compatibilidad)
+            const hasFile = video.file || video.fileName;
+
+            // Validar archivo de video solo para videos completamente nuevos sin ningún archivo
+            if (!hasFile && video.status === 'pending') {
+                // Solo mostrar error de archivo si no hay ni File ni fileName
                 errors.file = 'El archivo de video es obligatorio';
             }
 
@@ -92,18 +96,18 @@ export default function VideoTable({
                 } else if (video.title.length > 100) {
                     errors.title = 'El título no debe exceder 100 caracteres';
                 }
-            } else if (video.file) {
+            } else if (hasFile) {
                 // Solo requerir título si ya tiene archivo
                 errors.title = 'El título es obligatorio';
             }
 
             // Validar canal (requerido solo si ya tiene archivo)
-            if (!selectedChannel && video.file) {
+            if (!selectedChannel && hasFile) {
                 errors.channel = 'Debe seleccionar un canal';
             }
 
             // Validar fecha de programación (requerida solo si ya tiene archivo)
-            if (video.file) {
+            if (hasFile) {
                 if (!video.scheduledAt) {
                     errors.scheduledAt =
                         'La fecha de programación es obligatoria';
@@ -215,33 +219,63 @@ export default function VideoTable({
                                 onFileSelect={(files) => {
                                     if (files.length > 0) {
                                         const file = files[0];
-                                        updateVideo(video.id, 'file', file);
-                                        updateVideo(
-                                            video.id,
-                                            'fileName',
-                                            file.name,
+
+                                        // Actualizar múltiples campos de una sola vez para evitar estados inconsistentes
+                                        onVideosChange(
+                                            videos.map((v) => {
+                                                if (v.id === video.id) {
+                                                    const updatedVideo = {
+                                                        ...v,
+                                                    };
+
+                                                    // Actualizar archivo
+                                                    updatedVideo.file = file;
+                                                    updatedVideo.fileName =
+                                                        file.name;
+
+                                                    // Si el video no tiene título, usar el nombre del archivo
+                                                    if (
+                                                        !v.title ||
+                                                        v.title.trim() === ''
+                                                    ) {
+                                                        const titleFromFile =
+                                                            file.name.replace(
+                                                                /\.[^/.]+$/,
+                                                                '',
+                                                            ); // Remover extensión
+                                                        updatedVideo.title =
+                                                            titleFromFile;
+                                                    }
+
+                                                    // Cambiar estado a 'pending' después de subida exitosa
+                                                    updatedVideo.status =
+                                                        'pending';
+
+                                                    // Validar el video actualizado
+                                                    return validateVideo(
+                                                        updatedVideo,
+                                                    );
+                                                }
+                                                return v;
+                                            }),
                                         );
-                                        // Si el video no tiene título, usar el nombre del archivo
-                                        if (
-                                            !video.title ||
-                                            video.title.trim() === ''
-                                        ) {
-                                            const titleFromFile =
-                                                file.name.replace(
-                                                    /\.[^/.]+$/,
-                                                    '',
-                                                ); // Remover extensión
-                                            updateVideo(
-                                                video.id,
-                                                'title',
-                                                titleFromFile,
-                                            );
-                                        }
-                                        // Cambiar estado a 'pending' después de subida exitosa
-                                        updateVideo(
-                                            video.id,
-                                            'status',
-                                            'pending',
+                                    } else {
+                                        // Si no hay archivos (se está limpiando), limpiar los campos relacionados
+                                        onVideosChange(
+                                            videos.map((v) => {
+                                                if (v.id === video.id) {
+                                                    const updatedVideo = {
+                                                        ...v,
+                                                    };
+                                                    updatedVideo.file =
+                                                        undefined;
+                                                    updatedVideo.fileName = '';
+                                                    return validateVideo(
+                                                        updatedVideo,
+                                                    );
+                                                }
+                                                return v;
+                                            }),
                                         );
                                     }
                                 }}
@@ -505,6 +539,9 @@ export default function VideoTable({
             handleCellClick,
             handleCellBlur,
             selectedChannel,
+            onVideosChange,
+            validateVideo,
+            videos,
         ],
     );
 

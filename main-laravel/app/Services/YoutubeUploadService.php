@@ -58,7 +58,20 @@ class YoutubeUploadService
 
             // Set video status
             $status = new VideoStatus();
-            $status->setPrivacyStatus($video->privacy ?? 'public');
+
+            // If video has a scheduled_for date, set it as private initially and schedule for later
+            if ($video->scheduled_for && $video->scheduled_for > now()) {
+                $status->setPrivacyStatus('private');
+                $status->setPublishAt($video->scheduled_for->format('Y-m-d\TH:i:s.000\Z'));
+                Log::info('Video scheduled for YouTube publication', [
+                    'video_id' => $video->id,
+                    'scheduled_for' => $video->scheduled_for->format('Y-m-d H:i:s'),
+                    'publish_at' => $video->scheduled_for->format('Y-m-d\TH:i:s.000\Z')
+                ]);
+            } else {
+                $status->setPrivacyStatus($video->privacy ?? 'public');
+            }
+
             $status->setMadeForKids($video->made_for_kids ?? false);
 
             // Create video object
@@ -72,56 +85,76 @@ class YoutubeUploadService
                 throw new \Exception('Video file not found: ' . $videoPath);
             }
 
-            // Set up simple upload without chunking for now
-            // This is a simplified version - for production you'd want proper chunked upload
+            // Simple upload approach - for large files, consider implementing resumable upload
+            try {
+                // Prepare video data
+                $videoData = file_get_contents($videoPath);
 
-            // Upload video data
-            $videoData = file_get_contents($videoPath);
+                // Set the request with media upload parameter
+                $optParams = [
+                    'uploadType' => 'media',
+                    'data' => $videoData
+                ];
 
-            // Create HTTP context for upload
-            $boundary = uniqid();
-            $delimiter = '-------314159265358979323846';
-            $close_delim = "\r\n--{$delimiter}--\r\n";
+                // Execute the upload request
+                $response = $this->youtube->videos->insert('status,snippet', $youtubeVideo, $optParams);
 
-            $body = '--' . $delimiter . "\r\n";
-            $body .= 'Content-Type: application/json; charset=UTF-8' . "\r\n\r\n";
-            $body .= json_encode($youtubeVideo->toSimpleObject()) . "\r\n";
-            $body .= '--' . $delimiter . "\r\n";
-            $body .= 'Content-Type: video/*' . "\r\n";
-            $body .= 'Content-Transfer-Encoding: binary' . "\r\n\r\n";
-            $body .= $videoData;
-            $body .= $close_delim;
+                if ($response && isset($response['id'])) {
+                    $youtubeVideoId = $response['id'];
 
-            // For now, let's simulate the upload and mark as successful
-            // In production, you would make the actual HTTP request here
+                    Log::info('Video successfully uploaded to YouTube', [
+                        'video_id' => $video->id,
+                        'youtube_video_id' => $youtubeVideoId,
+                        'title' => $video->title,
+                        'file_size' => filesize($videoPath),
+                        'scheduled_for' => $video->scheduled_for ? $video->scheduled_for->format('Y-m-d H:i:s') : null,
+                    ]);
 
-            // Generate a fake YouTube video ID for testing
-            $fakeYoutubeId = 'test_' . uniqid();
+                    // Update video status based on scheduling
+                    $updateData = [
+                        'youtube_video_id' => $youtubeVideoId,
+                    ];
 
-            Log::info('Simulated YouTube upload (replace with real API call)', [
-                'video_id' => $video->id,
-                'title' => $video->title,
-                'file_size' => filesize($videoPath),
-            ]);
+                    if ($video->scheduled_for && $video->scheduled_for > now()) {
+                        // Video is scheduled for later publication
+                        $updateData['status'] = 'scheduled';
+                        $updateData['published_at'] = null; // Will be set when actually published
 
-            // Update video status as if upload was successful
-            $video->update([
-                'youtube_video_id' => $fakeYoutubeId,
-                'status' => 'published',
-                'published_at' => now(),
-            ]);
+                        Log::info('Video uploaded and scheduled for later publication', [
+                            'video_id' => $video->id,
+                            'youtube_video_id' => $youtubeVideoId,
+                            'publish_date' => $video->scheduled_for->format('Y-m-d H:i:s'),
+                        ]);
+                    } else {
+                        // Video is published immediately
+                        $updateData['status'] = 'published';
+                        $updateData['published_at'] = now();
 
-            Log::info('Video marked as uploaded (simulated)', [
-                'video_id' => $video->id,
-                'youtube_video_id' => $fakeYoutubeId,
-                'title' => $video->title,
-            ]);
+                        Log::info('Video uploaded and published immediately', [
+                            'video_id' => $video->id,
+                            'youtube_video_id' => $youtubeVideoId,
+                        ]);
+                    }
 
-            return [
-                'success' => true,
-                'youtube_video_id' => $fakeYoutubeId,
-                'message' => 'Video upload simulated successfully - implement real YouTube API integration',
-            ];
+                    // Update video status
+                    $video->update($updateData);
+
+                    return [
+                        'success' => true,
+                        'youtube_video_id' => $youtubeVideoId,
+                        'message' => 'Video uploaded successfully to YouTube',
+                    ];
+                } else {
+                    throw new \Exception('YouTube upload failed: No video ID returned from API');
+                }
+            } catch (\Google\Service\Exception $e) {
+                Log::error('YouTube API error during upload', [
+                    'video_id' => $video->id,
+                    'error' => $e->getMessage(),
+                    'errors' => $e->getErrors(),
+                ]);
+                throw new \Exception('YouTube API error: ' . $e->getMessage());
+            }
         } catch (\Exception $e) {
             Log::error('YouTube upload failed', [
                 'video_id' => $video->id,
@@ -146,12 +179,15 @@ class YoutubeUploadService
      */
     private function setupAuthentication(YoutubeCredential $credentials): void
     {
-        $this->client->setAccessToken([
+        // Set the access token data correctly
+        $tokenData = [
             'access_token' => decrypt($credentials->access_token),
             'refresh_token' => decrypt($credentials->refresh_token),
             'expires_in' => $credentials->expires_at->diffInSeconds(now()),
-            'created' => $credentials->last_refreshed_at->timestamp ?? now()->timestamp,
-        ]);
+            'created' => $credentials->last_refreshed_at ? $credentials->last_refreshed_at->timestamp : now()->timestamp,
+        ];
+
+        $this->client->setAccessToken($tokenData);
 
         // Refresh token if needed
         if ($this->client->isAccessTokenExpired()) {
