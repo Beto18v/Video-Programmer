@@ -39,6 +39,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::resource('channels', ChannelController::class);
     Route::patch('channels/{channel}/restore', [ChannelController::class, 'restore'])->name('channels.restore');
+    Route::post('channels/{channel}/sync', [ChannelController::class, 'sync'])->name('channels.sync');
+    Route::post('channels/sync-all', [ChannelController::class, 'syncAll'])->name('channels.sync-all');
 
     Route::group(['as' => 'plans.'], function () {
         Route::resource('plans', PlanController::class);

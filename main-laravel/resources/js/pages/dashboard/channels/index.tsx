@@ -9,9 +9,9 @@ import {
 } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link } from '@inertiajs/react';
-import { Edit, Eye, Plus, Trash2, Tv } from 'lucide-react';
-import { useEffect } from 'react';
+import { Head, Link, router } from '@inertiajs/react';
+import { Edit, Eye, Plus, RefreshCw, Trash2, Tv } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -30,6 +30,7 @@ interface Channel {
     video_count: number;
     view_count: number;
     avatar_url: string | null;
+    last_sync_at: string | null;
 }
 
 export default function ChannelsIndex({
@@ -39,6 +40,10 @@ export default function ChannelsIndex({
     channels?: Channel[];
     flash?: { success?: string; error?: string };
 }) {
+    const [channelData, setChannelData] = useState<Channel[]>(channels);
+    const [syncingChannels, setSyncingChannels] = useState<Set<number>>(new Set());
+    const [syncingAll, setSyncingAll] = useState(false);
+
     useEffect(() => {
         if (flash?.success) {
             toast.success(flash.success);
@@ -47,6 +52,72 @@ export default function ChannelsIndex({
             toast.error(flash.error);
         }
     }, [flash]);
+
+    const syncChannel = async (channelId: number) => {
+        setSyncingChannels(prev => new Set(prev).add(channelId));
+        
+        try {
+            const response = await fetch(`/channels/${channelId}/sync`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                },
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Update the channel in the local state
+                setChannelData(prev => 
+                    prev.map(channel => 
+                        channel.id === channelId ? { ...channel, ...data.channel } : channel
+                    )
+                );
+                toast.success(data.message);
+            } else {
+                toast.error(data.message);
+            }
+        } catch {
+            toast.error('Error al sincronizar el canal');
+        } finally {
+            setSyncingChannels(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(channelId);
+                return newSet;
+            });
+        }
+    };
+
+    const syncAllChannels = async () => {
+        setSyncingAll(true);
+        
+        try {
+            const response = await fetch('/channels/sync-all', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                },
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                toast.success(data.message);
+                // Reload the page to get fresh data after a short delay
+                setTimeout(() => {
+                    router.reload();
+                }, 2000);
+            } else {
+                toast.error(data.message);
+            }
+        } catch {
+            toast.error('Error al sincronizar los canales');
+        } finally {
+            setSyncingAll(false);
+        }
+    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -60,16 +131,26 @@ export default function ChannelsIndex({
                             Gestiona tus canales de YouTube conectados
                         </p>
                     </div>
-                    <Button asChild>
-                        <a href="/auth/google">
-                            <Plus className="mr-2 h-4 w-4" />
-                            Agregar Canal
-                        </a>
-                    </Button>
+                    <div className="flex gap-2">
+                        <Button 
+                            onClick={syncAllChannels}
+                            disabled={syncingAll}
+                            variant="outline"
+                        >
+                            <RefreshCw className={`mr-2 h-4 w-4 ${syncingAll ? 'animate-spin' : ''}`} />
+                            {syncingAll ? 'Sincronizando...' : 'Sincronizar Todo'}
+                        </Button>
+                        <Button asChild>
+                            <a href="/auth/google">
+                                <Plus className="mr-2 h-4 w-4" />
+                                Agregar Canal
+                            </a>
+                        </Button>
+                    </div>
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {channels.map((channel) => (
+                    {channelData.map((channel) => (
                         <Card key={channel.id}>
                             <CardHeader>
                                 <div className="flex items-center gap-3">
@@ -84,7 +165,7 @@ export default function ChannelsIndex({
                                             <Tv className="h-6 w-6" />
                                         </div>
                                     )}
-                                    <div>
+                                    <div className="flex-1">
                                         <CardTitle className="text-lg">
                                             {channel.name}
                                         </CardTitle>
@@ -92,6 +173,15 @@ export default function ChannelsIndex({
                                             {channel.description}
                                         </CardDescription>
                                     </div>
+                                    <Button
+                                        onClick={() => syncChannel(channel.id)}
+                                        disabled={syncingChannels.has(channel.id)}
+                                        size="sm"
+                                        variant="ghost"
+                                        className="shrink-0"
+                                    >
+                                        <RefreshCw className={`h-4 w-4 ${syncingChannels.has(channel.id) ? 'animate-spin' : ''}`} />
+                                    </Button>
                                 </div>
                             </CardHeader>
                             <CardContent>
@@ -114,6 +204,20 @@ export default function ChannelsIndex({
                                             {channel.view_count.toLocaleString()}
                                         </span>
                                     </div>
+                                    {channel.last_sync_at && (
+                                        <div className="flex justify-between text-sm text-muted-foreground">
+                                            <span>Última sincronización:</span>
+                                            <span>
+                                                {new Date(channel.last_sync_at).toLocaleDateString('es-ES', {
+                                                    day: '2-digit',
+                                                    month: '2-digit',
+                                                    year: 'numeric',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit'
+                                                })}
+                                            </span>
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="flex items-center justify-between">
@@ -159,7 +263,7 @@ export default function ChannelsIndex({
                     ))}
                 </div>
 
-                {channels.length === 0 && (
+                {channelData.length === 0 && (
                     <div className="flex flex-col items-center justify-center py-12">
                         <p className="text-muted-foreground">
                             No se encontraron canales

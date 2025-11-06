@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\ImportChannelVideos;
+use App\Jobs\SyncChannelStats;
 use App\Models\Channel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -92,5 +93,61 @@ class ChannelController extends Controller
     {
         $channel->restore();
         return redirect()->route('account-management.index')->with('success', 'Canal restaurado exitosamente.');
+    }
+
+    /**
+     * Sync channel statistics from YouTube API
+     */
+    public function sync(Channel $channel)
+    {
+        try {
+            // Dispatch the sync job synchronously to get immediate results
+            SyncChannelStats::dispatchSync($channel->id);
+            
+            // Reload the channel to get updated data
+            $channel->refresh();
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Estadísticas del canal actualizadas exitosamente',
+                'channel' => $channel
+            ]);
+        } catch (\Exception $e) {
+            Log::error("Error syncing channel {$channel->id}: " . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar las estadísticas del canal'
+            ], 500);
+        }
+    }
+
+    /**
+     * Sync all channels for the authenticated user
+     */
+    public function syncAll()
+    {
+        try {
+            $channels = Channel::where('user_id', auth()->id())
+                ->where('status', 'active')
+                ->get();
+            
+            foreach ($channels as $channel) {
+                SyncChannelStats::dispatch($channel->id);
+            }
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Sincronización iniciada para todos los canales',
+                'channels_count' => $channels->count()
+            ]);
+        } catch (\Exception $e) {
+            Log::error("Error syncing all channels: " . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al sincronizar los canales'
+            ], 500);
+        }
     }
 }

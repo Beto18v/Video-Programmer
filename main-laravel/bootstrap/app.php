@@ -4,6 +4,7 @@ use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Jobs\SyncVideoStats;
+use App\Jobs\SyncChannelStats;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -30,7 +31,8 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withSchedule(function ($schedule) {
-        $schedule->job(new SyncVideoStats)->hourly();
+        $schedule->job(new SyncVideoStats)->everyFifteenMinutes();
+        $schedule->job(new SyncChannelStats)->everyFifteenMinutes();
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
