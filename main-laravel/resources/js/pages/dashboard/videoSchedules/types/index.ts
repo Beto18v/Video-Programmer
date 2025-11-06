@@ -33,6 +33,7 @@ export interface VideoUpload {
         title?: string;
         channel?: string;
         scheduledAt?: string;
+        thumbnail?: string;
     };
 }
 

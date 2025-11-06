@@ -2,10 +2,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Calendar, Settings, Tv, Upload } from 'lucide-react';
 import { useState } from 'react';
-import { useVideoScheduling } from '../hooks';
+import { useVideoScheduling, useVideoUpload } from '../hooks';
 import { Channel, SheetColumn, SheetMapping } from '../types';
 import { SheetMappingView } from './sheet-mapping-view';
 import { UploadActions } from './upload-actions';
+import { UploadLogs } from './upload-logs';
 import { VideoTable } from './video-table';
 
 interface VideoSchedulingWorkflowProps {
@@ -24,17 +25,33 @@ export default function VideoSchedulingWorkflow({
     const {
         selectedChannel,
         videos,
-        uploadProgress,
-        isUploading,
-        isPaused,
         setSelectedChannel,
         setVideos,
+        importFromSheet,
+    } = useVideoScheduling();
+
+    const {
+        isUploading,
+        isPaused,
+        uploadProgress,
+        uploadLogs,
         startUpload,
         pauseUpload,
         resumeUpload,
         cancelUpload,
-        importFromSheet,
-    } = useVideoScheduling();
+        clearLogs,
+    } = useVideoUpload({
+        onUploadStart: () => {
+            console.log('Upload started');
+        },
+        onUploadComplete: (results) => {
+            console.log('Upload completed:', results);
+            // Refresh the page or show success message
+        },
+        onUploadError: (error) => {
+            console.error('Upload error:', error);
+        },
+    });
 
     const handleChannelSelect = (channel: Channel) => {
         setSelectedChannel(channel);
@@ -68,7 +85,17 @@ export default function VideoSchedulingWorkflow({
         videoIds: string[],
         action: 'upload' | 'schedule',
     ) => {
-        await startUpload(videoIds, action);
+        // Filter videos based on selected IDs
+        const selectedVideos = videos.filter((video) =>
+            videoIds.includes(video.id),
+        );
+
+        if (!selectedChannel) {
+            console.error('No channel selected');
+            return;
+        }
+
+        await startUpload(selectedVideos, selectedChannel, action);
     };
 
     return (
@@ -207,16 +234,25 @@ export default function VideoSchedulingWorkflow({
                                 </h2>
                             </div>
 
-                            <UploadActions
-                                videos={videos}
-                                onStartUpload={handleStartUpload}
-                                onPauseUpload={pauseUpload}
-                                onResumeUpload={resumeUpload}
-                                onCancelUpload={cancelUpload}
-                                uploadProgress={uploadProgress}
-                                isUploading={isUploading}
-                                isPaused={isPaused}
-                            />
+                            <div className="grid gap-6 lg:grid-cols-2">
+                                <UploadActions
+                                    videos={videos}
+                                    onStartUpload={handleStartUpload}
+                                    onPauseUpload={pauseUpload}
+                                    onResumeUpload={resumeUpload}
+                                    onCancelUpload={cancelUpload}
+                                    uploadProgress={uploadProgress}
+                                    isUploading={isUploading}
+                                    isPaused={isPaused}
+                                />
+
+                                <UploadLogs
+                                    logs={uploadLogs}
+                                    uploadProgress={uploadProgress}
+                                    isUploading={isUploading}
+                                    onClearLogs={clearLogs}
+                                />
+                            </div>
                         </div>
                     )}
                 </>

@@ -1,3 +1,14 @@
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -10,7 +21,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import {
     Calendar,
     Clock,
@@ -52,6 +63,14 @@ export default function VideoSchedulesIndex({
     videoSchedules?: VideoSchedule[];
     channels?: Channel[];
 }) {
+    const handleDeleteSchedule = (scheduleId: number) => {
+        router.delete(`/video-schedules/${scheduleId}`, {
+            onSuccess: () => {
+                // Optionally show success message
+            },
+        });
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Programaciones de Vídeos" />
@@ -207,9 +226,47 @@ export default function VideoSchedulesIndex({
                                                     <Edit className="h-4 w-4" />
                                                 </Link>
                                             </Button>
-                                            <Button size="sm" variant="outline">
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>
+                                                            ¿Eliminar
+                                                            programación?
+                                                        </AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            Esta acción no se
+                                                            puede deshacer. Se
+                                                            eliminará
+                                                            permanentemente la
+                                                            programación y el
+                                                            video asociado.
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>
+                                                            Cancelar
+                                                        </AlertDialogCancel>
+                                                        <AlertDialogAction
+                                                            onClick={() =>
+                                                                handleDeleteSchedule(
+                                                                    schedule.id,
+                                                                )
+                                                            }
+                                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                        >
+                                                            Eliminar
+                                                        </AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
                                         </div>
                                     </CardContent>
                                 </Card>

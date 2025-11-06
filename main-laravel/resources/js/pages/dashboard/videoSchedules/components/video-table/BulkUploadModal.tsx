@@ -96,22 +96,32 @@ export default function BulkUploadModal({
                         .trim();
 
                 const normalizedFileName = normalizeText(fileName);
+                let matchedVideo = null;
+                let matchedBy: FileMapping['matchedBy'] = 'none';
 
                 // 1. Buscar coincidencia exacta por título
-                let matchedVideo = videos.find(
+                matchedVideo = videos.find(
                     (video) =>
+                        video.title &&
                         normalizeText(video.title) === normalizedFileName,
                 );
+                if (matchedVideo) {
+                    matchedBy = 'title';
+                }
 
                 // 2. Si no hay coincidencia exacta, buscar por inclusión (título contiene nombre de archivo)
                 if (!matchedVideo) {
                     matchedVideo = videos.find((video) => {
+                        if (!video.title) return false;
                         const normalizedTitle = normalizeText(video.title);
                         return (
                             normalizedTitle.includes(normalizedFileName) ||
                             normalizedFileName.includes(normalizedTitle)
                         );
                     });
+                    if (matchedVideo) {
+                        matchedBy = 'title';
+                    }
                 }
 
                 // 3. Si no hay match por título, intentar por fileName existente
@@ -123,44 +133,46 @@ export default function BulkUploadModal({
                                 video.fileName.replace(/\.[^/.]+$/, ''),
                             ) === normalizedFileName,
                     );
-                }
-
-                // 4. Como último recurso, buscar videos sin archivo asignado
-                if (!matchedVideo) {
-                    matchedVideo = videos.find((video) => !video.file);
+                    if (matchedVideo) {
+                        matchedBy = 'filename';
+                    }
                 }
 
                 return {
                     file,
                     videoId: matchedVideo?.id || null,
-                    matchedBy: matchedVideo
-                        ? normalizeText(matchedVideo.title) ===
-                          normalizedFileName
-                            ? 'title'
-                            : normalizeText(matchedVideo.title).includes(
-                                    normalizedFileName,
-                                )
-                              ? 'title'
-                              : 'filename'
-                        : ('none' as FileMapping['matchedBy']),
+                    matchedBy,
                     status: matchedVideo ? 'matched' : 'unmatched',
                 };
             });
 
-            // Detectar y marcar duplicados
+            // Detectar y marcar duplicados MEJORADO
             const usedVideoIds = new Set<string>();
             mappings.forEach((mapping) => {
                 if (mapping.videoId) {
                     if (usedVideoIds.has(mapping.videoId)) {
+                        // Multiple files trying to match to the same video
                         mapping.status = 'duplicate';
                     } else {
                         usedVideoIds.add(mapping.videoId);
-                        // Verificar si el video ya tiene un archivo
+                        // If video already has a file, check if it's the same file
                         const video = videos.find(
                             (v) => v.id === mapping.videoId,
                         );
                         if (video?.file) {
-                            mapping.status = 'duplicate';
+                            // If it's the same file name and size, keep it matched
+                            if (
+                                video.file.name === mapping.file.name &&
+                                video.file.size === mapping.file.size
+                            ) {
+                                mapping.status = 'matched';
+                            } else {
+                                // Different file, mark as duplicate to allow user choice
+                                mapping.status = 'duplicate';
+                            }
+                        } else {
+                            // Video doesn't have a file, safe to match
+                            mapping.status = 'matched';
                         }
                     }
                 }

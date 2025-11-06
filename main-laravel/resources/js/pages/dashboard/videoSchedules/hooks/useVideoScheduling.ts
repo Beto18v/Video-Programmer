@@ -181,7 +181,8 @@ export function useVideoScheduling(): UseVideoSchedulingReturn {
     const addVideo = useCallback(async () => {
         const now = new Date();
         const defaultTime = new Date(now);
-        defaultTime.setHours(3, 33, 0, 0); // 3:33 AM
+        defaultTime.setDate(defaultTime.getDate() + 1); // Un día después
+        defaultTime.setHours(0, 0, 0, 0); // A las 00:00 (medianoche)
 
         const tempVideo: VideoUpload = {
             id: `temp_${generateVideoId()}`,
@@ -422,7 +423,8 @@ export function useVideoScheduling(): UseVideoSchedulingReturn {
             const importedVideos: VideoUpload[] = data.map((row, index) => {
                 const now = new Date();
                 const defaultTime = new Date(now);
-                defaultTime.setHours(3, 33, 0, 0); // 3:33 AM
+                defaultTime.setDate(defaultTime.getDate() + 1); // Un día después
+                defaultTime.setHours(0, 0, 0, 0); // A las 00:00 (medianoche)
 
                 const video: VideoUpload = {
                     id: generateVideoId() + '_sheet_' + index,

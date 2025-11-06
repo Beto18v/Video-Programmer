@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\VideoSchedule;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class VideoScheduleController extends Controller
@@ -161,8 +162,21 @@ class VideoScheduleController extends Controller
      */
     public function destroy(Request $request, VideoSchedule $videoSchedule)
     {
+        // Verify user owns the video schedule
+        if ($videoSchedule->video && $videoSchedule->video->user_id !== auth()->id()) {
+            return response()->json(['error' => 'No autorizado'], 403);
+        }
+
         // Delete the associated video first
         if ($videoSchedule->video) {
+            // Delete video files if they exist
+            if ($videoSchedule->video->file_path) {
+                Storage::disk('public')->delete($videoSchedule->video->file_path);
+            }
+            if ($videoSchedule->video->thumbnail_path) {
+                Storage::disk('public')->delete($videoSchedule->video->thumbnail_path);
+            }
+
             $videoSchedule->video->delete();
         }
 
@@ -172,7 +186,8 @@ class VideoScheduleController extends Controller
             return response()->json(['message' => 'Video schedule deleted successfully']);
         }
 
-        return redirect()->route('video-schedules.index');
+        return redirect()->route('video-schedules.index')
+            ->with('success', 'Programación eliminada correctamente');
     }
 
     /**

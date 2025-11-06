@@ -128,6 +128,24 @@ export default function UploadActions({
     const allAvailableSelected =
         availableVideos.length > 0 &&
         availableVideos.every((v) => selectedVideos.has(v.id));
+
+    // Validar que los videos seleccionados tengan información obligatoria completa
+    const selectedVideosComplete = useMemo(() => {
+        const selectedVideosList = videos.filter((v) =>
+            selectedVideos.has(v.id),
+        );
+        return selectedVideosList.every((video) => {
+            // Información obligatoria: Video (file), Título, Fecha/Hora
+            return (
+                video.file &&
+                video.title &&
+                video.title.trim().length > 0 &&
+                video.scheduledAt
+            );
+        });
+    }, [videos, selectedVideos]);
+
+    const canStartUpload = selectedVideos.size > 0 && selectedVideosComplete;
     const someSelected = selectedVideos.size > 0;
 
     const getStatusColor = useCallback((status: VideoUpload['status']) => {
@@ -358,7 +376,7 @@ export default function UploadActions({
                         >
                             <DialogTrigger asChild>
                                 <Button
-                                    disabled={selectedVideos.size === 0}
+                                    disabled={!canStartUpload}
                                     className="flex items-center gap-2"
                                 >
                                     {uploadAction === 'upload' ? (
@@ -369,7 +387,7 @@ export default function UploadActions({
                                     {uploadAction === 'upload'
                                         ? 'Subir Ahora'
                                         : 'Programar'}
-                                    {someSelected &&
+                                    {selectedVideos.size > 0 &&
                                         ` (${selectedVideos.size})`}
                                 </Button>
                             </DialogTrigger>
@@ -443,6 +461,23 @@ export default function UploadActions({
                 {videos.length === 0 && (
                     <div className="py-8 text-center text-muted-foreground">
                         No hay videos para procesar
+                    </div>
+                )}
+
+                {/* Mensaje de ayuda para validación */}
+                {selectedVideos.size > 0 && !selectedVideosComplete && (
+                    <div className="mt-4 rounded-lg border border-yellow-200 bg-yellow-50 p-3">
+                        <div className="flex items-center gap-2 text-yellow-800">
+                            <AlertCircle className="h-4 w-4" />
+                            <span className="text-sm font-medium">
+                                Información incompleta
+                            </span>
+                        </div>
+                        <p className="mt-1 text-sm text-yellow-700">
+                            Para programar videos, todos deben tener:{' '}
+                            <strong>Video</strong>, <strong>Título</strong> y{' '}
+                            <strong>Fecha/Hora</strong> completados.
+                        </p>
                     </div>
                 )}
             </CardContent>

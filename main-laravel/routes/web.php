@@ -10,6 +10,7 @@ use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VideoController;
 use App\Http\Controllers\VideoScheduleController;
+use App\Http\Controllers\VideoUploadController;
 use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\YoutubeCredentialController;
 use App\Http\Controllers\AccountManagementController;
@@ -67,9 +68,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('video-schedules/{videoSchedule}/upload', [VideoScheduleController::class, 'uploadFile'])->name('upload-file');
     });
 
+    // Video upload routes
+    Route::group(['as' => 'video-uploads.'], function () {
+        Route::post('video-uploads/bulk', [VideoUploadController::class, 'bulkUpload'])->name('bulk-upload');
+        Route::post('video-uploads/single', [VideoUploadController::class, 'uploadSingle'])->name('single-upload');
+        Route::post('video-uploads/single-file', [VideoUploadController::class, 'uploadSingleFile'])->name('single-file-upload');
+        Route::get('video-uploads/{video}/progress', [VideoUploadController::class, 'getUploadProgress'])->name('upload-progress');
+    });
+
     Route::group(['as' => 'youtube-credentials.'], function () {
         Route::resource('youtube-credentials', YoutubeCredentialController::class);
     });
+
+    // YouTube setup page
+    Route::get('dashboard/youtube-setup', function () {
+        return Inertia::render('dashboard/youtube-setup');
+    })->name('youtube-setup');
 
     Route::group(['as' => 'activity-logs.'], function () {
         Route::resource('activity-logs', ActivityLogController::class);

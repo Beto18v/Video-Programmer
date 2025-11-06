@@ -65,35 +65,63 @@ export default function VideoTable({
     // Función para validar un video individual
     const validateVideo = useCallback(
         (video: VideoUpload): VideoUpload => {
+            // No validar videos que están siendo subidos o ya completados
+            if (
+                video.status === 'uploading' ||
+                video.status === 'completed' ||
+                video.status === 'scheduled'
+            ) {
+                return {
+                    ...video,
+                    validationErrors: undefined, // Limpiar errores previos
+                };
+            }
+
             const errors: VideoUpload['validationErrors'] = {};
 
-            // Validar archivo de video (requerido)
-            if (!video.file) {
+            // Validar archivo de video (requerido solo para videos pendientes)
+            if (!video.file && video.status === 'pending') {
                 errors.file = 'El archivo de video es obligatorio';
             }
 
             // Validar título (requerido, mínimo 3 caracteres, máximo 100)
-            if (!video.title || video.title.trim().length === 0) {
+            // Solo validar título si no está vacío (permitir videos nuevos sin título inicialmente)
+            if (video.title && video.title.trim().length > 0) {
+                if (video.title.trim().length < 3) {
+                    errors.title = 'El título debe tener al menos 3 caracteres';
+                } else if (video.title.length > 100) {
+                    errors.title = 'El título no debe exceder 100 caracteres';
+                }
+            } else if (video.file) {
+                // Solo requerir título si ya tiene archivo
                 errors.title = 'El título es obligatorio';
-            } else if (video.title.trim().length < 3) {
-                errors.title = 'El título debe tener al menos 3 caracteres';
-            } else if (video.title.length > 100) {
-                errors.title = 'El título no debe exceder 100 caracteres';
             }
 
-            // Validar canal (requerido)
-            if (!selectedChannel) {
+            // Validar canal (requerido solo si ya tiene archivo)
+            if (!selectedChannel && video.file) {
                 errors.channel = 'Debe seleccionar un canal';
             }
 
-            // Validar fecha de programación (requerida, no puede ser en el pasado)
-            if (!video.scheduledAt) {
-                errors.scheduledAt = 'La fecha de programación es obligatoria';
-            } else {
-                const scheduledDate = new Date(video.scheduledAt);
-                const now = new Date();
-                if (scheduledDate <= now) {
-                    errors.scheduledAt = 'La fecha debe ser futura';
+            // Validar fecha de programación (requerida solo si ya tiene archivo)
+            if (video.file) {
+                if (!video.scheduledAt) {
+                    errors.scheduledAt =
+                        'La fecha de programación es obligatoria';
+                } else {
+                    const scheduledDate = new Date(video.scheduledAt);
+                    const now = new Date();
+                    if (scheduledDate <= now) {
+                        errors.scheduledAt = 'La fecha debe ser futura';
+                    }
+                }
+            }
+
+            // Validar thumbnail (opcional, pero si existe debe ser una imagen válida)
+            if (video.thumbnail) {
+                if (!video.thumbnail.type.startsWith('image/')) {
+                    errors.thumbnail = 'El archivo debe ser una imagen';
+                } else if (video.thumbnail.size > 10 * 1024 * 1024) {
+                    errors.thumbnail = 'La imagen no debe exceder 10MB';
                 }
             }
 
@@ -110,7 +138,8 @@ export default function VideoTable({
     const addVideo = useCallback(() => {
         const now = new Date();
         const defaultTime = new Date(now);
-        defaultTime.setHours(3, 33, 0, 0); // 3:33 AM
+        defaultTime.setDate(defaultTime.getDate() + 1); // Un día después
+        defaultTime.setHours(0, 0, 0, 0); // A las 00:00 (medianoche)
 
         const newVideo: VideoUpload = {
             id: generateVideoId(),
@@ -130,7 +159,10 @@ export default function VideoTable({
 
     const removeVideo = useCallback(
         (videoId: string) => {
-            onVideosChange(videos.filter((video) => video.id !== videoId));
+            const updatedVideos = videos.filter(
+                (video) => video.id !== videoId,
+            );
+            onVideosChange(updatedVideos);
         },
         [videos, onVideosChange],
     );
@@ -182,11 +214,34 @@ export default function VideoTable({
                                 accept="video/*"
                                 onFileSelect={(files) => {
                                     if (files.length > 0) {
-                                        updateVideo(video.id, 'file', files[0]);
+                                        const file = files[0];
+                                        updateVideo(video.id, 'file', file);
                                         updateVideo(
                                             video.id,
                                             'fileName',
-                                            files[0].name,
+                                            file.name,
+                                        );
+                                        // Si el video no tiene título, usar el nombre del archivo
+                                        if (
+                                            !video.title ||
+                                            video.title.trim() === ''
+                                        ) {
+                                            const titleFromFile =
+                                                file.name.replace(
+                                                    /\.[^/.]+$/,
+                                                    '',
+                                                ); // Remover extensión
+                                            updateVideo(
+                                                video.id,
+                                                'title',
+                                                titleFromFile,
+                                            );
+                                        }
+                                        // Cambiar estado a 'pending' después de subida exitosa
+                                        updateVideo(
+                                            video.id,
+                                            'status',
+                                            'pending',
                                         );
                                     }
                                 }}
@@ -212,7 +267,7 @@ export default function VideoTable({
 
                 case 'thumbnail':
                     return (
-                        <div className="w-32">
+                        <div className="w-32 space-y-1">
                             <FileUpload
                                 label=""
                                 accept="image/*"
@@ -231,11 +286,17 @@ export default function VideoTable({
                                     }
                                 }}
                                 currentFile={video.thumbnail}
-                                placeholder="Imagen"
+                                placeholder="Miniatura"
                                 maxSize={10} // 10MB for images
                                 className="min-w-0"
                                 compact={true}
                             />
+                            {video.validationErrors?.thumbnail && (
+                                <div className="flex items-center gap-1 text-xs text-destructive">
+                                    <AlertCircle className="h-3 w-3" />
+                                    {video.validationErrors.thumbnail}
+                                </div>
+                            )}
                         </div>
                     );
 
@@ -471,26 +532,70 @@ export default function VideoTable({
     // ✅ MEJORA: Función de subida masiva con asociación automática de canal
     const handleBulkUpload = useCallback(
         async (fileMappings: { videoId: string; file: File }[]) => {
-            const updatedVideos = videos.map((video) => {
-                const mapping = fileMappings.find(
-                    (m) => m.videoId === video.id,
-                );
-                if (mapping) {
-                    return {
-                        ...video,
+            const updatedVideos = [...videos];
+            const newVideos: VideoUpload[] = [];
+
+            // Procesar cada archivo subido
+            fileMappings.forEach((mapping) => {
+                if (mapping.videoId) {
+                    // Si hay un video existente, actualizarlo
+                    const videoIndex = updatedVideos.findIndex(
+                        (v) => v.id === mapping.videoId,
+                    );
+                    if (videoIndex !== -1) {
+                        const existingVideo = updatedVideos[videoIndex];
+                        updatedVideos[videoIndex] = {
+                            ...existingVideo,
+                            file: mapping.file,
+                            fileName: mapping.file.name,
+                            status: 'pending', // Update status when file is assigned
+                            // Si el video no tiene título, usar el nombre del archivo
+                            title:
+                                existingVideo.title &&
+                                existingVideo.title.trim() !== ''
+                                    ? existingVideo.title
+                                    : mapping.file.name.replace(
+                                          /\.[^/.]+$/,
+                                          '',
+                                      ), // Remover extensión
+                            // Asegurar que el canal esté asociado
+                            channelId:
+                                selectedChannel?.id || existingVideo.channelId,
+                            channelName:
+                                selectedChannel?.name ||
+                                existingVideo.channelName,
+                        };
+                    }
+                } else {
+                    // Si no hay video existente, crear uno nuevo
+                    const now = new Date();
+                    const defaultTime = new Date(now);
+                    defaultTime.setDate(defaultTime.getDate() + 1); // Un día después
+                    defaultTime.setHours(0, 0, 0, 0); // A las 00:00
+
+                    const newVideo: VideoUpload = {
+                        id: generateVideoId(),
                         file: mapping.file,
                         fileName: mapping.file.name,
-                        // Asegurar que el canal esté asociado
-                        channelId: selectedChannel?.id || video.channelId,
-                        channelName: selectedChannel?.name || video.channelName,
+                        title: mapping.file.name.replace(/\.[^/.]+$/, ''), // Remover extensión
+                        description: '',
+                        hashtags: '',
+                        scheduledAt: defaultTime.toISOString().slice(0, 16),
+                        channelId: selectedChannel?.id,
+                        channelName: selectedChannel?.name,
+                        status: 'pending', // Set status to pending when file is present
+                        forKids: false,
+                        ageRestricted: false,
                     };
+                    newVideos.push(newVideo);
                 }
-                return video;
             });
 
-            onVideosChange(updatedVideos);
+            // Combinar videos actualizados con nuevos videos
+            const finalVideos = [...updatedVideos, ...newVideos];
+            onVideosChange(finalVideos);
         },
-        [videos, onVideosChange, selectedChannel],
+        [videos, onVideosChange, selectedChannel, generateVideoId],
     );
 
     if (videos.length === 0) {
