@@ -85,6 +85,13 @@ class YoutubeUploadService
 
             $status->setMadeForKids($video->made_for_kids ?? false);
 
+            Log::info('YouTube video status configuration', [
+                'video_id' => $video->id,
+                'made_for_kids_value' => $video->made_for_kids,
+                'made_for_kids_final' => $video->made_for_kids ?? false,
+                'privacy_status' => $status->getPrivacyStatus(),
+            ]);
+
             // Create video object
             $youtubeVideo = new YouTubeVideo();
             $youtubeVideo->setSnippet($snippet);
