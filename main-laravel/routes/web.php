@@ -86,8 +86,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('dashboard/youtube-setup');
     })->name('youtube-setup');
 
-    // YouTube status page
     Route::get('dashboard/youtube-status', [YoutubeStatusController::class, 'status'])->name('youtube-status');
+
+    // Video Cleaner page
+    Route::get('dashboard/video-cleaner', function () {
+        return Inertia::render('dashboard/video-cleaner/index');
+    })->name('video-cleaner.index');
 
     Route::group(['as' => 'activity-logs.'], function () {
         Route::resource('activity-logs', ActivityLogController::class);
@@ -104,6 +108,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('tabs', [GoogleSheetsAuthController::class, 'listTabs'])->name('tabs');
         Route::post('data', [SheetController::class, 'getSheetData'])->name('data');
         Route::get('check-credentials', [SheetController::class, 'checkCredentials'])->name('check-credentials');
+    });
+
+    // Video Cleaner routes
+    Route::group(['as' => 'video-cleaner.'], function () {
+        Route::post('video-cleaner/process', [App\Http\Controllers\VideoCleanController::class, 'process'])->name('process');
+        Route::get('video-cleaner/status/{id}', [App\Http\Controllers\VideoCleanController::class, 'status'])->name('status');
+        Route::get('video-cleaner/batch/{batchId}', [App\Http\Controllers\VideoCleanController::class, 'batchStatus'])->name('batch-status');
     });
 });
 

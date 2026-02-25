@@ -19,6 +19,7 @@ import {
     Folder,
     Key,
     LayoutGrid,
+    Trash2,
     Tv,
     Users,
     Video,
@@ -45,6 +46,11 @@ const mainNavItems: NavItem[] = [
         title: 'Programaciones',
         href: '/video-schedules',
         icon: Calendar,
+    },
+    {
+        title: 'Limpieza de Videos',
+        href: '/dashboard/video-cleaner',
+        icon: Trash2,
     },
     {
         title: 'Gestión de cuentas',
